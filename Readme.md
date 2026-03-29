@@ -1,4 +1,4 @@
-# BidHaven - Local Property Auction Platform
+# Bet- Local Property Auction Platform
 
 ## Members
 
