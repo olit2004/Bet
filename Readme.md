@@ -11,7 +11,7 @@
 | Lemi Gobena      | UGR/1589/16  |
 | Misganaw Habtamu | UGR/1707/16   |
 | Olit Oljira      | UGR/8925/16   |
-| ... | ... |
+
 
 
 
