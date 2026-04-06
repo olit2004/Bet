@@ -35,7 +35,12 @@
 - **Update:** Users can edit their submitted proposals before the deadline.
 - **Delete:** Users can delete their own proposals, and admins can remove inappropriate ones.
 
-### 4. Authentication & Authorization
+  
+### 4. Business Feature 4: Notification System
+- **Create:**  The system automatically generates notifications for users based on events such as new bids, outbids, proposal updates, and auction results.
+- **Read:**  Users can view all their notifications, including message content, status, and timestamp.
+- **Update:* Users can mark notifications as read to manage their notification list.
+### 5. Authentication & Authorization
 - **Authentication:**
   - User Sign Up
   - User Login and Logout
@@ -47,7 +52,7 @@
   - **Seller/Landlord:** Can manage property listings and review bids/proposals.
   - **Admin:** Full control over users, properties, bids, and proposals.
 
-### 5. Unique Features
+### 6. Unique Features
 - **Location-Based Feed:** Displays properties sorted based on proximity to the logged-in user.
 - **Auction State Management:** Sellers/Landlords can end auctions early, and the system automatically determines the highest bidder.
 - **Flexible Listing Type:** Properties can be listed as either **For Sale** or **For Rent**, supporting both bidding and proposal-based selection.
