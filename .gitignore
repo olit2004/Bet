@@ -1,0 +1,66 @@
+# Flutter/Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+
+# Android
+/android/local.properties
+/android/key.properties
+/android/app/src/main/res/values/google-services.json
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# iOS
+**/ios/Flutter/.last_build_id
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/ServiceDefinitions.json
+**/ios/Runner/GeneratedPluginRegistrant.[h|m]
+**/ios/Runner/GeneratedPluginRegistrant.swift
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/DerivedData/
+*.moved-aside
+*.xcuserstate
+*.xcresult
+
+# macOS
+**/macos/Flutter/ephemeral/
+**/macos/Flutter/Generated.xcconfig
+**/macos/Flutter/flutter_export_environment.sh
+**/macos/Runner/GeneratedPluginRegistrant.swift
+
+# Windows
+/windows/flutter/ephemeral/
+/windows/flutter/generated_config.cmake
+
+# Linux
+/linux/flutter/ephemeral/
+
+# Web
+.web_assets/
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.history
+
+# Miscellaneous
+*.log
+*.pyc
+*.swp
+.DS_Store
+.env
+.env.*
+
+# EXCEPTIONS
+# Ensure .gitkeep files are NOT ignored so empty folders remain in git
+!.gitkeep
