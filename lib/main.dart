@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'core/routing/app_router.dart';
-import 'core/theme/app_theme.dart';
-// Import other providers as they are created
-// import 'features/auth/presentation/providers/auth_provider.dart';
+import 'package:bet/core/routing/app_router.dart';
+import 'package:bet/core/theme/app_theme.dart';
 
 void main() {
   runApp(const BethApp());
@@ -17,14 +15,12 @@ class BethApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         // Add your providers here as you implement them
-        // ChangeNotifierProvider(create: (_) => AuthProvider()),
-        // ChangeNotifierProvider(create: (_) => PropertyProvider()),
       ],
       child: MaterialApp.router(
-        title: 'Beth',
+        title: 'Bet',
         debugShowCheckedModeBanner: false,
-        theme: AppTheme.lightTheme, // Assuming Member 1 implements this
-        routerConfig: AppRouter.router, // Assuming Member 1 implements this
+        theme: AppTheme.lightTheme,
+        routerConfig: AppRouter.router,
       ),
     );
   }
