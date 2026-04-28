@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+
 /// Defines the global routing configuration using GoRouter.
 class AppRouter {
   AppRouter._();
