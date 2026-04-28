@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-
+import 'package:bet/features/auth/screens/landing_screen.dart';
 
 /// Defines the global routing configuration using GoRouter.
 class AppRouter {
@@ -16,9 +16,7 @@ class AppRouter {
     routes: [
       GoRoute(
         path: '/',
-        builder: (context, state) => const Scaffold(
-          body: Center(child: Text('Landing Screen Placeholder')),
-        ),
+        builder: (context, state) => const LandingScreen(),
       ),
       GoRoute(
         path: '/login',
