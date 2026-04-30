@@ -149,7 +149,7 @@ class LandingScreen extends StatelessWidget {
                     child: CustomButton(
                       text: 'Get Started',
                       onPressed: () {
-                        context.push('/login');
+                        context.push('/signup');
                       },
                     ),
                   ),
