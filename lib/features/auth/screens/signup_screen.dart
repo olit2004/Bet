@@ -16,6 +16,8 @@ class SignupScreen extends StatefulWidget {
 class _SignupScreenState extends State<SignupScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _companyController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isBuyer = true;
   bool _obscurePassword = true;
@@ -24,6 +26,8 @@ class _SignupScreenState extends State<SignupScreen> {
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
+    _phoneController.dispose();
+    _companyController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -85,6 +89,22 @@ class _SignupScreenState extends State<SignupScreen> {
                         hintText: 'fita@example.com',
                         controller: _emailController,
                       ),
+                      if (!_isBuyer) ...[
+                        const SizedBox(height: 20),
+                        _buildLabel('Phone Number'),
+                        const SizedBox(height: 8),
+                        CustomTextField(
+                          hintText: '+251900000000',
+                          controller: _phoneController,
+                        ),
+                        const SizedBox(height: 20),
+                        _buildLabel('Company / Agency (Optional)'),
+                        const SizedBox(height: 8),
+                        CustomTextField(
+                          hintText: 'Beth Realty',
+                          controller: _companyController,
+                        ),
+                      ],
                       const SizedBox(height: 20),
                       _buildLabel('Password'),
                       const SizedBox(height: 8),
