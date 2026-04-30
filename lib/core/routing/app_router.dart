@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:bet/features/auth/screens/landing_screen.dart';
+import 'package:bet/features/auth/screens/signup_screen.dart';
 
 /// Defines the global routing configuration using GoRouter.
 class AppRouter {
@@ -26,9 +27,7 @@ class AppRouter {
       ),
       GoRoute(
         path: '/signup',
-        builder: (context, state) => const Scaffold(
-          body: Center(child: Text('Signup Screen Placeholder')),
-        ),
+        builder: (context, state) => const SignupScreen(),
       ),
       GoRoute(
         path: '/forgot-password',
