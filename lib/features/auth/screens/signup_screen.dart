@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:bet/core/constants/app_colors.dart';
-import 'package:bet/core/widgets/app_logo.dart';
+import 'package:bet/core/widgets/custom_app_bar.dart';
 import 'package:bet/core/widgets/custom_button.dart';
 import 'package:bet/core/widgets/custom_text_field.dart';
 
@@ -32,22 +32,20 @@ class _SignupScreenState extends State<SignupScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
+      appBar: const CustomAppBar(showBackButton: true),
       body: SafeArea(
         child: Column(
           children: [
-            const SizedBox(height: 20),
-            const Center(child: AppLogo(size: 32)),
-            const SizedBox(height: 30),
+            const SizedBox(height: 10),
             Expanded(
-              child: Container(
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(32),
-                    topRight: Radius.circular(32),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(32),
                   ),
-                ),
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(32.0),
                   child: Column(
@@ -148,7 +146,8 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
               ),
             ),
-          ],
+          ),
+        ],
         ),
       ),
     );
