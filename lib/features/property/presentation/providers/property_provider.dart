@@ -28,4 +28,38 @@ class PropertyProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  /// Searches properties based on a query string
+  Future<void> searchProperties(String query) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      if (query.trim().isEmpty) {
+        _properties = await _repository.getProperties();
+      } else {
+        _properties = await _repository.searchProperties(query);
+      }
+    } catch (e) {
+      _properties = [];
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Filters properties by a specific category
+  Future<void> filterByCategory(PropertyCategory category) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      _properties = await _repository.getPropertiesByCategory(category);
+    } catch (e) {
+      _properties = [];
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }
