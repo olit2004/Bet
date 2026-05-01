@@ -35,7 +35,10 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               // 1. Top Header Section
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 40.0, horizontal: 24.0),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 40.0,
+                  horizontal: 24.0,
+                ),
                 child: Column(
                   children: [
                     const AppLogo(size: 32),
@@ -71,7 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     borderRadius: BorderRadius.circular(32),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: Colors.black.withValues(alpha: 0.05),
                         blurRadius: 20,
                         offset: const Offset(0, 10),
                       ),
@@ -82,17 +85,27 @@ class _LoginScreenState extends State<LoginScreen> {
                       CustomTextField(
                         hintText: 'Email address',
                         controller: _emailController,
-                        prefixIcon: const Icon(Icons.alternate_email, color: AppColors.secondaryText, size: 20),
+                        prefixIcon: const Icon(
+                          Icons.alternate_email,
+                          color: AppColors.secondaryText,
+                          size: 20,
+                        ),
                       ),
                       const SizedBox(height: 16),
                       CustomTextField(
                         hintText: 'Password',
                         controller: _passwordController,
                         obscureText: _obscurePassword,
-                        prefixIcon: const Icon(Icons.lock_outline, color: AppColors.secondaryText, size: 20),
+                        prefixIcon: const Icon(
+                          Icons.lock_outline,
+                          color: AppColors.secondaryText,
+                          size: 20,
+                        ),
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                            _obscurePassword
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
                             color: AppColors.secondaryText,
                             size: 20,
                           ),
@@ -205,9 +218,7 @@ class _LoginScreenState extends State<LoginScreen> {
       style: OutlinedButton.styleFrom(
         backgroundColor: Colors.white,
         side: const BorderSide(color: Color(0xFFE5E7EB)),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         padding: const EdgeInsets.symmetric(vertical: 16),
         minimumSize: const Size(double.infinity, 50),
       ),
@@ -218,7 +229,8 @@ class _LoginScreenState extends State<LoginScreen> {
             'https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg',
             height: 20,
             width: 20,
-            errorBuilder: (context, error, stackTrace) => const Icon(Icons.g_mobiledata, color: Colors.red),
+            errorBuilder: (context, error, stackTrace) =>
+                const Icon(Icons.g_mobiledata, color: Colors.red),
           ),
           const SizedBox(width: 12),
           Text(
