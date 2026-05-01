@@ -11,6 +11,7 @@ class AppColors {
   static const Color background = Color(0xFFF5F7FC);
   static const Color surface = Color(0xFFFFFFFF);
   static const Color inputFill = Color(0xFFF1F4F9);
+  static const Color cardBackground = Color(0xFF9CB0C4); // Added for login section
 
   static const Color primaryText = Color(0xFF05345C);
   static const Color secondaryText = Color(0xFF3D618C);
