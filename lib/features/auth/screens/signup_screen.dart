@@ -139,7 +139,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       const SizedBox(height: 24),
                       Center(
                         child: GestureDetector(
-                          onTap: () => context.pop(),
+                          onTap: () => context.push('/login'),
                           child: RichText(
                             text: TextSpan(
                               style: GoogleFonts.inter(
