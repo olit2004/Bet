@@ -28,7 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -60,66 +60,77 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
 
-              // 2. Middle Form Section
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(32.0),
-                decoration: const BoxDecoration(
-                  color: AppColors.cardBackground,
-                ),
-                child: Column(
-                  children: [
-                    CustomTextField(
-                      hintText: 'Email address',
-                      controller: _emailController,
-                      prefixIcon: const Icon(Icons.alternate_email, color: AppColors.secondaryText, size: 20),
-                    ),
-                    const SizedBox(height: 16),
-                    CustomTextField(
-                      hintText: 'Password',
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      prefixIcon: const Icon(Icons.lock_outline, color: AppColors.secondaryText, size: 20),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                          color: AppColors.secondaryText,
-                          size: 20,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
+              // 2. Middle Form Section (Floating Card)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(32.0),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(32),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
                       ),
-                    ),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () {
-                          context.push('/forgot-password');
-                        },
-                        child: Text(
-                          'Forgot Password?',
-                          style: GoogleFonts.inter(
-                            color: AppColors.primaryBlue,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      CustomTextField(
+                        hintText: 'Email address',
+                        controller: _emailController,
+                        prefixIcon: const Icon(Icons.alternate_email, color: AppColors.secondaryText, size: 20),
+                      ),
+                      const SizedBox(height: 16),
+                      CustomTextField(
+                        hintText: 'Password',
+                        controller: _passwordController,
+                        obscureText: _obscurePassword,
+                        prefixIcon: const Icon(Icons.lock_outline, color: AppColors.secondaryText, size: 20),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                            color: AppColors.secondaryText,
+                            size: 20,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                        ),
+                      ),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () {
+                            context.push('/forgot-password');
+                          },
+                          child: Text(
+                            'Forgot Password?',
+                            style: GoogleFonts.inter(
+                              color: AppColors.primaryBlue,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    CustomButton(
-                      text: 'Sign In',
-                      onPressed: () {
-                        // Handle sign in
-                        context.go('/home');
-                      },
-                    ),
-                    const SizedBox(height: 32),
-                    _buildDivider(),
-                  ],
+                      const SizedBox(height: 16),
+                      CustomButton(
+                        text: 'Sign In',
+                        onPressed: () {
+                          // Handle sign in
+                          context.go('/home');
+                        },
+                      ),
+                      const SizedBox(height: 32),
+                      _buildDivider(),
+                    ],
+                  ),
                 ),
               ),
 
