@@ -5,11 +5,15 @@ import 'package:bet/core/widgets/app_logo.dart';
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Color? backgroundColor;
   final bool showBackButton;
+  final Widget? title;
+  final Color? backButtonColor;
 
   const CustomAppBar({
     super.key,
     this.backgroundColor,
     this.showBackButton = false,
+    this.title,
+    this.backButtonColor,
   });
 
   @override
@@ -21,11 +25,11 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       automaticallyImplyLeading: false,
       leading: showBackButton
           ? IconButton(
-              icon: const Icon(Icons.arrow_back_ios, color: AppColors.primaryText, size: 20),
+              icon: Icon(Icons.arrow_back, color: backButtonColor ?? AppColors.primaryText, size: 24),
               onPressed: () => Navigator.of(context).pop(),
             )
           : null,
-      title: const AppLogo(size: 28),
+      title: title ?? const AppLogo(size: 28),
       centerTitle: false,
     );
   }
