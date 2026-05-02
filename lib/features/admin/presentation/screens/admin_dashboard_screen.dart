@@ -59,21 +59,21 @@ class AdminDashboardScreen extends StatelessWidget {
             _buildActivityTile(
               "New Bid: \$1.2M",
               "Skyline Penthouse • 2m ago",
-              "/home/ulakeb/learn/flutter/Bet/assets/images/auction.png",
+              "/images/auction.png",
               Icons.trending_up,
               Colors.green,
             ),
             _buildActivityTile(
               "Property Verified",
               "Oak Ridge Manor • 15m ago",
-              "/home/ulakeb/learn/flutter/Bet/assets/images/verify.png",
+              "/images/verify.png",
               Icons.verified_user,
               Colors.blue,
             ),
             _buildActivityTile(
               "Sale Confirmed",
               "Azure Shores Villa • 42m ago",
-              "/home/ulakeb/learn/flutter/Bet/assets/images/clipboard.png",
+              "/images/clipboard.png",
               Icons.check_circle,
               Colors.teal,
             ),
@@ -100,9 +100,7 @@ class AdminDashboardScreen extends StatelessWidget {
       actions: const [
         CircleAvatar(
           radius: 18,
-          backgroundImage: AssetImage(
-            "/home/ulakeb/learn/flutter/Bet/assets/images/profile.png",
-          ),
+          backgroundImage: AssetImage("/images/avater.png"),
         ),
         SizedBox(width: 15),
       ],
