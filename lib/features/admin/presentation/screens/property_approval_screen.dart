@@ -26,14 +26,14 @@ class PropertiesScreen extends StatelessWidget {
             _houseCard(
               "/images/skyline-retreat.png",
               "Grand x",
-              "20,000,000",
-              "Bekalu Addissu",
+              "4,000,000",
+              "Lemi Gobena",
             ),
 
             _houseCard(
               "/images/garden-state.png",
               "Grand x",
-              "20,000,000",
+              "30,000,000",
               "Bekalu Addissu",
             ),
 
@@ -41,14 +41,14 @@ class PropertiesScreen extends StatelessWidget {
               "/images/Industrial-loft.png",
               "Grand x",
               "20,000,000",
-              "Bekalu Addissu",
+              "Olit jira",
             ),
 
             _houseCard(
               "/images/the-glass-Pavillion.png",
               "Grand x",
               "20,000,000",
-              "Bekalu Addissu",
+              "misganaw andualem",
             ),
           ],
         ),
@@ -70,7 +70,7 @@ class PropertiesScreen extends StatelessWidget {
           const SizedBox(width: 8),
         ],
       ),
-      actions: const [
+      actions: const [        
         CircleAvatar(
           radius: 18,
           backgroundImage: AssetImage("/images/avater.png"),
