@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:bet/core/constants/app_colors.dart';
+import 'package:bet/core/widgets/app_logo.dart';
 
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});
@@ -8,563 +7,367 @@ class AdminDashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 18.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(),
-              const SizedBox(height: 24),
-              _buildOverviewCard(),
-              const SizedBox(height: 20),
-              _buildMetricCard(
-                'Active Auctions',
-                '142',
-                'Hot',
-                AppColors.primaryBlue.withOpacity(0.08),
-                const Icon(Icons.gavel, color: AppColors.primaryBlue),
-              ),
-              const SizedBox(height: 16),
-              _buildMetricCard(
-                'Pending Verifications',
-                '28',
-                'Priority',
-                AppColors.primaryBlue.withOpacity(0.06),
-                const Icon(Icons.shield, color: AppColors.primaryBlue),
-              ),
-              const SizedBox(height: 20),
-              _buildMarketActivityCard(),
-              const SizedBox(height: 20),
-              _buildRecentActivitySection(),
-              const SizedBox(height: 24),
-            ],
-          ),
-        ),
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.only(bottom: 16.0),
-        child: _buildBottomNavigationBar(),
-      ),
-    );
-  }
+      backgroundColor: const Color.fromRGBO(248, 249, 255, 1),
 
-  Widget _buildHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Column(
+      appBar: _buildAppBar(),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Beth',
-              style: GoogleFonts.manrope(
-                color: AppColors.primaryText,
-                fontSize: 28,
-                fontWeight: FontWeight.w800,
-              ),
+            _buildHeader("Global Performance", "Real-time ecosystem health"),
+            const SizedBox(height: 20),
+
+            _buildStatCard(
+              "TOTAL REVENUE",
+              "\$4.2M",
+              "+12.5%",
+              Icons.payments,
+              Colors.indigo[50]!,
+              Colors.indigo,
             ),
-            const SizedBox(height: 4),
-            Text(
-              'Rental & Bidding',
-              style: GoogleFonts.inter(
-                color: AppColors.secondaryText,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
+            _buildStatCard(
+              "ACTIVE AUCTIONS",
+              "142",
+              "Hot",
+              Icons.gavel,
+              Colors.orange[50]!,
+              Colors.orange,
+            ),
+            _buildStatCard(
+              "PENDING VERIFICATIONS",
+              "28",
+              "Priority",
+              Icons.verified,
+              Colors.teal[50]!,
+              Colors.teal,
+            ),
+
+            const SizedBox(height: 30),
+            _buildSectionTitle(
+              "Market Activity",
+              "Last 7 days volume",
+              "Weekly View",
+            ),
+            _buildSimpleBarChart(),
+
+            const SizedBox(height: 30),
+            _buildSectionTitle("Recent Activity", "", "LIVE", isBadge: true),
+            const SizedBox(height: 10),
+
+            // Activity List
+            _buildActivityTile(
+              "New Bid: \$1.2M",
+              "Skyline Penthouse • 2m ago",
+              "/home/ulakeb/learn/flutter/Bet/assets/images/auction.png",
+              Icons.trending_up,
+              Colors.green,
+            ),
+            _buildActivityTile(
+              "Property Verified",
+              "Oak Ridge Manor • 15m ago",
+              "/home/ulakeb/learn/flutter/Bet/assets/images/verify.png",
+              Icons.verified_user,
+              Colors.blue,
+            ),
+            _buildActivityTile(
+              "Sale Confirmed",
+              "Azure Shores Villa • 42m ago",
+              "/home/ulakeb/learn/flutter/Bet/assets/images/clipboard.png",
+              Icons.check_circle,
+              Colors.teal,
             ),
           ],
         ),
-        Container(
-          padding: const EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.04),
-                blurRadius: 12,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: const CircleAvatar(
-            radius: 24,
-            backgroundColor: AppColors.primaryBlue,
-            child: Icon(Icons.person, color: Colors.white),
+      ),
+      bottomNavigationBar: _buildBottomNav(),
+    );
+  }
+
+  // UI COMPONENTS
+
+  AppBar _buildAppBar() {
+    return AppBar(
+      backgroundColor: Colors.white,
+      elevation: 0,
+      title: Row(
+        children: [
+          SizedBox(width: 10),
+          AppLogo(size: 30),
+          const SizedBox(width: 8),
+        ],
+      ),
+      actions: const [
+        CircleAvatar(
+          radius: 18,
+          backgroundImage: AssetImage(
+            "/home/ulakeb/learn/flutter/Bet/assets/images/profile.png",
           ),
         ),
+        SizedBox(width: 15),
       ],
     );
   }
 
-  Widget _buildOverviewCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(32),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 24,
-            offset: const Offset(0, 12),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Global Performance',
-            style: GoogleFonts.manrope(
-              color: AppColors.primaryText,
-              fontSize: 36,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Real-time ecosystem health',
-            style: GoogleFonts.inter(
-              color: AppColors.secondaryText,
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 24),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(28),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
-                  blurRadius: 18,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'TOTAL REVENUE',
-                        style: GoogleFonts.inter(
-                          color: AppColors.secondaryText,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.6,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            '\$4.2M',
-                            style: GoogleFonts.manrope(
-                              color: AppColors.primaryText,
-                              fontSize: 32,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            '+12.5%',
-                            style: GoogleFonts.inter(
-                              color: const Color(0xFF00B469),
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  height: 56,
-                  width: 56,
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryBlue.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: const Icon(
-                    Icons.account_balance_wallet,
-                    color: AppColors.primaryBlue,
-                    size: 28,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMetricCard(
-    String label,
-    String value,
-    String badge,
-    Color background,
-    Widget icon,
-  ) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label.toUpperCase(),
-                  style: GoogleFonts.inter(
-                    color: AppColors.secondaryText,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.6,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      value,
-                      style: GoogleFonts.manrope(
-                        color: AppColors.primaryText,
-                        fontSize: 32,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      badge,
-                      style: GoogleFonts.inter(
-                        color: label == 'Active Auctions'
-                            ? const Color(0xFFB47B00)
-                            : const Color(0xFF1C8A52),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Container(
-            height: 56,
-            width: 56,
-            decoration: BoxDecoration(
-              color: AppColors.primaryBlue.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: icon,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMarketActivityCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(32),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Market Activity',
-                      style: GoogleFonts.manrope(
-                        color: AppColors.primaryText,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Last 7 days volume',
-                      style: GoogleFonts.inter(
-                        color: AppColors.secondaryText,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Text(
-                'Weekly View',
-                style: GoogleFonts.manrope(
-                  color: AppColors.primaryBlue,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 18),
-          Container(
-            height: 220,
-            decoration: BoxDecoration(
-              color: AppColors.background,
-              borderRadius: BorderRadius.circular(24),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildChartBar(48, false),
-                _buildChartBar(68, false),
-                _buildChartBar(60, false),
-                _buildChartBar(92, true),
-                _buildChartBar(88, false),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildChartBar(double height, bool active) {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: Container(
-          height: height,
-          decoration: BoxDecoration(
-            color: active
-                ? AppColors.primaryBlue
-                : AppColors.primaryBlue.withOpacity(0.24),
-            borderRadius: BorderRadius.circular(18),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRecentActivitySection() {
+  Widget _buildHeader(String title, String subtitle) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                'Recent Activity',
-                style: GoogleFonts.manrope(
-                  color: AppColors.primaryText,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              decoration: BoxDecoration(
-                color: const Color(0xFF33D786).withOpacity(0.18),
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.star, size: 14, color: Color(0xFF0F9D58)),
-                  const SizedBox(width: 6),
-                  Text(
-                    'LIVE',
-                    style: GoogleFonts.inter(
-                      color: const Color(0xFF0F9D58),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        _buildActivityTile(
-          'New Bid: \$1.2M',
-          'Skyline Penthouse • 2m ago',
-          Icons.flash_on,
-          AppColors.primaryBlue.withOpacity(0.12),
-          const Icon(
-            Icons.arrow_upward,
-            color: AppColors.primaryBlue,
-            size: 18,
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 38,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF0D1B3E),
           ),
         ),
-        const SizedBox(height: 16),
-        _buildActivityTile(
-          'Property Verified',
-          'Oak Ridge Manor • 15m ago',
-          Icons.verified,
-          AppColors.primaryBlue.withOpacity(0.08),
-          const Icon(
-            Icons.check_circle,
-            color: AppColors.primaryBlue,
-            size: 18,
+        Text(
+          subtitle,
+          style: TextStyle(
+            color: const Color.fromARGB(255, 73, 82, 129),
+            fontSize: 20,
           ),
-        ),
-        const SizedBox(height: 16),
-        _buildActivityTile(
-          'Sale Confirmed',
-          'Azure Shores Villa • 42m ago',
-          Icons.check_circle_outline,
-          AppColors.primaryBlue.withOpacity(0.08),
-          const Icon(Icons.check_circle, color: Color(0xFF0F9D58), size: 18),
         ),
       ],
     );
   }
 
-  Widget _buildActivityTile(
-    String title,
-    String subtitle,
+  Widget _buildStatCard(
+    String label,
+    String value,
+    String badge,
     IconData icon,
-    Color tileColor,
-    Widget trailing,
+    Color bgColor,
+    Color iconColor,
   ) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+      margin: const EdgeInsets.only(bottom: 15),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(24),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            height: 52,
-            width: 52,
-            decoration: BoxDecoration(
-              color: tileColor,
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: Icon(icon, color: AppColors.primaryBlue, size: 24),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: GoogleFonts.manrope(
-                    color: AppColors.primaryText,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: GoogleFonts.inter(
-                    color: AppColors.secondaryText,
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          trailing,
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBottomNavigationBar() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 18,
-            offset: const Offset(0, 10),
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
           ),
         ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _buildNavItem(Icons.dashboard, 'Dashboard', true),
-          _buildNavItem(Icons.apartment, 'Properties', false),
-          _buildNavItem(Icons.group, 'Users', false),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: Color.fromARGB(255, 76, 90, 109),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Text(
+                    value,
+                    style: const TextStyle(
+                      fontSize: 34,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF0D1B3E),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    badge,
+                    style: TextStyle(
+                      color: iconColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: bgColor,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: iconColor),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildNavItem(IconData icon, String label, bool active) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
+  Widget _buildSectionTitle(
+    String title,
+    String subtitle,
+    String actionText, {
+    bool isBadge = false,
+  }) {
+    return Row(
       children: [
-        Icon(
-          icon,
-          size: 22,
-          color: active ? AppColors.primaryBlue : AppColors.secondaryText,
+        SizedBox(width: 10),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF0D1B3E),
+              ),
+            ),
+
+            SizedBox(height: 10),
+
+            Text(
+              subtitle,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(255, 124, 139, 177),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 6),
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            color: active ? AppColors.primaryBlue : AppColors.secondaryText,
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
+        const Spacer(),
+
+        isBadge
+            ? Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.greenAccent[100],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  actionText,
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green,
+                  ),
+                ),
+              )
+            : Text(
+                actionText,
+                style: const TextStyle(
+                  color: Colors.blue,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+      ],
+    );
+  }
+
+  Widget _buildSimpleBarChart() {
+    // This creates a simple visual bar chart using Containers
+    return Container(
+      height: 200,
+      margin: const EdgeInsets.symmetric(vertical: 15),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color.fromARGB(255, 154, 177, 240)!.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          _bar(40),
+          _bar(70),
+          _bar(50),
+          _bar(90),
+          _bar(60),
+          _bar(100),
+          _bar(110),
+        ],
+      ),
+    );
+  }
+
+  Widget _bar(double height) {
+    double maxHeight = 200;
+    double opacity = height / maxHeight;
+
+    opacity = opacity.clamp(0.2, 1.0);
+
+    return Container(
+      width: 60,
+      height: height,
+      decoration: BoxDecoration(
+        color: const Color.fromARGB(255, 112, 79, 218).withOpacity(opacity),
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(6),
+          topRight: Radius.circular(6),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActivityTile(
+    String title,
+    String subtitle,
+    String iconUrl,
+    IconData icon,
+    Color color,
+  ) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: ListTile(
+        leading: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            color: Colors.black87,
+            width: 45,
+            height: 45,
+            child: CircleAvatar(
+              backgroundImage: AssetImage(iconUrl),
+              backgroundColor: color,
+            ),
           ),
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+        ),
+        subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
+        trailing: Icon(icon, color: color, size: 20),
+      ),
+    );
+  }
+
+  Widget _buildBottomNav() {
+    return BottomNavigationBar(
+      selectedItemColor: Colors.blue[800],
+      unselectedItemColor: Colors.grey,
+      showUnselectedLabels: true,
+      items: const [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.grid_view_rounded),
+          label: 'Dashboard',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.apartment),
+          label: 'Properties',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.people_outline),
+          label: 'Users',
         ),
       ],
     );
