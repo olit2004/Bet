@@ -201,7 +201,6 @@ Widget _approval(String title, Color bgColor) {
     decoration: BoxDecoration(
       color: bgColor,
       borderRadius: BorderRadius.circular(30),
-      // Adding a light border automatically if the background is white
       border: bgColor == Colors.white
           ? Border.all(color: Colors.blue.shade100)
           : null,
@@ -209,7 +208,6 @@ Widget _approval(String title, Color bgColor) {
     child: Text(
       title,
       style: TextStyle(
-        // If background is white, use dark text; otherwise, use white text
         color: bgColor == Colors.white ? Color(0xFF34495E) : Colors.white,
         fontWeight: FontWeight.bold,
         fontSize: 16,
