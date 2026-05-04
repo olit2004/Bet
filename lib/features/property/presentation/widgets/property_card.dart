@@ -45,7 +45,7 @@ class PropertyCard extends StatelessWidget {
                 ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
                   child: property.imageUrls.isNotEmpty
-                      ? Image.network(
+                      ? Image.asset(
                           property.imageUrls.first,
                           height: 180,
                           width: double.infinity,
@@ -71,7 +71,7 @@ class PropertyCard extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryBlue.withValues(alpha: 0.95),
+                      color: AppColors.success,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -132,9 +132,23 @@ class PropertyCard extends StatelessWidget {
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w700,
                           fontSize: 18,
+                          color: AppColors.primaryText,
                         ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(Icons.location_on, size: 12, color: AppColors.secondaryText),
+                      const SizedBox(width: 4),
+                      Text(
+                        property.address,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppColors.secondaryText,
+                            ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 12),
                   // Specs Row
