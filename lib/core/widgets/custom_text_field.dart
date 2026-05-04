@@ -8,6 +8,7 @@ class CustomTextField extends StatelessWidget {
   final bool obscureText;
   final Widget? suffixIcon;
   final Widget? prefixIcon;
+  final ValueChanged<String>? onChanged;
 
   const CustomTextField({
     super.key,
@@ -16,6 +17,7 @@ class CustomTextField extends StatelessWidget {
     this.obscureText = false,
     this.suffixIcon,
     this.prefixIcon,
+    this.onChanged,
   });
 
   @override
@@ -23,6 +25,7 @@ class CustomTextField extends StatelessWidget {
     return TextField(
       controller: controller,
       obscureText: obscureText,
+      onChanged: onChanged,
       style: GoogleFonts.inter(
         color: AppColors.primaryText,
       ),
