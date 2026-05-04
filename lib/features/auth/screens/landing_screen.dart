@@ -48,6 +48,7 @@ class LandingScreen extends StatelessWidget {
               child: Image.asset(
                 'assets/images/gigapixel-Hero.png',
                 fit: BoxFit.cover,
+                alignment: const Alignment(0, 0.6),
                 width: double.infinity,
                 height: double.infinity,
                 errorBuilder: (context, error, stackTrace) => Container(
@@ -66,12 +67,51 @@ class LandingScreen extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withValues(alpha: 0.1),
+                    Colors.black.withValues(alpha: 0.6),
+                    Colors.black.withValues(alpha: 0.2),
                     Colors.transparent,
                     Colors.black.withValues(alpha: 0.5),
                     Colors.black.withValues(alpha: 0.9),
                   ],
-                  stops: const [0.0, 0.3, 0.7, 1.0],
+                  stops: const [0.0, 0.15, 0.4, 0.7, 1.0],
+                ),
+              ),
+            ),
+            // Top Motto
+            Positioned(
+              top: 36,
+              left: 20,
+              right: 20,
+              child: Center(
+                child: Column(
+                  children: [
+                    Text(
+                      'WHERE HERITAGE MEETS MODERN OPPORTUNITY',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 3.8,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withValues(alpha: 0.8),
+                            offset: const Offset(0, 2),
+                            blurRadius: 4,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
+                      width: 40,
+                      height: 2,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF6FFBBE).withValues(alpha: 0.6),
+                        borderRadius: BorderRadius.circular(1),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
