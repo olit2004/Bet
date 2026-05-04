@@ -66,12 +66,12 @@ class LandingScreen extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
+                    Colors.black.withValues(alpha: 0.1),
                     Colors.transparent,
-                    Colors.black.withValues(alpha: 0.0),
-                    Colors.black.withValues(alpha: 0.4),
-                    Colors.black.withValues(alpha: 0.8),
+                    Colors.black.withValues(alpha: 0.5),
+                    Colors.black.withValues(alpha: 0.9),
                   ],
-                  stops: const [0.0, 0.5, 0.8, 1.0],
+                  stops: const [0.0, 0.3, 0.7, 1.0],
                 ),
               ),
             ),
@@ -109,6 +109,13 @@ class LandingScreen extends StatelessWidget {
                               fontWeight: FontWeight.w900,
                               letterSpacing: -1.2,
                               height: 1.1,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black.withValues(alpha: 0.5),
+                                  offset: const Offset(0, 2),
+                                  blurRadius: 4,
+                                ),
+                              ],
                             ),
                           ),
                           TextSpan(
@@ -119,6 +126,13 @@ class LandingScreen extends StatelessWidget {
                               fontWeight: FontWeight.w900,
                               letterSpacing: -1.2,
                               height: 1.1,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black.withValues(alpha: 0.5),
+                                  offset: const Offset(0, 2),
+                                  blurRadius: 4,
+                                ),
+                              ],
                             ),
                           ),
                         ],
@@ -148,6 +162,13 @@ class LandingScreen extends StatelessWidget {
                           color: Colors.white,
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black.withValues(alpha: 0.5),
+                              offset: const Offset(0, 1),
+                              blurRadius: 2,
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -165,9 +186,16 @@ class LandingScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.2),
+        color: Colors.black.withValues(alpha: 0.4),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
