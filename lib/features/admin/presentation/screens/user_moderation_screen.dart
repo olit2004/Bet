@@ -9,7 +9,8 @@ class UsersScreen extends StatefulWidget {
 }
 
 class _UsersScreenState extends State<UsersScreen> {
-  String current_filter = "";
+  String currentFilter = "";
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromRGBO(248, 249, 255, 1),
@@ -131,7 +132,7 @@ class _UsersScreenState extends State<UsersScreen> {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1), // shadow color
+                color: Colors.black.withValues(alpha:0.1), // shadow color
                 blurRadius: 10, // softness
                 offset: Offset(0, 5), // position (x, y)
               ),
@@ -156,7 +157,7 @@ class _UsersScreenState extends State<UsersScreen> {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1), // shadow color
+                color: Colors.black.withValues(alpha:0.1), // shadow color
                 blurRadius: 10, // softness
                 offset: Offset(0, 5), // position (x, y)
               ),
@@ -188,7 +189,7 @@ class _UsersScreenState extends State<UsersScreen> {
               206,
               204,
               204,
-            ).withOpacity(0.05), // shadow color
+            ).withValues(alpha:0.05), // shadow color
             blurRadius: 5, // softness
             offset: Offset(0, 3), // position (x, y)
           ),
@@ -202,7 +203,7 @@ class _UsersScreenState extends State<UsersScreen> {
           ),
           const Spacer(),
           Text(
-            "Filtered by $current_filter",
+            "Filtered by $currentFilter",
             style: TextStyle(
               color: const Color.fromARGB(255, 109, 36, 205),
               fontWeight: FontWeight.bold,
@@ -222,7 +223,7 @@ class _UsersScreenState extends State<UsersScreen> {
       icon: const Icon(Icons.filter_list),
       onSelected: (value) {
         setState(() {
-          current_filter = value;
+          currentFilter = value;
         });
       },
       itemBuilder: (context) {
@@ -236,7 +237,7 @@ class _UsersScreenState extends State<UsersScreen> {
   Widget _usersCard(
     String name,
     String role,
-    String status_discription,
+    String statusDiscription,
     String imageUrl,
     bool isSeller, {
     Color roleColor = const Color.fromARGB(255, 147, 198, 239),
@@ -248,7 +249,7 @@ class _UsersScreenState extends State<UsersScreen> {
       decoration: BoxDecoration(
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05), // shadow color
+            color: Colors.black.withValues(alpha:0.05), // shadow color
             blurRadius: 5, // softness
             offset: Offset(0, 3), // position (x, y)
           ),
@@ -276,11 +277,11 @@ class _UsersScreenState extends State<UsersScreen> {
               Column(
                 children: [
                   Text(
-                    "$name",
+                    "name",
                     style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 3),
-                  Text("$status_discription", style: TextStyle(fontSize: 14)),
+                  Text("statusDiscription", style: TextStyle(fontSize: 14)),
                 ],
               ),
               const Spacer(),
@@ -295,7 +296,7 @@ class _UsersScreenState extends State<UsersScreen> {
                 ),
 
                 child: Text(
-                  "$role",
+                  "role",
                   style: TextStyle(
                     color: const Color.fromARGB(255, 255, 254, 254),
                   ),
@@ -314,8 +315,8 @@ class _UsersScreenState extends State<UsersScreen> {
                   color: const Color.fromARGB(255, 135, 187, 230),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Text("Suspend"),
                 alignment: Alignment.center,
+                child: Text("Suspend"),
               ),
 
               Container(
@@ -325,11 +326,12 @@ class _UsersScreenState extends State<UsersScreen> {
                   color: const Color.fromARGB(255, 43, 63, 240),
                   borderRadius: BorderRadius.circular(12),
                 ),
+                alignment: Alignment.center,
                 child: Text(
                   "Veiw Details",
                   style: TextStyle(color: Colors.white),
                 ),
-                alignment: Alignment.center,
+                
               ),
             ],
           ),
