@@ -15,6 +15,7 @@ class LandingScreen extends StatelessWidget {
       backgroundColor: AppColors.background,
       appBar: const CustomAppBar(),
       body: SingleChildScrollView(
+        primary: true,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -48,6 +49,7 @@ class LandingScreen extends StatelessWidget {
               child: Image.asset(
                 'assets/images/gigapixel-Hero.png',
                 fit: BoxFit.cover,
+                alignment: const Alignment(0, 0.6),
                 width: double.infinity,
                 height: double.infinity,
                 errorBuilder: (context, error, stackTrace) => Container(
@@ -66,12 +68,51 @@ class LandingScreen extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
+                    Colors.black.withValues(alpha: 0.6),
+                    Colors.black.withValues(alpha: 0.2),
                     Colors.transparent,
-                    Colors.black.withValues(alpha: 0.0),
-                    Colors.black.withValues(alpha: 0.4),
-                    Colors.black.withValues(alpha: 0.8),
+                    Colors.black.withValues(alpha: 0.5),
+                    Colors.black.withValues(alpha: 0.9),
                   ],
-                  stops: const [0.0, 0.5, 0.8, 1.0],
+                  stops: const [0.0, 0.15, 0.4, 0.7, 1.0],
+                ),
+              ),
+            ),
+            // Top Motto
+            Positioned(
+              top: 36,
+              left: 20,
+              right: 20,
+              child: Center(
+                child: Column(
+                  children: [
+                    Text(
+                      'WHERE HERITAGE MEETS MODERN OPPORTUNITY',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 3.8,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withValues(alpha: 0.8),
+                            offset: const Offset(0, 2),
+                            blurRadius: 4,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
+                      width: 40,
+                      height: 2,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF6FFBBE).withValues(alpha: 0.6),
+                        borderRadius: BorderRadius.circular(1),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -83,31 +124,60 @@ class LandingScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(
-                      children: [
-                        TextSpan(
-                          text: 'Architectural\n',
-                          style: GoogleFonts.inter(
-                            color: Colors.white,
-                            fontSize: 48,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -1.8,
-                            height: 1.1,
+                  // Trust Pills Row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildHeroPill(Icons.verified_user, 'Verified'),
+                      const SizedBox(width: 12),
+                      _buildHeroPill(Icons.speed, 'Instant'),
+                      const SizedBox(width: 12),
+                      _buildHeroPill(Icons.lock, 'Secure'),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: RichText(
+                      textAlign: TextAlign.center,
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: 'Architectural\n',
+                            style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontSize: 40,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -1.2,
+                              height: 1.1,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black.withValues(alpha: 0.5),
+                                  offset: const Offset(0, 2),
+                                  blurRadius: 4,
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        TextSpan(
-                          text: 'Curations',
-                          style: GoogleFonts.inter(
-                            color: const Color(0xFF6FFBBE),
-                            fontSize: 48,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -1.8,
-                            height: 1.1,
+                          TextSpan(
+                            text: 'Curations',
+                            style: GoogleFonts.inter(
+                              color: const Color(0xFF6FFBBE),
+                              fontSize: 40,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -1.2,
+                              height: 1.1,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black.withValues(alpha: 0.5),
+                                  offset: const Offset(0, 2),
+                                  blurRadius: 4,
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -120,11 +190,97 @@ class LandingScreen extends StatelessWidget {
                       },
                     ),
                   ),
+                  const SizedBox(height: 24),
+                  // User Group Info
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildAvatarGroup(),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Join 10k+ active users',
+                        style: GoogleFonts.inter(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black.withValues(alpha: 0.5),
+                              offset: const Offset(0, 1),
+                              blurRadius: 2,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildHeroPill(IconData icon, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: const Color(0xFF6FFBBE), size: 14),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              color: Colors.white,
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAvatarGroup() {
+    return SizedBox(
+      width: 70,
+      height: 28,
+      child: Stack(
+        children: [
+          _buildPositionedAvatar(0),
+          _buildPositionedAvatar(1),
+          _buildPositionedAvatar(2),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPositionedAvatar(int index) {
+    return Positioned(
+      left: index * 16.0,
+      child: Container(
+        width: 28,
+        height: 28,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white, width: 2),
+          color: Colors.grey[400],
+        ),
+        child: const Icon(Icons.person, size: 16, color: Colors.white),
       ),
     );
   }

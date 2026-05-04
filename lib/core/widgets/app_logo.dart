@@ -10,9 +10,27 @@ class AppLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => context.go('/'),
-      child: Row(
+    return InkWell(
+      onTap: () {
+        final state = GoRouterState.of(context);
+        if (state.uri.path == '/') {
+          // If already on landing page, scroll to top
+          final scrollController = PrimaryScrollController.of(context);
+          if (scrollController.hasClients) {
+            scrollController.animateTo(
+              0,
+              duration: const Duration(milliseconds: 600),
+              curve: Curves.easeOutQuart,
+            );
+          }
+        } else {
+          context.go('/');
+        }
+      },
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: Row(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -52,6 +70,7 @@ class AppLogo extends StatelessWidget {
             ],
           ),
         ],
+      ),
       ),
     );
   }
