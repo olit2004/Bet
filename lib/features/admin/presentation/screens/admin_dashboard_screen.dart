@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bet/core/widgets/app_logo.dart';
 
+
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});
 
@@ -146,7 +147,7 @@ class AdminDashboardScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha:0.03),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -275,7 +276,7 @@ class AdminDashboardScreen extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 15),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 154, 177, 240)!.withOpacity(0.3),
+        color: const Color.fromARGB(255, 154, 177, 240).withValues(alpha:0.3),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -304,7 +305,7 @@ class AdminDashboardScreen extends StatelessWidget {
       width: 60,
       height: height,
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 112, 79, 218).withOpacity(opacity),
+        color: const Color.fromARGB(255, 112, 79, 218).withValues(alpha: opacity),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(6),
           topRight: Radius.circular(6),

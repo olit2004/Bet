@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class IdentityReviewScreen extends StatelessWidget {
   const IdentityReviewScreen({super.key});
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -222,7 +223,7 @@ BoxDecoration _boxStyle() {
     borderRadius: BorderRadius.circular(20),
     boxShadow: [
       BoxShadow(
-        color: const Color.fromARGB(255, 6, 5, 5).withOpacity(0.01),
+        color: const Color.fromARGB(255, 6, 5, 5).withValues(alpha:0.01),
         blurRadius: 10,
         offset: const Offset(0, 5),
       ),
