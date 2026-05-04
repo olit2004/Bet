@@ -4,6 +4,7 @@ import 'package:bet/features/auth/screens/landing_screen.dart';
 import 'package:bet/features/auth/screens/signup_screen.dart';
 import 'package:bet/features/auth/screens/login_screen.dart';
 import 'package:bet/features/auth/screens/forgot_password_screen.dart';
+import 'package:bet/features/property/presentation/screens/home_screen.dart';
 
 /// Defines the global routing configuration using GoRouter.
 class AppRouter {
@@ -35,9 +36,7 @@ class AppRouter {
       ),
       GoRoute(
         path: '/home',
-        builder: (context, state) => const Scaffold(
-          body: Center(child: Text('Home Screen Placeholder')),
-        ),
+        builder: (context, state) => const HomeScreen(),
       ),
     ],
   );
