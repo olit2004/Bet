@@ -15,6 +15,7 @@ class LandingScreen extends StatelessWidget {
       backgroundColor: AppColors.background,
       appBar: const CustomAppBar(),
       body: SingleChildScrollView(
+        primary: true,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

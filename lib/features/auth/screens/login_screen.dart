@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/core/widgets/app_logo.dart';
+import 'package:bet/core/widgets/custom_app_bar.dart';
 import 'package:bet/core/widgets/custom_button.dart';
 import 'package:bet/core/widgets/custom_text_field.dart';
 
@@ -29,6 +30,11 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
+      extendBodyBehindAppBar: true,
+      appBar: const CustomAppBar(
+        backgroundColor: Colors.transparent,
+        showBackButton: true,
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -41,7 +47,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 child: Column(
                   children: [
-                    const AppLogo(size: 32),
                     const SizedBox(height: 24),
                     Text(
                       'Welcome Back',
