@@ -368,7 +368,7 @@ Widget _activeListing() {
                 children: [
                   _houseCard(
                     "/images/garden-state.png",
-                    "The Obsidian Pavilion",
+                    "The Obsidian Pavilion ",
                     4,
                     2,
                   ),
