@@ -30,7 +30,7 @@ class _PropertySearchBarState extends State<PropertySearchBar> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: CustomTextField(
-            hintText: 'Search Ethiopian properties...',
+            hintText: 'I am looking for property for rent or buy',
             controller: _searchController,
             prefixIcon: const Icon(Icons.search, color: AppColors.secondaryText),
             onChanged: (value) {

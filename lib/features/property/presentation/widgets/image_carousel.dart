@@ -4,11 +4,13 @@ import '../../../../core/constants/app_colors.dart';
 class ImageCarousel extends StatefulWidget {
   final List<String> imageUrls;
   final double height;
+  final bool isVerified;
 
   const ImageCarousel({
     super.key,
     required this.imageUrls,
     this.height = 300,
+    this.isVerified = false,
   });
 
   @override
@@ -99,8 +101,44 @@ class _ImageCarouselState extends State<ImageCarousel> {
               ),
             ),
           ),
+        
+        // Verified Badge
+        if (widget.isVerified)
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 10,
+            right: 16,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 4,
+                  ),
+                ],
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.verified, color: AppColors.success, size: 16),
+                  SizedBox(width: 4),
+                  Text(
+                    'VERIFIED',
+                    style: TextStyle(
+                      color: AppColors.primaryBlue,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
           
-        // Back Button Overlay (Common in detail screens)
+        // Back Button Overlay
         Positioned(
           top: MediaQuery.of(context).padding.top + 10,
           left: 16,

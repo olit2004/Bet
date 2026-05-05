@@ -16,11 +16,6 @@ class PropertyDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currencyFormatter = NumberFormat.currency(
-      symbol: '${property.currency} ',
-      decimalDigits: 0,
-    );
-
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SingleChildScrollView(
@@ -31,6 +26,7 @@ class PropertyDetailScreen extends StatelessWidget {
             ImageCarousel(
               imageUrls: property.imageUrls,
               height: 400,
+              isVerified: property.isVerified,
             ),
             
             Padding(
@@ -50,12 +46,12 @@ class PropertyDetailScreen extends StatelessWidget {
                             Text(
                               property.title,
                               style: GoogleFonts.manrope(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
+                                fontSize: 26,
+                                fontWeight: FontWeight.w800,
                                 color: AppColors.primaryText,
                               ),
                             ),
-                            const SizedBox(height: 4),
+                            const SizedBox(height: 6),
                             Row(
                               children: [
                                 const Icon(Icons.location_on_outlined, size: 16, color: AppColors.secondaryText),
@@ -65,6 +61,7 @@ class PropertyDetailScreen extends StatelessWidget {
                                   style: GoogleFonts.inter(
                                     fontSize: 14,
                                     color: AppColors.secondaryText,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                               ],
@@ -73,15 +70,15 @@ class PropertyDetailScreen extends StatelessWidget {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryBlue.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(20),
+                          color: AppColors.primaryBlue,
+                          borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
                           property.categoryName,
                           style: GoogleFonts.inter(
-                            color: AppColors.primaryBlue,
+                            color: Colors.white,
                             fontWeight: FontWeight.bold,
                             fontSize: 12,
                           ),
@@ -90,15 +87,27 @@ class PropertyDetailScreen extends StatelessWidget {
                     ],
                   ),
                   
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
                   
-                  Text(
-                    currencyFormatter.format(property.price),
-                    style: GoogleFonts.manrope(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.primaryBlue,
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        'ETB ',
+                        style: GoogleFonts.manrope(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primaryBlue,
+                        ),
+                      ),
+                      Text(
+                        NumberFormat('#,###').format(property.price),
+                        style: GoogleFonts.manrope(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.primaryBlue,
+                        ),
+                      ),
+                    ],
                   ),
                   
                   const SizedBox(height: 24),
