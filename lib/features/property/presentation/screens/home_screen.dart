@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/property_provider.dart';
 import '../widgets/property_card.dart';
 import '../widgets/search_bar.dart';
+import '../../property_routes.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/app_logo.dart';
 
@@ -190,8 +192,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: PropertyCard(
                               property: property,
                               onTap: () {
-                                // Navigate to Detail Screen
-                                // context.push('/detail/${property.id}');
+                                context.push(PropertyRoutes.detail, extra: property);
                               },
                             ),
                           );
