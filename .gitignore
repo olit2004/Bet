@@ -61,6 +61,7 @@
 .env
 .env.*
 
+implementation_plan.md
 # EXCEPTIONS
 # Ensure .gitkeep files are NOT ignored so empty folders remain in git
 !.gitkeep

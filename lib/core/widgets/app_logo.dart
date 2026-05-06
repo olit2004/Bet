@@ -1,58 +1,77 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
 import 'package:bet/core/constants/app_colors.dart';
 
 class AppLogo extends StatelessWidget {
   final double size;
 
-  const AppLogo({
-    super.key,
-    required this.size,
-  });
+  const AppLogo({super.key, required this.size});
 
   @override
   Widget build(BuildContext context) {
-    // Built as a Row to perfectly match the provided screenshot
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        // The icon container based on the screenshot
-        SizedBox(
-          width: size,
-          height: size,
-          child: CustomPaint(
-            painter: _LogoIconPainter(color: AppColors.primaryBlue),
+    return InkWell(
+      onTap: () {
+        final state = GoRouterState.of(context);
+        if (state.uri.path == '/') {
+          // If already on landing page, scroll to top
+          final scrollController = PrimaryScrollController.of(context);
+          if (scrollController.hasClients) {
+            scrollController.animateTo(
+              0,
+              duration: const Duration(milliseconds: 600),
+              curve: Curves.easeOutQuart,
+            );
+          }
+        } else {
+          context.go('/');
+        }
+      },
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // The icon container based on the screenshot
+          SizedBox(
+            width: size,
+            height: size,
+            child: CustomPaint(
+              painter: _LogoIconPainter(color: AppColors.primaryBlue),
+            ),
           ),
-        ),
-        SizedBox(width: size * 0.3),
-        // The text part from the screenshot
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Beth', // Using "Beth" to match the image accurately
-              style: GoogleFonts.manrope(
-                color: AppColors.primaryText,
-                fontSize: size * 0.9,
-                fontWeight: FontWeight.w800,
-                height: 1.0,
+          SizedBox(width: size * 0.3),
+          // The text part from the screenshot
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Beth', // Using "Beth" to match the image accurately
+                style: GoogleFonts.manrope(
+                  color: AppColors.primaryText,
+                  fontSize: size * 0.9,
+                  fontWeight: FontWeight.w800,
+                  height: 1.0,
+                ),
               ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              'RENTAL & BIDDING',
-              style: GoogleFonts.inter(
-                color: AppColors.primaryLightBlue,
-                fontSize: size * 0.22,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.5,
+              const SizedBox(height: 2),
+              Text(
+                'RENTAL & BIDDING',
+                style: GoogleFonts.inter(
+                  color: AppColors.primaryLightBlue,
+                  fontSize: size * 0.22,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.5,
+                ),
               ),
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      ),
+      ),
     );
   }
 }

@@ -1,42 +1,36 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:bet/core/constants/app_colors.dart';
+import 'package:bet/core/widgets/app_logo.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final String title;
+  final Color? backgroundColor;
   final bool showBackButton;
+  final Widget? title;
+  final Color? backButtonColor;
 
   const CustomAppBar({
     super.key,
-    required this.title,
-    this.showBackButton = true,
+    this.backgroundColor,
+    this.showBackButton = false,
+    this.title,
+    this.backButtonColor,
   });
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: AppColors.background,
+      backgroundColor: backgroundColor ?? AppColors.surface,
       elevation: 0,
-      centerTitle: true,
-      automaticallyImplyLeading: false, // Control the back button manually
+      titleSpacing: 16,
+      automaticallyImplyLeading: false,
       leading: showBackButton
           ? IconButton(
-              icon: const Icon(Icons.arrow_back, color: AppColors.primaryText),
-              onPressed: () {
-                if (Navigator.of(context).canPop()) {
-                  Navigator.of(context).pop();
-                }
-              },
+              icon: Icon(Icons.arrow_back, color: backButtonColor ?? AppColors.primaryText, size: 24),
+              onPressed: () => Navigator.of(context).pop(),
             )
           : null,
-      title: Text(
-        title,
-        style: GoogleFonts.manrope(
-          color: AppColors.primaryText,
-          fontSize: 18.0,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
+      title: title ?? const AppLogo(size: 28),
+      centerTitle: false,
     );
   }
 
