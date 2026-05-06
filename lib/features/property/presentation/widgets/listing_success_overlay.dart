@@ -3,17 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:bet/core/constants/app_colors.dart';
 
-/// Success overlay shown after a property listing is published.
-/// Displays a centered card with a checkmark, message, and a
-/// "Return to Dashboard" button over a blurred backdrop.
 class ListingSuccessOverlay extends StatefulWidget {
-  /// Called when the user taps "Return to Dashboard".
   final VoidCallback onReturnToDashboard;
 
-  const ListingSuccessOverlay({
-    super.key,
-    required this.onReturnToDashboard,
-  });
+  const ListingSuccessOverlay({super.key, required this.onReturnToDashboard});
 
   @override
   State<ListingSuccessOverlay> createState() => _ListingSuccessOverlayState();
@@ -36,10 +29,7 @@ class _ListingSuccessOverlayState extends State<ListingSuccessOverlay>
       parent: _controller,
       curve: Curves.easeOutBack,
     );
-    _fadeAnimation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeIn,
-    );
+    _fadeAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
     _controller.forward();
   }
 
@@ -55,17 +45,13 @@ class _ListingSuccessOverlayState extends State<ListingSuccessOverlay>
       opacity: _fadeAnimation,
       child: Stack(
         children: [
-          // ── Blurred backdrop ──
           Positioned.fill(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-              child: Container(
-                color: Colors.black.withValues(alpha: 0.3),
-              ),
+              child: Container(color: Colors.black.withValues(alpha: 0.3)),
             ),
           ),
 
-          // ── Centered card ──
           Center(
             child: ScaleTransition(
               scale: _scaleAnimation,
@@ -89,7 +75,6 @@ class _ListingSuccessOverlayState extends State<ListingSuccessOverlay>
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // ── Checkmark icon ──
                     Container(
                       width: 72,
                       height: 72,
@@ -105,7 +90,7 @@ class _ListingSuccessOverlayState extends State<ListingSuccessOverlay>
                     ),
                     const SizedBox(height: 28),
 
-                    // ── Title ──
+                    // Title
                     Text(
                       'Listing Published\nSuccessfully!',
                       textAlign: TextAlign.center,
@@ -118,7 +103,7 @@ class _ListingSuccessOverlayState extends State<ListingSuccessOverlay>
                     ),
                     const SizedBox(height: 16),
 
-                    // ── Subtitle ──
+                    // Subtitle
                     Text(
                       'Your architectural masterpiece\nis now live in the global curator\nnetwork.',
                       textAlign: TextAlign.center,
@@ -130,7 +115,7 @@ class _ListingSuccessOverlayState extends State<ListingSuccessOverlay>
                     ),
                     const SizedBox(height: 32),
 
-                    // ── Return to Dashboard button ──
+                    //  Return to Dashboard button
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton(
@@ -167,10 +152,6 @@ class _ListingSuccessOverlayState extends State<ListingSuccessOverlay>
   }
 }
 
-/// Shows the [ListingSuccessOverlay] as a full-screen modal overlay.
-///
-/// [onReturnToDashboard] is called when the user taps the button.
-/// The overlay is dismissed automatically before the callback fires.
 Future<void> showListingSuccessOverlay(
   BuildContext context, {
   required VoidCallback onReturnToDashboard,
@@ -178,10 +159,10 @@ Future<void> showListingSuccessOverlay(
   return showDialog(
     context: context,
     barrierDismissible: false,
-    barrierColor: Colors.transparent, // We handle our own backdrop
+    barrierColor: Colors.transparent,
     builder: (_) => ListingSuccessOverlay(
       onReturnToDashboard: () {
-        Navigator.of(context).pop(); // Close the dialog first
+        Navigator.of(context).pop();
         onReturnToDashboard();
       },
     ),

@@ -32,18 +32,22 @@ class BidSuccessOverlay extends StatelessWidget {
                         color: AppColors.primaryBlue.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.close, color: AppColors.primaryBlue, size: 20),
+                      child: const Icon(
+                        Icons.close,
+                        color: AppColors.primaryBlue,
+                        size: 20,
+                      ),
                     ),
                   ),
                 ),
-                
+
                 Text(
                   'Bid Accepted!',
                   style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                        color: AppColors.primaryText,
-                        fontWeight: FontWeight.w900,
-                        fontSize: 28,
-                      ),
+                    color: AppColors.primaryText,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 28,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 RichText(
@@ -55,17 +59,23 @@ class BidSuccessOverlay extends StatelessWidget {
                       height: 1.5,
                     ),
                     children: const [
-                      TextSpan(text: 'Congratulations! You have\naccepted the bid for the '),
+                      TextSpan(
+                        text:
+                            'Congratulations! You have\naccepted the bid for the ',
+                      ),
                       TextSpan(
                         text: 'Skyline\nPenthouse',
                         style: TextStyle(fontWeight: FontWeight.w800),
                       ),
-                      TextSpan(text: '. We are now initiating\nthe secure escrow process.'),
+                      TextSpan(
+                        text:
+                            '. We are now initiating\nthe secure escrow process.',
+                      ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 32),
-                
+
                 // Final Sale Price Box
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -114,7 +124,7 @@ class BidSuccessOverlay extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 32),
-                
+
                 // List items
                 _buildListItem(
                   icon: Icons.notifications_none,
@@ -126,7 +136,10 @@ class BidSuccessOverlay extends StatelessWidget {
                     ),
                     children: const [
                       TextSpan(text: 'The buyer, '),
-                      TextSpan(text: 'Abebe Tesfaye', style: TextStyle(fontWeight: FontWeight.w800)),
+                      TextSpan(
+                        text: 'Abebe Tesfaye',
+                        style: TextStyle(fontWeight: FontWeight.w800),
+                      ),
                       TextSpan(text: ', will be notified immediately.'),
                     ],
                   ),
@@ -141,16 +154,18 @@ class BidSuccessOverlay extends StatelessWidget {
                       height: 1.5,
                     ),
                     children: const [
-                      TextSpan(text: 'Our legal team will reach out with the contract details within 24 hours.'),
+                      TextSpan(
+                        text:
+                            'Our legal team will reach out with the contract details within 24 hours.',
+                      ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 48),
-                
+
                 TextButton(
                   onPressed: () {
-                    context.pop(); // close dialog
-                    // You might want to pop back to dashboard here depending on routing setup
+                    context.pop();
                   },
                   child: Text(
                     'Back to My Listings',
@@ -164,8 +179,7 @@ class BidSuccessOverlay extends StatelessWidget {
               ],
             ),
           ),
-          
-          // Floating green checkmark circle
+
           Positioned(
             top: -40,
             child: Container(
@@ -199,9 +213,7 @@ class BidSuccessOverlay extends StatelessWidget {
           child: Icon(icon, color: AppColors.primaryBlue, size: 20),
         ),
         const SizedBox(width: 16),
-        Expanded(
-          child: RichText(text: textSpan),
-        ),
+        Expanded(child: RichText(text: textSpan)),
       ],
     );
   }

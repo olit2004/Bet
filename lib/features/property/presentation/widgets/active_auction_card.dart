@@ -10,7 +10,6 @@ class ActiveAuctionCard extends StatelessWidget {
   final String location;
   final String currentBid;
   final int bidsPlaced;
-  final String? trendLabel;
   final VoidCallback onManageAuction;
   final VoidCallback? onTap;
 
@@ -23,7 +22,6 @@ class ActiveAuctionCard extends StatelessWidget {
     required this.location,
     required this.currentBid,
     required this.bidsPlaced,
-    this.trendLabel,
     required this.onManageAuction,
     this.onTap,
   });
@@ -31,154 +29,126 @@ class ActiveAuctionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors
-            .transparent, // Let the background show through if any, or maybe white
-      ),
+      decoration: const BoxDecoration(color: Colors.transparent),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Image Section ──
-          GestureDetector(
-            onTap: onTap,
-            child: _buildImageSection(context),
+          // Image Section
+          GestureDetector(onTap: onTap, child: _buildImageSection(context)),
+          const SizedBox(height: 16),
+
+          // Title & Price Section
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.headlineMedium
+                          ?.copyWith(fontWeight: FontWeight.w800, height: 1.2),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      location,
+                      style: GoogleFonts.inter(
+                        color: AppColors.secondaryText,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'CURRENT BID',
+                    style: GoogleFonts.inter(
+                      color: AppColors.secondaryText,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.0,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    currentBid,
+                    style: GoogleFonts.manrope(
+                      color: const Color(0xFF00684A), // Green price color
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
           const SizedBox(height: 16),
 
-            // ── Title & Price Section ──
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: Theme.of(context).textTheme.headlineMedium
-                            ?.copyWith(
-                              fontWeight: FontWeight.w800,
-                              height: 1.2,
-                            ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        location,
-                        style: GoogleFonts.inter(
-                          color: AppColors.secondaryText,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      'CURRENT BID',
-                      style: GoogleFonts.inter(
-                        color: AppColors.secondaryText,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 1.0,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      currentBid,
-                      style: GoogleFonts.manrope(
-                        color: const Color(0xFF00684A), // Green price color
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
+          // Divider
+          Divider(
+            color: AppColors.secondaryText.withValues(alpha: 0.15),
+            thickness: 1,
+            height: 1,
+          ),
+          const SizedBox(height: 16),
 
-            // ── Divider ──
-            Divider(
-              color: AppColors.secondaryText.withValues(alpha: 0.15),
-              thickness: 1,
-              height: 1,
-            ),
-            const SizedBox(height: 16),
-
-            // ── Bids Info & Manage Button ──
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.people_outline_rounded,
-                      color: AppColors.secondaryText,
-                      size: 20,
+          // Bids Info & Manage Button
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.people_outline_rounded,
+                    color: AppColors.secondaryText,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '$bidsPlaced Bids\nplaced',
+                    style: GoogleFonts.inter(
+                      color: AppColors.primaryText,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      height: 1.2,
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '$bidsPlaced Bids\nplaced',
-                      style: GoogleFonts.inter(
-                        color: AppColors.primaryText,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        height: 1.2,
-                      ),
-                    ),
-                  ],
-                ),
-                if (trendLabel != null)
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.trending_up_rounded,
-                        color: AppColors.secondaryText,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        trendLabel!,
-                        style: GoogleFonts.inter(
-                          color: AppColors.primaryText,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
                   ),
-              ],
-            ),
-            const SizedBox(height: 20),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
 
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                onPressed: onManageAuction,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryLightBlue,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24), // Pill shape
-                  ),
-                  elevation: 0,
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton(
+              onPressed: onManageAuction,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryLightBlue,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24), // Pill shape
                 ),
-                child: Text(
-                  'Manage Auction',
-                  style: GoogleFonts.manrope(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                  ),
+                elevation: 0,
+              ),
+              child: Text(
+                'Manage Auction',
+                style: GoogleFonts.manrope(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
-          ],
-        ),
-      );
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildImageSection(BuildContext context) {
@@ -190,7 +160,6 @@ class ActiveAuctionCard extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // Property image
             if (imageUrl.startsWith('assets/'))
               Image.asset(imageUrl, fit: BoxFit.cover)
             else
@@ -211,7 +180,7 @@ class ActiveAuctionCard extends StatelessWidget {
                 },
               ),
 
-            // Verified Badge (top left)
+            // Verified Badge
             if (isVerified)
               Positioned(
                 top: 16,
@@ -236,7 +205,7 @@ class ActiveAuctionCard extends StatelessWidget {
                   ),
                 ),
               ),
-            // Listing Type Badge (if 'isVerified' is false but we need 'LISTING', shown in second screenshot)
+
             if (!isVerified)
               Positioned(
                 top: 16,
@@ -281,7 +250,7 @@ class ActiveAuctionCard extends StatelessWidget {
                     const Icon(
                       Icons.timer_outlined,
                       size: 16,
-                      color: Color(0xFF917325), // Bronze/gold color
+                      color: Color(0xFF917325),
                     ),
                     const SizedBox(width: 6),
                     Text(

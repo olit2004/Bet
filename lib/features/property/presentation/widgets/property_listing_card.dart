@@ -2,11 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:bet/core/constants/app_colors.dart';
 
-/// Status of a property listing, determines badge color and stats display.
 enum ListingStatus { active, sold }
 
-/// A reusable card widget for displaying a property listing summary.
-/// Used on the Seller Dashboard and potentially on MyListings / search results.
 class PropertyListingCard extends StatelessWidget {
   final String imageUrl;
   final ListingStatus status;
@@ -52,15 +49,13 @@ class PropertyListingCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image with badge and price overlay
             _buildImageSection(),
-            // Property info
+
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Title row with menu button
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -71,18 +66,10 @@ class PropertyListingCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      if (onMenuPressed != null)
-                        GestureDetector(
-                          onTap: onMenuPressed,
-                          child: Icon(
-                            Icons.more_vert,
-                            color: AppColors.secondaryText.withValues(alpha: 0.6),
-                          ),
-                        ),
                     ],
                   ),
                   const SizedBox(height: 6),
-                  // Location row
+
                   Row(
                     children: [
                       Icon(
@@ -108,7 +95,10 @@ class PropertyListingCard extends StatelessWidget {
                     child: OutlinedButton(
                       onPressed: onActionPressed,
                       style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: AppColors.primaryBlue, width: 1.5),
+                        side: const BorderSide(
+                          color: AppColors.primaryBlue,
+                          width: 1.5,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -134,7 +124,9 @@ class PropertyListingCard extends StatelessWidget {
 
   Widget _buildImageSection() {
     final bool isActive = status == ListingStatus.active;
-    final Color badgeColor = isActive ? AppColors.success : const Color(0xFF8E99A4);
+    final Color badgeColor = isActive
+        ? AppColors.success
+        : const Color(0xFF8E99A4);
     final String badgeText = isActive ? 'ACTIVE' : 'SOLD';
 
     return ClipRRect(
@@ -152,7 +144,10 @@ class PropertyListingCard extends StatelessWidget {
               top: 12,
               left: 12,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: badgeColor.withValues(alpha: 0.9),
                   borderRadius: BorderRadius.circular(20),
@@ -173,7 +168,10 @@ class PropertyListingCard extends StatelessWidget {
               bottom: 12,
               left: 12,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.95),
                   borderRadius: BorderRadius.circular(8),
@@ -205,7 +203,11 @@ class PropertyListingCard extends StatelessWidget {
           return Container(
             color: AppColors.inputFill,
             child: const Center(
-              child: Icon(Icons.image_outlined, size: 48, color: AppColors.secondaryText),
+              child: Icon(
+                Icons.image_outlined,
+                size: 48,
+                color: AppColors.secondaryText,
+              ),
             ),
           );
         },
@@ -223,18 +225,18 @@ class PropertyListingCard extends StatelessWidget {
               Text(
                 stat.label,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: AppColors.secondaryText.withValues(alpha: 0.7),
-                      letterSpacing: 0.5,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  color: AppColors.secondaryText.withValues(alpha: 0.7),
+                  letterSpacing: 0.5,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const SizedBox(height: 4),
               Text(
                 stat.value,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: AppColors.primaryText,
-                      fontWeight: FontWeight.w700,
-                    ),
+                  color: AppColors.primaryText,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ],
           ),
@@ -244,7 +246,6 @@ class PropertyListingCard extends StatelessWidget {
   }
 }
 
-/// A small data class for stats displayed on the listing card.
 class ListingCardStat {
   final String label;
   final String value;

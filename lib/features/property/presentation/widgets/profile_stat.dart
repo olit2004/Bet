@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:bet/core/constants/app_colors.dart';
 
-/// A compact inline stat display showing a large number with a label below.
-/// Used on profile/summary screens where stats are displayed side-by-side.
 class ProfileStat extends StatelessWidget {
   final String value;
   final String label;
