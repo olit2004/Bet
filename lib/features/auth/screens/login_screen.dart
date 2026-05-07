@@ -17,6 +17,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _isBuyer = true;
 
   @override
   void dispose() {
@@ -85,7 +86,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      _buildRoleToggle(),
+                      const SizedBox(height: 32),
                       CustomTextField(
                         hintText: 'Email address',
                         controller: _emailController,
@@ -140,8 +144,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       CustomButton(
                         text: 'Sign In',
                         onPressed: () {
-                          // Handle sign in
-                          context.go('/home');
+                          // Handle sign in based on role
+                          if (_isBuyer) {
+                            context.go('/home');
+                          } else {
+                            context.go('/admin-dashboard');
+                          }
                         },
                       ),
                       const SizedBox(height: 32),
@@ -246,6 +254,77 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildRoleToggle() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'I AM A',
+          style: GoogleFonts.inter(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: AppColors.secondaryText,
+            letterSpacing: 1.2,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF0F4FF),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: _buildToggleOption(
+                  label: 'Buyer/Renter',
+                  isSelected: _isBuyer,
+                  onTap: () => setState(() => _isBuyer = true),
+                ),
+              ),
+              Expanded(
+                child: _buildToggleOption(
+                  label: 'Seller/Landlord',
+                  isSelected: !_isBuyer,
+                  onTap: () => setState(() => _isBuyer = false),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildToggleOption({
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primaryBlue : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+              color: isSelected ? Colors.white : AppColors.primaryBlue,
+            ),
+          ),
+        ),
       ),
     );
   }
