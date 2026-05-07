@@ -238,11 +238,11 @@ class _LoginScreenState extends State<LoginScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Image.network(
-            'https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg',
+            'https://img.icons8.com/color/48/google-logo.png',
             height: 20,
             width: 20,
             errorBuilder: (context, error, stackTrace) =>
-                const Icon(Icons.g_mobiledata, color: Colors.red),
+                const Icon(Icons.account_circle, color: AppColors.secondaryText, size: 20),
           ),
           const SizedBox(width: 12),
           Text(
