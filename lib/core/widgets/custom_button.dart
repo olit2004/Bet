@@ -5,19 +5,29 @@ import 'package:bet/core/constants/app_colors.dart';
 class CustomButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
+  final Color? color;
+  final Color? textColor;
+  final double? width;
+  final double? height;
 
   const CustomButton({
     super.key,
     required this.text,
     required this.onPressed,
+    this.color,
+    this.textColor,
+    this.width,
+    this.height,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: double.infinity,
+      width: width ?? double.infinity,
+      height: height,
       decoration: BoxDecoration(
-        gradient: AppColors.primaryGradient,
+        color: color,
+        gradient: color == null ? AppColors.primaryGradient : null,
         borderRadius: BorderRadius.circular(20.0),
       ),
       child: ElevatedButton(
@@ -33,7 +43,7 @@ class CustomButton extends StatelessWidget {
         child: Text(
           text,
           style: GoogleFonts.manrope(
-            color: Colors.white,
+            color: textColor ?? Colors.white,
             fontWeight: FontWeight.bold,
             fontSize: 16.0,
           ),
