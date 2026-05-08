@@ -4,57 +4,77 @@ import 'package:bet/core/constants/app_colors.dart';
 
 class CustomTextField extends StatelessWidget {
   final String hintText;
+  final String? label;
   final TextEditingController controller;
   final bool obscureText;
   final Widget? suffixIcon;
   final Widget? prefixIcon;
   final TextInputType keyboardType;
   final ValueChanged<String>? onChanged;
+  final int maxLines;
 
   const CustomTextField({
     super.key,
     required this.hintText,
+    this.label,
     required this.controller,
     this.obscureText = false,
     this.suffixIcon,
     this.prefixIcon,
     this.keyboardType = TextInputType.text,
     this.onChanged,
+    this.maxLines = 1,
   });
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      controller: controller,
-      obscureText: obscureText,
-      onChanged: onChanged,
-      keyboardType: keyboardType,
-      style: GoogleFonts.inter(
-        color: AppColors.primaryText,
-      ),
-      decoration: InputDecoration(
-        hintText: hintText,
-        hintStyle: GoogleFonts.inter(
-          color: AppColors.secondaryText,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (label != null) ...[
+          Text(
+            label!,
+            style: GoogleFonts.manrope(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primaryText,
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
+        TextField(
+          controller: controller,
+          obscureText: obscureText,
+          onChanged: onChanged,
+          maxLines: maxLines,
+          style: GoogleFonts.inter(
+            color: AppColors.primaryText,
+          ),
+          decoration: InputDecoration(
+            hintText: hintText,
+            hintStyle: GoogleFonts.inter(
+              color: AppColors.secondaryText,
+            ),
+            prefixIcon: prefixIcon,
+            suffixIcon: suffixIcon,
+            fillColor: AppColors.inputFill,
+            filled: true,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16.0),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16.0),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16.0),
+              borderSide: BorderSide.none,
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+          ),
         ),
-        prefixIcon: prefixIcon,
-        suffixIcon: suffixIcon,
-        fillColor: AppColors.inputFill,
-        filled: true,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16.0),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16.0),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16.0),
-          borderSide: BorderSide.none,
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
-      ),
+      ],
     );
   }
 }
