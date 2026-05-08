@@ -1,5 +1,5 @@
-import 'auction_model.dart';
-import 'bid_model.dart';
+import '../models/auction_model.dart';
+import '../models/bid_model.dart';
 
 
 abstract class AuctionRepository {

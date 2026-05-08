@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/app_logo.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -14,9 +15,22 @@ class ProfileScreen extends StatelessWidget {
         backgroundColor: AppColors.background,
         elevation: 0,
         scrolledUnderElevation: 0,
+        leading: const Padding(
+          padding: EdgeInsets.only(left: 16.0),
+          child: AppLogo(size: 24, showText: false),
+        ),
+        leadingWidth: 100,
+        title: Text(
+          'Profile',
+          style: GoogleFonts.manrope(
+            fontWeight: FontWeight.w800,
+            fontSize: 22,
+            color: const Color(0xFF05345C),
+          ),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings_outlined, color: AppColors.primaryText),
+            icon: const Icon(Icons.settings_outlined, color: Color(0xFF374CE2)),
             onPressed: () => context.push('/settings'),
           ),
           const SizedBox(width: 8),
@@ -25,88 +39,103 @@ class ProfileScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // 1. Profile Header
-            const SizedBox(height: 20),
-            CircleAvatar(
-              radius: 50,
-              backgroundColor: AppColors.inputFill,
-              child: ClipOval(
-                child: Image.network(
-                  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
-                  height: 100,
-                  width: 100,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.person, size: 50, color: AppColors.secondaryText),
+            const SizedBox(height: 30),
+            
+            // 1. Avatar with subtle glow
+            Center(
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF374CE2).withValues(alpha: 0.1),
+                      blurRadius: 20,
+                      spreadRadius: 5,
+                    ),
+                  ],
+                ),
+                child: CircleAvatar(
+                  radius: 70,
+                  backgroundColor: AppColors.inputFill,
+                  backgroundImage: const NetworkImage(
+                    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
+                  ),
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            
+            const SizedBox(height: 24),
+            
+            // 2. Name
             Text(
               'Lemi Fita',
               style: GoogleFonts.manrope(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primaryText,
+                fontSize: 28,
+                fontWeight: FontWeight.w900,
+                color: const Color(0xFF05345C),
+                letterSpacing: -0.5,
               ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              'User since 2021',
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                color: AppColors.secondaryText,
-                fontWeight: FontWeight.w500,
+            
+            const SizedBox(height: 12),
+            
+            // 3. Client Badge
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF3F7FF),
+                borderRadius: BorderRadius.circular(20),
               ),
-            ),
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40.0),
               child: Text(
-                'Searching and the best apartments in Addis, finding and ensure all my things are required according to house requirements.',
-                textAlign: TextAlign.center,
+                'Client since 2021',
                 style: GoogleFonts.inter(
                   fontSize: 13,
-                  color: AppColors.secondaryText,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF374CE2),
+                ),
+              ),
+            ),
+            
+            const SizedBox(height: 20),
+            
+            // 4. Bio
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32.0),
+              child: Text(
+                'Curating architectural masterpieces in the Pacific Northwest. Focused on brutalist and mid-century modern restorations.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontSize: 15,
+                  color: const Color(0xFF3D618C),
                   height: 1.5,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
             
             const SizedBox(height: 32),
             
-            // 2. Stats
+            // 5. Stats Grid (2x2)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32.0),
-              child: Row(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: 2,
+                crossAxisSpacing: 20,
+                mainAxisSpacing: 20,
+                childAspectRatio: 1.4,
                 children: [
-                  Expanded(
-                    child: _buildStatItem('12', 'ACTIVE BIDS'),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildStatItem('4', 'PROPERTIES'),
-                  ),
+                  _buildStatCard('12', 'ACTIVE BIDS', const Color(0xFF374CE2)),
+                  _buildStatCard('4', 'PROPOSALS', const Color(0xFF059669)),
+                  _buildStatCard('\$4.2M', 'ASSET VALUE', const Color(0xFF05345C)),
+                  _buildStatCard('100%', 'ESCROW SUCCESS', const Color(0xFF05345C)),
                 ],
               ),
             ),
             
-            const SizedBox(height: 32),
-            
-            // 3. Menu Options
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Column(
-                children: [
-                  _buildMenuItem(Icons.person_outline, 'Edit Profile', () {}),
-                  _buildMenuItem(Icons.favorite_outline, 'Saved Properties', () {}),
-                  _buildMenuItem(Icons.history, 'Transaction History', () {}),
-                  _buildMenuItem(Icons.help_outline, 'Help & Support', () {}),
-                  _buildMenuItem(Icons.logout, 'Logout', () {
-                    context.go('/login');
-                  }, isDestructive: true),
-                ],
-              ),
-            ),
             const SizedBox(height: 40),
           ],
         ),
@@ -114,63 +143,45 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatItem(String value, String label) {
+  Widget _buildStatCard(String value, String label, Color textColor) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.inputFill),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
             value,
             style: GoogleFonts.manrope(
-              fontSize: 20,
+              fontSize: 24,
               fontWeight: FontWeight.w800,
-              color: AppColors.primaryBlue,
+              color: textColor,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             label,
-            style: GoogleFonts.inter(
-              fontSize: 11,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.manrope(
+              fontSize: 10,
               fontWeight: FontWeight.bold,
-              color: AppColors.secondaryText,
+              color: const Color(0xFF9CA3AF),
+              letterSpacing: 0.5,
             ),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildMenuItem(IconData icon, String title, VoidCallback onTap, {bool isDestructive = false}) {
-    return ListTile(
-      onTap: onTap,
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: isDestructive ? Colors.red.shade50 : AppColors.inputFill.withValues(alpha: 0.5),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Icon(
-          icon, 
-          size: 20, 
-          color: isDestructive ? Colors.red : AppColors.primaryBlue
-        ),
-      ),
-      title: Text(
-        title,
-        style: GoogleFonts.inter(
-          fontSize: 15,
-          fontWeight: FontWeight.w600,
-          color: isDestructive ? Colors.red : AppColors.primaryText,
-        ),
-      ),
-      trailing: const Icon(Icons.chevron_right, size: 20, color: AppColors.secondaryText),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
     );
   }
 }

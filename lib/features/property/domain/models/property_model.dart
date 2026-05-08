@@ -1,4 +1,4 @@
-enum PropertyCategory { buy, rent, auction, commercial }
+enum PropertyCategory { buy, rent, commercial }
 
 class PropertySpec {
   final String label;
@@ -48,8 +48,6 @@ class Property {
         return 'Buy';
       case PropertyCategory.rent:
         return 'Rent';
-      case PropertyCategory.auction:
-        return 'Auction';
       case PropertyCategory.commercial:
         return 'Commercial';
     }

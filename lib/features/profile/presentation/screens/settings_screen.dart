@@ -16,12 +16,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final _oldPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _bioController = TextEditingController(
+    text: 'Curating architectural masterpieces in the Pacific Northwest. Focused on brutalist and mid-century modern restorations.',
+  );
 
   @override
   void dispose() {
     _oldPasswordController.dispose();
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
+    _bioController.dispose();
     super.dispose();
   }
 
@@ -40,6 +44,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
         backgroundColor: AppColors.background,
         elevation: 0,
         scrolledUnderElevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF374CE2)),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         title: Text(
           'Settings',
           style: GoogleFonts.manrope(
@@ -53,6 +61,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(
+              'Update Profile',
+              style: GoogleFonts.manrope(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primaryText,
+              ),
+            ),
+            const SizedBox(height: 24),
+            CustomTextField(
+              label: 'Bio',
+              hintText: 'Tell us about yourself',
+              controller: _bioController,
+              maxLines: 4,
+            ),
+            const SizedBox(height: 16),
+            CustomButton(
+              text: 'Update Bio',
+              onPressed: () {
+                // Logic to update bio
+              },
+            ),
+            const SizedBox(height: 48),
+            const Divider(),
+            const SizedBox(height: 32),
             Text(
               'Change Password',
               style: GoogleFonts.manrope(
