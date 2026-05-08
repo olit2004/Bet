@@ -30,28 +30,15 @@ class _PropertySearchBarState extends State<PropertySearchBar> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: CustomTextField(
-            hintText: 'Search Ethiopian properties...',
+            hintText: 'Search modern lofts, penthouses...',
             controller: _searchController,
-            prefixIcon: const Icon(Icons.search, color: AppColors.secondaryText),
+            prefixIcon: const Icon(Icons.search, color: AppColors.secondaryText, size: 20),
             onChanged: (value) {
               context.read<PropertyProvider>().searchProperties(value);
             },
-            suffixIcon: Container(
-              margin: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.primaryBlue.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: IconButton(
-                icon: const Icon(Icons.tune, color: AppColors.primaryBlue, size: 20),
-                onPressed: () {
-                  // Future: Open advanced filters
-                },
-              ),
-            ),
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
         // Horizontal Scrollable Category Chips
         Consumer<PropertyProvider>(
           builder: (context, provider, child) {
@@ -71,27 +58,27 @@ class _PropertySearchBarState extends State<PropertySearchBar> {
                     },
                   ),
                   ...PropertyCategory.values.map((category) {
-                    return _buildCategoryChip(
-                      label: category.name.capitalize(),
-                      isSelected: provider.selectedCategory == category,
-                      onSelected: (selected) {
-                        if (selected) {
-                          provider.filterByCategory(category);
-                        } else {
-                          provider.filterByCategory(null);
-                        }
-                        _searchController.clear();
-                      },
-                    );
-                  }),
-                ],
-              ),
-            );
-          },
-        ),
-      ],
-    );
-  }
+                  return _buildCategoryChip(
+                    label: category.name.capitalize(),
+                    isSelected: provider.selectedCategory == category,
+                    onSelected: (selected) {
+                      if (selected) {
+                        provider.filterByCategory(category);
+                      } else {
+                        provider.filterByCategory(null);
+                      }
+                      _searchController.clear();
+                    },
+                  );
+                }),
+              ],
+            ),
+          );
+        },
+      ),
+    ],
+  );
+}
 
   Widget _buildCategoryChip({
     required String label,
@@ -99,27 +86,24 @@ class _PropertySearchBarState extends State<PropertySearchBar> {
     required Function(bool) onSelected,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(right: 8.0),
-      child: ChoiceChip(
-        label: Text(label),
-        selected: isSelected,
-        onSelected: onSelected,
-        selectedColor: AppColors.primaryBlue,
-        backgroundColor: Colors.white,
-        labelStyle: TextStyle(
-          color: isSelected ? Colors.white : AppColors.secondaryText,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-          fontSize: 14,
+      padding: const EdgeInsets.only(right: 12.0),
+      child: GestureDetector(
+        onTap: () => onSelected(true),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primaryBlue : AppColors.chipBackground,
+            borderRadius: BorderRadius.circular(100),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? Colors.white : AppColors.secondaryText,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+              fontSize: 14,
+            ),
+          ),
         ),
-        side: BorderSide(
-          color: isSelected ? AppColors.primaryBlue : AppColors.inputFill,
-          width: 1,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        showCheckmark: false,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
     );
   }

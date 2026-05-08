@@ -5,54 +5,59 @@ class MockPropertyData {
     Property(
       id: '1',
       title: 'Exquisite Villa',
-      description: 'A stunning modern villa located in the heart of Bole. This property features spacious rooms, a private garden, and state-of-the-art security systems. Perfect for families looking for luxury and comfort.',
-      price: 4250000,
+      description:
+          'Designed by renowned architect Marcus Thorne, this residence serves as a masterful dialogue between organic textures and stark industrial lines. Featuring floor-to-ceiling glass that dissolves the boundary between the interior gallery and the surrounding eucalyptus groves.',
+      price: 12450000,
       currency: 'ETB',
-      address: 'Bole, Addis Ababa',
+      address: 'Garment',
       imageUrls: [
-        'assets/images/properties/villa.png',
+        'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
       ],
       category: PropertyCategory.buy,
       specs: [
-        PropertySpec(label: 'Bedrooms', value: '4', icon: 'bed'),
-        PropertySpec(label: 'Bathrooms', value: '3', icon: 'bathtub'),
-        PropertySpec(label: 'Area', value: '350 sqm', icon: 'square_foot'),
+        PropertySpec(label: 'Beds', value: '5', icon: 'bed'),
+        PropertySpec(label: 'Baths', value: '4', icon: 'bathtub'),
+        PropertySpec(label: 'SQM', value: '500', icon: 'square_foot'),
       ],
       isVerified: true,
       isFeatured: true,
     ),
     Property(
       id: '2',
-      title: 'Modern Apartment',
-      description: 'Elegant high-rise apartment with breathtaking city views. Fully furnished with high-end appliances and modern finishes. Includes access to a communal gym and rooftop lounge.',
-      price: 150000,
+      title: 'Elegant Apartments',
+      description:
+          'Designed by the visionary studio these residences offer a sophisticated interplay between urban rhythm and curated tranquility. Featuring expansive steel-framed windows that pull the city\'s shifting skyline into the living space, each unit balances raw exposed concrete with the warmth of hand-finished oak.',
+      price: 7450000,
       currency: 'ETB',
-      address: 'Kazanchis, Addis Ababa',
+      address: 'Tsehay Realstate',
       imageUrls: [
-        'assets/images/properties/apartment.png',
+        'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
       ],
-      category: PropertyCategory.rent,
+      category: PropertyCategory.commercial,
       specs: [
-        PropertySpec(label: 'Bedrooms', value: '2', icon: 'bed'),
-        PropertySpec(label: 'Bathrooms', value: '2', icon: 'bathtub'),
-        PropertySpec(label: 'Floor', value: '12th', icon: 'layers'),
+        PropertySpec(label: '3-Bedrooms', value: '10', icon: 'bed'),
+        PropertySpec(label: '2-Bedrooms', value: '15', icon: 'bed'),
+        PropertySpec(label: 'Studios', value: '25', icon: 'bed'),
       ],
       isVerified: true,
     ),
     Property(
       id: '3',
-      title: 'Commercial Office Space',
-      description: 'Spacious open-plan office in a prime business district. Suitable for startups or established firms. Features high-speed internet connectivity and ample parking.',
-      price: 85000,
+      title: 'Modern Loft',
+      description:
+          'Spacious open-plan office in a prime business district. Suitable for startups or established firms. Features high-speed internet connectivity and ample parking.',
+      price: 850000,
       currency: 'ETB',
       address: 'Mexico, Addis Ababa',
-      imageUrls: [
-        'assets/images/properties/apartment.png', // Reusing for mock
-      ],
-      category: PropertyCategory.commercial,
+      imageUrls: ['assets/images/skyline-retreat.png'],
+      category: PropertyCategory.rent,
       specs: [
         PropertySpec(label: 'Space', value: '120 sqm', icon: 'square_foot'),
-        PropertySpec(label: 'Parking', value: 'Available', icon: 'local_parking'),
+        PropertySpec(
+          label: 'Parking',
+          value: 'Available',
+          icon: 'local_parking',
+        ),
       ],
     ),
   ];
