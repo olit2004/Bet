@@ -3,12 +3,15 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/core/widgets/app_logo.dart';
+import '../../domain/models/property_model.dart';
+import '../../property_routes.dart';
 
 class PropertyDetailsScreen extends StatelessWidget {
   final String propertyId;
   final String imageUrl;
   final String title;
   final String location;
+  final Property? property;
 
   const PropertyDetailsScreen({
     super.key,
@@ -16,6 +19,7 @@ class PropertyDetailsScreen extends StatelessWidget {
     required this.imageUrl,
     required this.title,
     required this.location,
+    this.property,
   });
 
   @override
@@ -52,14 +56,12 @@ class PropertyDetailsScreen extends StatelessWidget {
                     ),
                   ),
           ),
-
           Positioned.fill(
             child: SingleChildScrollView(
               physics: const ClampingScrollPhysics(),
               child: Column(
                 children: [
                   SizedBox(height: MediaQuery.of(context).size.height * 0.38),
-
                   Container(
                     width: double.infinity,
                     decoration: const BoxDecoration(
@@ -112,7 +114,6 @@ class PropertyDetailsScreen extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 8),
-
                         Row(
                           children: [
                             Icon(
@@ -134,7 +135,6 @@ class PropertyDetailsScreen extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 32),
-
                         Container(
                           padding: const EdgeInsets.symmetric(vertical: 24),
                           decoration: BoxDecoration(
@@ -147,7 +147,7 @@ class PropertyDetailsScreen extends StatelessWidget {
                                 child: Column(
                                   children: [
                                     Text(
-                                      'HIGHEST BID',
+                                      'PRICE / BID',
                                       style: GoogleFonts.inter(
                                         color: const Color(0xFF00684A),
                                         fontSize: 10,
@@ -157,7 +157,7 @@ class PropertyDetailsScreen extends StatelessWidget {
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
-                                      '18,450,000',
+                                      property?.price.toString() ?? '18,450,000',
                                       style: GoogleFonts.manrope(
                                         color: const Color(0xFF00684A),
                                         fontSize: 22,
@@ -178,7 +178,7 @@ class PropertyDetailsScreen extends StatelessWidget {
                                 child: Column(
                                   children: [
                                     Text(
-                                      'ENDS IN',
+                                      'STATUS',
                                       style: GoogleFonts.inter(
                                         color: AppColors.primaryText,
                                         fontSize: 10,
@@ -188,7 +188,7 @@ class PropertyDetailsScreen extends StatelessWidget {
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
-                                      '04h 12m',
+                                      property?.categoryName ?? 'Available',
                                       style: GoogleFonts.manrope(
                                         color: AppColors.primaryText,
                                         fontSize: 22,
@@ -202,7 +202,6 @@ class PropertyDetailsScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 32),
-
                         Row(
                           children: [
                             _buildFeatureBox(
@@ -214,9 +213,8 @@ class PropertyDetailsScreen extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 48),
-
                         Text(
-                          'RESIDENTIAL VISION',
+                          'PROPERTY VISION',
                           style: GoogleFonts.inter(
                             color: AppColors.primaryText,
                             fontSize: 11,
@@ -226,7 +224,7 @@ class PropertyDetailsScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Perched atop the city\'s most iconic tower, the Skyline Penthouse offers an unparalleled urban sanctuary. Defined by its seamless floor-to-ceiling glass and 360-degree metropolitan views, this residence features private elevator access, 24/7 personalized concierge services, and a master suite that floats above the lights of the city.',
+                          property?.description ?? 'Perched atop the city\'s most iconic tower...',
                           style: GoogleFonts.inter(
                             color: AppColors.primaryText.withValues(alpha: 0.8),
                             fontSize: 14,
@@ -243,7 +241,6 @@ class PropertyDetailsScreen extends StatelessWidget {
           ),
         ],
       ),
-
       bottomNavigationBar: Container(
         color: bgColor,
         padding: EdgeInsets.only(
@@ -260,7 +257,7 @@ class PropertyDetailsScreen extends StatelessWidget {
                 height: 56,
                 child: ElevatedButton(
                   onPressed: () {
-                    context.push('/manage-bids/$propertyId');
+                    // Action: Save/Watch
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFD6DFE8),
@@ -287,14 +284,22 @@ class PropertyDetailsScreen extends StatelessWidget {
               child: SizedBox(
                 height: 56,
                 child: ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    if (property != null) {
+                      if (property!.category == PropertyCategory.rent) {
+                        context.push('${PropertyRoutes.counterOffer}/$propertyId', extra: property);
+                      } else {
+                        context.push('${PropertyRoutes.placeBid}/$propertyId', extra: property);
+                      }
+                    }
+                  },
                   icon: const Icon(
                     Icons.gavel_rounded,
                     color: Colors.white,
                     size: 20,
                   ),
                   label: Text(
-                    'Stop Bid',
+                    property?.category == PropertyCategory.rent ? 'Make Offer' : 'Place Bid',
                     style: GoogleFonts.manrope(
                       color: Colors.white,
                       fontSize: 15,
