@@ -271,7 +271,7 @@ class _CreatePropertyContentState extends State<CreatePropertyContent> {
                   setState(() {
                     _selectedLocation = latLng;
                     _locationName =
-                        '${latLng.latitude.toStringAsFixed(4)}, ${latLng.longitude.toStringAsFixed(4)}';
+                        'Lat: ${latLng.latitude.toStringAsFixed(4)}, Long: ${latLng.longitude.toStringAsFixed(4)}';
                   });
                 },
               ),
@@ -503,6 +503,23 @@ class _CreatePropertyContentState extends State<CreatePropertyContent> {
         ),
         child: ElevatedButton(
           onPressed: () {
+            if (_titleController.text.isEmpty || _priceController.text.isEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Please fill in at least the title and price.',
+                    style: GoogleFonts.inter(),
+                  ),
+                  backgroundColor: AppColors.error,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              );
+              return;
+            }
+
             showListingSuccessOverlay(
               context,
               onReturnToDashboard: () {
@@ -562,7 +579,7 @@ class _CreatePropertyContentState extends State<CreatePropertyContent> {
           color: AppColors.secondaryText.withValues(alpha: 0.5),
           fontSize: 15,
         ),
-        fillColor: const Color(0xFF94A3B8).withValues(alpha: 0.1),
+        fillColor: AppColors.inputFill,
         filled: true,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
