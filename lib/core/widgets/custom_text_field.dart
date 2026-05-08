@@ -9,6 +9,7 @@ class CustomTextField extends StatelessWidget {
   final bool obscureText;
   final Widget? suffixIcon;
   final Widget? prefixIcon;
+  final TextInputType keyboardType;
   final ValueChanged<String>? onChanged;
   final int maxLines;
 
@@ -20,6 +21,7 @@ class CustomTextField extends StatelessWidget {
     this.obscureText = false,
     this.suffixIcon,
     this.prefixIcon,
+    this.keyboardType = TextInputType.text,
     this.onChanged,
     this.maxLines = 1,
   });
