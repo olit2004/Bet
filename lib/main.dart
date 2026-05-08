@@ -5,10 +5,13 @@ import 'package:bet/core/theme/app_theme.dart';
 import 'package:bet/features/property/presentation/providers/property_provider.dart';
 import 'package:bet/features/property/data/repositories/property_repository_impl.dart';
 
+import 'package:bet/core/providers/navigation_provider.dart';
+
 void main() {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => NavigationProvider()),
         ChangeNotifierProvider(
           create: (_) => PropertyProvider(
             repository: PropertyRepositoryImpl(),

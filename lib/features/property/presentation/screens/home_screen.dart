@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/property_provider.dart';
 import '../widgets/property_card.dart';
@@ -8,6 +7,7 @@ import '../widgets/search_bar.dart';
 import '../../property_routes.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/app_logo.dart';
+import '../../../../core/providers/navigation_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -38,13 +38,16 @@ class _HomeScreenState extends State<HomeScreen> {
         scrolledUnderElevation: 0,
         title: const AppLogo(size: 20),
         actions: [
-          CircleAvatar(
-            radius: 18,
-            backgroundColor: AppColors.inputFill,
-            child: ClipOval(
-              child: Image.asset(
-                'assets/images/avater.png',
-                errorBuilder: (context, error, stackTrace) => const Icon(Icons.person, color: AppColors.secondaryText),
+          GestureDetector(
+            onTap: () => context.read<NavigationProvider>().setIndex(2),
+            child: CircleAvatar(
+              radius: 18,
+              backgroundColor: AppColors.inputFill,
+              child: ClipOval(
+                child: Image.asset(
+                  'assets/images/avater.png',
+                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.person, color: AppColors.secondaryText),
+                ),
               ),
             ),
           ),
@@ -58,67 +61,10 @@ class _HomeScreenState extends State<HomeScreen> {
           child: CustomScrollView(
             slivers: [
               // 1. Greeting Banner (Hey message!)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppColors.inputFill),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.02),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Hey message!',
-                                style: GoogleFonts.manrope(
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.primaryText,
-                                  fontSize: 16,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                'Mohamed and the Devs, here you see your business and real estate listing status here.',
-                                style: GoogleFonts.inter(
-                                  color: AppColors.secondaryText,
-                                  fontSize: 13,
-                                  height: 1.4,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        IconButton(
-                          visualDensity: VisualDensity.compact,
-                          icon: const Icon(Icons.close, size: 18, color: AppColors.secondaryText),
-                          onPressed: () {
-                            // Logic to hide banner
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              
-              // 2. Search and Categories Section
+              // 1. Search and Categories Section
               const SliverToBoxAdapter(
                 child: Padding(
-                  padding: EdgeInsets.only(bottom: 24.0),
+                  padding: EdgeInsets.symmetric(vertical: 16.0),
                   child: PropertySearchBar(),
                 ),
               ),
@@ -188,7 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         (context, index) {
                           final property = provider.properties[index];
                           return Padding(
-                            padding: const EdgeInsets.only(bottom: 16.0),
+                            padding: const EdgeInsets.only(bottom: 20.0),
                             child: PropertyCard(
                               property: property,
                               onTap: () {
@@ -208,34 +154,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 0,
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        selectedItemColor: AppColors.primaryBlue,
-        unselectedItemColor: AppColors.secondaryText.withValues(alpha: 0.5),
-        selectedLabelStyle: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12),
-        unselectedLabelStyle: GoogleFonts.inter(fontWeight: FontWeight.w500, fontSize: 12),
-        elevation: 10,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_rounded), 
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite_outline_rounded), 
-            label: 'Saved',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history_rounded), 
-            label: 'History',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline_rounded), 
-            label: 'Profile',
-          ),
-        ],
       ),
     );
   }

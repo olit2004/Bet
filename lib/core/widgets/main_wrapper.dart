@@ -1,67 +1,87 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../constants/app_colors.dart';
+import 'package:provider/provider.dart';
 import '../../features/property/presentation/screens/home_screen.dart';
-import '../../features/property/presentation/screens/saved_screen.dart';
 import '../../features/activity/presentation/screens/actions_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
+import '../providers/navigation_provider.dart';
 
-class MainWrapper extends StatefulWidget {
+class MainWrapper extends StatelessWidget {
   const MainWrapper({super.key});
 
-  @override
-  State<MainWrapper> createState() => _MainWrapperState();
-}
-
-class _MainWrapperState extends State<MainWrapper> {
-  int _currentIndex = 0;
-
-  final List<Widget> _screens = [
-    const HomeScreen(),
-    const SavedScreen(),
-    const ActionsScreen(),
-    const ProfileScreen(),
+  final List<Widget> _screens = const [
+    HomeScreen(),
+    ActionsScreen(),
+    ProfileScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        selectedItemColor: AppColors.primaryBlue,
-        unselectedItemColor: AppColors.secondaryText.withValues(alpha: 0.5),
-        selectedLabelStyle: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12),
-        unselectedLabelStyle: GoogleFonts.inter(fontWeight: FontWeight.w500, fontSize: 12),
-        elevation: 10,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_rounded), 
-            label: 'Home',
+    return Consumer<NavigationProvider>(
+      builder: (context, navProvider, child) {
+        return Scaffold(
+          body: IndexedStack(
+            index: navProvider.currentIndex,
+            children: _screens,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite_outline_rounded), 
-            label: 'Saved',
+          bottomNavigationBar: Container(
+            height: 80,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, -5),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildNavItem(context, Icons.home_rounded, 'HOME', 0),
+                _buildNavItem(context, Icons.grid_view_rounded, 'ACTIONS', 1),
+                _buildNavItem(context, Icons.person_outline_rounded, 'PROFILE', 2),
+              ],
+            ),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history_rounded), 
-            label: 'History',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline_rounded), 
-            label: 'Profile',
-          ),
-        ],
+        );
+      },
+    );
+  }
+
+  Widget _buildNavItem(BuildContext context, IconData icon, String label, int index) {
+    final navProvider = context.read<NavigationProvider>();
+    final isSelected = navProvider.currentIndex == index;
+    
+    return GestureDetector(
+      onTap: () => navProvider.setIndex(index),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFF3F7FF) : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? const Color(0xFF374CE2) : const Color(0xFF9CA3AF),
+              size: 24,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: 10,
+                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
+                color: isSelected ? const Color(0xFF374CE2) : const Color(0xFF9CA3AF),
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
