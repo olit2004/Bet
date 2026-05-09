@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../domain/models/property_model.dart';
-import '../../domain/repositories/property_repository.dart';
+import '../models/property_model.dart';
+import '../repositories/property_repository.dart';
 
 class PropertyProvider extends ChangeNotifier {
   final PropertyRepository _repository;

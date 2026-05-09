@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
-import '../../domain/models/property_model.dart';
+import 'package:bet/core/property/models/property_model.dart';
 import '../widgets/bid_info_card.dart';
 import '../widgets/upload_container.dart';
 import '../widgets/legal_notice_card.dart';

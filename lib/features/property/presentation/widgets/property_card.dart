@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../domain/models/property_model.dart';
+import 'package:bet/core/property/models/property_model.dart';
 import '../../../../core/constants/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';

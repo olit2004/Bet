@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:bet/core/routing/app_router.dart';
 import 'package:bet/core/theme/app_theme.dart';
-import 'package:bet/features/property/presentation/providers/property_provider.dart';
-import 'package:bet/features/property/data/repositories/property_repository_impl.dart';
+import 'package:bet/core/property/providers/property_provider.dart';
+import 'package:bet/core/property/repositories/property_repository_impl.dart';
 
 import 'package:bet/core/providers/navigation_provider.dart';
 

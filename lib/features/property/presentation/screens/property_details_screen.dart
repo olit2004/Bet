@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/core/widgets/app_logo.dart';
-import '../../domain/models/property_model.dart';
+import 'package:bet/core/property/models/property_model.dart';
 import '../../property_routes.dart';
 
 class PropertyDetailsScreen extends StatelessWidget {

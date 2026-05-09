@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../domain/models/property_model.dart';
-import '../providers/property_provider.dart';
+import 'package:bet/core/property/models/property_model.dart';
+import 'package:bet/core/property/providers/property_provider.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 

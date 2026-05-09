@@ -1,5 +1,5 @@
-import '../../domain/models/property_model.dart';
-import '../../domain/repositories/property_repository.dart';
+import '../models/property_model.dart';
+import './property_repository.dart';
 import '../data_sources/mock_property_data.dart';
 
 class PropertyRepositoryImpl implements PropertyRepository {

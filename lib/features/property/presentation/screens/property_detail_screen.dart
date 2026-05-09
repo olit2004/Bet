@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:bet/core/constants/app_colors.dart';
 import '../../../../core/widgets/app_logo.dart';
-import '../../domain/models/property_model.dart';
+import 'package:bet/core/property/models/property_model.dart';
 import '../widgets/image_carousel.dart';
 import '../widgets/property_specs.dart';
 

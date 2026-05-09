@@ -1,4 +1,4 @@
-import '../../domain/models/property_model.dart';
+import '../models/property_model.dart';
 
 class MockPropertyData {
   static const List<Property> properties = [

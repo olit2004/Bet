@@ -148,7 +148,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           if (_isBuyer) {
                             context.go('/home');
                           } else {
-                            context.go('/admin-dashboard');
+                            context.go('/seller-dashboard');
                           }
                         },
                       ),

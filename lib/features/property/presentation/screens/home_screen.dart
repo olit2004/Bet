@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import '../providers/property_provider.dart';
+import 'package:bet/core/property/providers/property_provider.dart';
 import '../widgets/property_card.dart';
 import '../widgets/search_bar.dart';
 import '../../property_routes.dart';

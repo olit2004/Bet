@@ -9,7 +9,7 @@ import 'presentation/screens/active_auctions_screen.dart';
 import 'presentation/screens/seller_dashboard_screen.dart';
 import 'presentation/screens/place_bid_screen.dart';
 import 'presentation/screens/counter_offer_screen.dart';
-import 'domain/models/property_model.dart';
+import 'package:bet/core/property/models/property_model.dart';
 
 /// Routes for the Property & Bidding feature
 class PropertyRoutes {

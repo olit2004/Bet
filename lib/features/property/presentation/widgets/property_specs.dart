@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:bet/core/constants/app_colors.dart';
-import '../../domain/models/property_model.dart';
+import 'package:bet/core/property/models/property_model.dart';
 
 class PropertySpecsGrid extends StatelessWidget {
   final List<PropertySpec> specs;

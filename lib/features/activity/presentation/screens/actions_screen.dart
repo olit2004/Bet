@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/core/widgets/app_logo.dart';
-import 'package:bet/features/property/presentation/providers/property_provider.dart';
+import 'package:bet/core/property/providers/property_provider.dart';
 import 'package:bet/features/property/property_routes.dart';
 
 class ActionsScreen extends StatefulWidget {
