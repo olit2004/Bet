@@ -10,63 +10,55 @@ class UsersScreen extends StatefulWidget {
 
 class _UsersScreenState extends State<UsersScreen> {
   String current_filter = "";
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color.fromRGBO(248, 249, 255, 1),
-
-      appBar: _buildAppBar(),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(
-              "Property Approvals",
-              "Review pending submissions for quality assurance.",
-            ),
-
-            SizedBox(height: 20),
-            _currentStats(),
-            SizedBox(height: 20),
-            _filterBar(),
-            SizedBox(height: 20),
-            _usersCard(
-              "Bekalu",
-              "Seller",
-              "susbended due to fraud",
-              "/images/bekalu.png",
-              true,
-            ),
-            SizedBox(height: 20),
-
-            _usersCard(
-              "Bety",
-              "buyer",
-              "Listed 1 property",
-              "/images/bety.png",
-              false,
-            ),
-            SizedBox(height: 20),
-            _usersCard(
-              "Fita",
-              "Buyer",
-              "Pending Verification",
-              "/images/profile.png",
-              true,
-            ),
-
-            SizedBox(height: 20),
-            _usersCard(
-              "Lemi",
-              "Seller",
-              "Listed 12 properties",
-              "/images/lemi.png",
-              false,
-            ),
-          ],
-        ),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildHeader(
+            "User Moderation",
+            "Review pending submissions for quality assurance.",
+          ),
+          SizedBox(height: 20),
+          _currentStats(),
+          SizedBox(height: 20),
+          _filterBar(),
+          SizedBox(height: 20),
+          _usersCard(
+            "Bekalu",
+            "Seller",
+            "susbended due to fraud",
+            "/images/bekalu.png",
+            true,
+          ),
+          SizedBox(height: 20),
+          _usersCard(
+            "Bety",
+            "buyer",
+            "Listed 1 property",
+            "/images/bety.png",
+            false,
+          ),
+          SizedBox(height: 20),
+          _usersCard(
+            "Fita",
+            "Buyer",
+            "Pending Verification",
+            "/images/profile.png",
+            true,
+          ),
+          SizedBox(height: 20),
+          _usersCard(
+            "Lemi",
+            "Seller",
+            "Listed 12 properties",
+            "/images/lemi.png",
+            false,
+          ),
+        ],
       ),
-      bottomNavigationBar: _buildBottomNav(),
     );
   }
 

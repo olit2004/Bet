@@ -6,54 +6,44 @@ class PropertiesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color.fromRGBO(248, 249, 255, 1),
-
-      appBar: _buildAppBar(),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(
-              "Property Approvals",
-              "Review pending submissions for quality assurance.",
-            ),
-            SizedBox(height: 20),
-            _filterButtons(),
-            SizedBox(height: 20),
-
-            _houseCard(
-              "/images/skyline-retreat.png",
-              "Grand x",
-              "4,000,000",
-              "Lemi Gobena",
-            ),
-
-            _houseCard(
-              "/images/garden-state.png",
-              "Grand x",
-              "30,000,000",
-              "Bekalu Addissu",
-            ),
-
-            _houseCard(
-              "/images/Industrial-loft.png",
-              "Grand x",
-              "20,000,000",
-              "Olit jira",
-            ),
-
-            _houseCard(
-              "/images/the-glass-Pavillion.png",
-              "Grand x",
-              "20,000,000",
-              "misganaw andualem",
-            ),
-          ],
-        ),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildHeader(
+            "Property Approvals",
+            "Review pending submissions for quality assurance.",
+          ),
+          SizedBox(height: 20),
+          _filterButtons(),
+          SizedBox(height: 20),
+          _houseCard(
+            "/images/skyline-retreat.png",
+            "Grand x",
+            "4,000,000",
+            "Lemi Gobena",
+          ),
+          _houseCard(
+            "/images/garden-state.png",
+            "Grand x",
+            "30,000,000",
+            "Bekalu Addissu",
+          ),
+          _houseCard(
+            "/images/Industrial-loft.png",
+            "Grand x",
+            "20,000,000",
+            "Olit jira",
+          ),
+          _houseCard(
+            "/images/the-glass-Pavillion.png",
+            "Grand x",
+            "20,000,000",
+            "misganaw andualem",
+          ),
+        ],
       ),
-      bottomNavigationBar: _buildBottomNav(),
     );
   }
 

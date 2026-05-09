@@ -155,7 +155,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         },
                       ),
                       const SizedBox(height: 32),
-                      _buildDivider(),
                     ],
                   ),
                 ),
@@ -166,8 +165,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 padding: const EdgeInsets.all(32.0),
                 child: Column(
                   children: [
-                    _buildGoogleButton(),
-                    const SizedBox(height: 32),
                     GestureDetector(
                       onTap: () => context.push('/signup'),
                       child: RichText(
@@ -196,66 +193,6 @@ class _LoginScreenState extends State<LoginScreen> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildDivider() {
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        const Divider(color: Colors.white30, thickness: 1),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: Text(
-            'Or continue with',
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: AppColors.primaryText,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildGoogleButton() {
-    return OutlinedButton(
-      onPressed: () {
-        // Handle google sign in
-      },
-      style: OutlinedButton.styleFrom(
-        backgroundColor: Colors.white,
-        side: const BorderSide(color: Color(0xFFE5E7EB)),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        minimumSize: const Size(double.infinity, 50),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.network(
-            'https://img.icons8.com/color/48/google-logo.png',
-            height: 20,
-            width: 20,
-            errorBuilder: (context, error, stackTrace) =>
-                const Icon(Icons.account_circle, color: AppColors.secondaryText, size: 20),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            'Google',
-            style: GoogleFonts.inter(
-              color: AppColors.primaryText,
-              fontWeight: FontWeight.w600,
-              fontSize: 16,
-            ),
-          ),
-        ],
       ),
     );
   }
