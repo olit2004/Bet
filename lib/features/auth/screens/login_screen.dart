@@ -145,7 +145,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         text: 'Sign In',
                         onPressed: () {
                           // Handle sign in based on role
-                          if (_isBuyer) {
+                          if (_emailController.text == 'admin@beth.com') {
+                            context.go('/admin-dashboard');
+                          } else if (_isBuyer) {
                             context.go('/home');
                           } else {
                             context.go('/seller-dashboard');

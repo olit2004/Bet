@@ -13,7 +13,23 @@ class LandingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const CustomAppBar(),
+      appBar: CustomAppBar(
+        actions: [
+          TextButton(
+            onPressed: () => context.push('/login'),
+            child: Text(
+              'LOGIN',
+              style: GoogleFonts.inter(
+                color: AppColors.primaryBlue,
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.0,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
       body: SingleChildScrollView(
         primary: true,
         child: Column(

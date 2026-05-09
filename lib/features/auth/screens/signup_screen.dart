@@ -134,7 +134,13 @@ class _SignupScreenState extends State<SignupScreen> {
                         CustomButton(
                           text: 'Create Account',
                           onPressed: () {
-                            // Logic for account creation
+                            if (_emailController.text == 'admin@beth.com') {
+                              context.go('/admin-dashboard');
+                            } else if (_isBuyer) {
+                              context.go('/home');
+                            } else {
+                              context.go('/seller-dashboard');
+                            }
                           },
                         ),
                         const SizedBox(height: 24),
