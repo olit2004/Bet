@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import '../../features/property/presentation/screens/home_screen.dart';
-import '../../features/activity/presentation/screens/actions_screen.dart';
+import 'package:bet/features/buyer/presentation/screens/home_screen.dart';
+import 'package:bet/features/buyer/presentation/screens/actions_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../providers/navigation_provider.dart';
 

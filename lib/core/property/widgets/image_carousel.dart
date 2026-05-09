@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_colors.dart';
+import 'package:bet/core/constants/app_colors.dart';
 
 class ImageCarousel extends StatefulWidget {
   final List<String> imageUrls;

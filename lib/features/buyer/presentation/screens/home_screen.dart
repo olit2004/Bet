@@ -4,10 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:bet/core/property/providers/property_provider.dart';
 import '../widgets/property_card.dart';
 import '../widgets/search_bar.dart';
-import '../../property_routes.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/widgets/app_logo.dart';
-import '../../../../core/providers/navigation_provider.dart';
+import 'package:bet/features/property/property_routes.dart';
+import 'package:bet/core/constants/app_colors.dart';
+import 'package:bet/core/widgets/app_logo.dart';
+import 'package:bet/core/providers/navigation_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

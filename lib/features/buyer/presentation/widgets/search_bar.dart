@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:bet/core/property/models/property_model.dart';
 import 'package:bet/core/property/providers/property_provider.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/widgets/custom_text_field.dart';
+import 'package:bet/core/constants/app_colors.dart';
+import 'package:bet/core/widgets/custom_text_field.dart';
 
 class PropertySearchBar extends StatefulWidget {
   const PropertySearchBar({super.key});

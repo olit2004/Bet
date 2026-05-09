@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/widgets/custom_button.dart';
-import '../../../../core/widgets/custom_text_field.dart';
+import 'package:bet/core/constants/app_colors.dart';
+import 'package:bet/core/widgets/custom_button.dart';
+import 'package:bet/core/widgets/custom_text_field.dart';
 import 'package:bet/core/property/models/property_model.dart';
-import '../widgets/bid_info_card.dart';
-import '../widgets/upload_container.dart';
-import '../widgets/legal_notice_card.dart';
+import 'package:bet/core/property/widgets/bid_info_card.dart';
+import 'package:bet/core/property/widgets/upload_container.dart';
+import 'package:bet/core/property/widgets/legal_notice_card.dart';
 
 class PlaceBidScreen extends StatefulWidget {
   final Property property;

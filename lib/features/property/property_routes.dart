@@ -3,11 +3,11 @@ import 'presentation/screens/my_listings_screen.dart';
 import 'presentation/screens/create_listing_screen.dart';
 import 'presentation/screens/manage_bids_screen.dart';
 import 'presentation/screens/review_bid_screen.dart';
-import 'presentation/screens/property_details_screen.dart';
+import 'package:bet/features/buyer/presentation/screens/property_details_screen.dart';
 import 'presentation/screens/seller_profile_screen.dart';
 import 'presentation/screens/active_auctions_screen.dart';
 import 'presentation/screens/seller_dashboard_screen.dart';
-import 'presentation/screens/place_bid_screen.dart';
+import 'package:bet/features/buyer/presentation/screens/place_bid_screen.dart';
 import 'presentation/screens/counter_offer_screen.dart';
 import 'package:bet/core/property/models/property_model.dart';
 
