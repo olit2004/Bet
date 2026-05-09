@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:bet/core/constants/app_colors.dart';
-import '../widgets/performance_card.dart';
-import '../widgets/profile_stat.dart';
+import 'package:bet/features/seller/presentation/widgets/performance_card.dart';
+import 'package:bet/features/seller/presentation/widgets/profile_stat.dart';
 
 /// The content body of the Seller Profile, without Scaffold or navigation.
 /// Reused inside the dashboard shell (as a tab) and SellerProfileScreen (as a pushed route).

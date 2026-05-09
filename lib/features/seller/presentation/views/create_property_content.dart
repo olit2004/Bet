@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:bet/core/constants/app_colors.dart';
-import '../widgets/listing_success_overlay.dart';
+import 'package:bet/features/seller/presentation/widgets/listing_success_overlay.dart';
 
 class CreatePropertyContent extends StatefulWidget {
   const CreatePropertyContent({super.key});

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:bet/core/constants/app_colors.dart';
-import '../widgets/active_auction_card.dart';
+import 'package:bet/features/seller/presentation/widgets/active_auction_card.dart';
 
 class ActiveAuctionsContent extends StatelessWidget {
   const ActiveAuctionsContent({super.key});

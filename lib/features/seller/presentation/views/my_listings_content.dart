@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/core/widgets/app_logo.dart';
-import '../widgets/stat_item.dart';
-import '../widgets/property_listing_card.dart';
+import 'package:bet/features/seller/presentation/widgets/stat_item.dart';
+import 'package:bet/features/seller/presentation/widgets/property_listing_card.dart';
 import 'package:bet/features/buyer/buyer_routes.dart';
 import 'package:bet/features/seller/seller_routes.dart';
 
