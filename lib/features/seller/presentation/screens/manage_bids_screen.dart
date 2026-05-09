@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:bet/core/constants/app_colors.dart';
-import 'package:bet/features/property/presentation/widgets/bid_success_overlay.dart';
+import 'package:bet/features/seller/presentation/widgets/bid_success_overlay.dart';
 
 class ManageBidsScreen extends StatelessWidget {
   final String propertyId;

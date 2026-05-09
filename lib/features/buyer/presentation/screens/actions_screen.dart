@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/core/widgets/app_logo.dart';
 import 'package:bet/core/property/providers/property_provider.dart';
-import 'package:bet/features/property/property_routes.dart';
+import 'package:bet/features/buyer/buyer_routes.dart';
 
 class ActionsScreen extends StatefulWidget {
   const ActionsScreen({super.key});
@@ -199,7 +199,7 @@ class _ActionsScreenState extends State<ActionsScreen> with SingleTickerProvider
           status: 'WINNING BID',
           statusColor: const Color(0xFFD1FAE5),
           statusTextColor: const Color(0xFF059669),
-          onTap: () => context.push(PropertyRoutes.detail, extra: villa),
+          onTap: () => context.push(BuyerRoutes.detail, extra: villa),
         ),
         _buildBidCard(
           title: 'Elegant Apartments',
@@ -209,7 +209,7 @@ class _ActionsScreenState extends State<ActionsScreen> with SingleTickerProvider
           statusColor: const Color(0xFFFFEDD5),
           statusTextColor: const Color(0xFFEA580C),
           showRaiseButton: true,
-          onTap: () => context.push(PropertyRoutes.detail, extra: apartments),
+          onTap: () => context.push(BuyerRoutes.detail, extra: apartments),
         ),
       ],
     );
@@ -238,7 +238,7 @@ class _ActionsScreenState extends State<ActionsScreen> with SingleTickerProvider
           price: '30,000 ETB',
           icon: Icons.description_outlined,
           iconColor: const Color(0xFF374CE2),
-          onTap: () => context.push(PropertyRoutes.detail, extra: apartments),
+          onTap: () => context.push(BuyerRoutes.detail, extra: apartments),
         ),
         _buildHistoryCard(
           title: 'Grand Villa',
@@ -250,7 +250,7 @@ class _ActionsScreenState extends State<ActionsScreen> with SingleTickerProvider
           price: '10,420,000 ETB',
           icon: Icons.check_circle_outline,
           iconColor: const Color(0xFF059669),
-          onTap: () => context.push(PropertyRoutes.detail, extra: villa),
+          onTap: () => context.push(BuyerRoutes.detail, extra: villa),
         ),
       ],
     );

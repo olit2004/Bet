@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/core/widgets/app_logo.dart';
 import 'package:bet/core/property/models/property_model.dart';
-import 'package:bet/features/property/property_routes.dart';
+import 'package:bet/features/buyer/buyer_routes.dart';
 
 class PropertyDetailsScreen extends StatelessWidget {
   final String propertyId;
@@ -287,9 +287,9 @@ class PropertyDetailsScreen extends StatelessWidget {
                   onPressed: () {
                     if (property != null) {
                       if (property!.category == PropertyCategory.rent) {
-                        context.push('${PropertyRoutes.counterOffer}/$propertyId', extra: property);
+                        context.push('${BuyerRoutes.counterOffer}/$propertyId', extra: property);
                       } else {
-                        context.push('${PropertyRoutes.placeBid}/$propertyId', extra: property);
+                        context.push('${BuyerRoutes.placeBid}/$propertyId', extra: property);
                       }
                     }
                   },

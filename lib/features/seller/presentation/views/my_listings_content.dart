@@ -4,6 +4,8 @@ import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/core/widgets/app_logo.dart';
 import '../widgets/stat_item.dart';
 import '../widgets/property_listing_card.dart';
+import 'package:bet/features/buyer/buyer_routes.dart';
+import 'package:bet/features/seller/seller_routes.dart';
 
 class MyListingsContent extends StatelessWidget {
   final VoidCallback? onAddNewListing;
@@ -112,11 +114,11 @@ class MyListingsContent extends StatelessWidget {
             ],
             actionLabel: 'Manage Bids',
             onActionPressed: () {
-              context.push('/manage-bids/skyline-123');
+              context.push('${SellerRoutes.manageBids}/skyline-123');
             },
             onTap: () {
               context.push(
-                '/property/skyline-123',
+                '${BuyerRoutes.detail}/skyline-123',
                 extra: {
                   'imageUrl': 'assets/images/properties/villa.png',
                   'title': 'Skyline Penthouse',
@@ -142,7 +144,7 @@ class MyListingsContent extends StatelessWidget {
             onActionPressed: () {},
             onTap: () {
               context.push(
-                '/property/apartment-123',
+                '${BuyerRoutes.detail}/apartment-123',
                 extra: {
                   'imageUrl': 'assets/images/properties/apartment.png',
                   'title': '3bdrm Apartment',

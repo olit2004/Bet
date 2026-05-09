@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:bet/core/property/providers/property_provider.dart';
 import '../widgets/property_card.dart';
 import '../widgets/search_bar.dart';
-import 'package:bet/features/property/property_routes.dart';
+import 'package:bet/features/buyer/buyer_routes.dart';
 import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/core/widgets/app_logo.dart';
 import 'package:bet/core/providers/navigation_provider.dart';
@@ -138,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: PropertyCard(
                               property: property,
                               onTap: () {
-                                context.push(PropertyRoutes.detail, extra: property);
+                                context.push(BuyerRoutes.detail, extra: property);
                               },
                             ),
                           );
