@@ -61,7 +61,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const Divider(),
             const SizedBox(height: 32),
             Text(
-              'Change Password',
+              'Change Password ',
               style: GoogleFonts.manrope(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
