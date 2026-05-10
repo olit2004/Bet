@@ -234,3 +234,4 @@ BoxDecoration _boxStyle() {
 TextStyle _textStyle(double fontsize, FontWeight fontweight, Color color) {
   return TextStyle(fontSize: fontsize, fontWeight: fontweight, color: color);
 }
+

@@ -1,102 +1,85 @@
 import 'package:flutter/material.dart';
 import 'package:bet/core/widgets/app_logo.dart';
-import 'package:bet/features/admin/presentation/screens/property_approval_screen.dart';
-import 'package:bet/features/admin/presentation/screens/user_moderation_screen.dart';
 
-class AdminDashboardScreen extends StatefulWidget {
+
+class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});
-
-  @override
-  State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
-}
-
-class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
-  int _currentIndex = 0;
-
-  late final List<Widget> _pages = [
-    _buildDashboardContent(),
-    const PropertiesScreen(),
-    const UsersScreen(),
-  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromRGBO(248, 249, 255, 1),
-      appBar: _buildAppBar(),
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _pages,
-      ),
-      bottomNavigationBar: _buildBottomNav(),
-    );
-  }
 
-  Widget _buildDashboardContent() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeader("Global Performance", "Real-time ecosystem health"),
-          const SizedBox(height: 20),
-          _buildStatCard(
-            "TOTAL REVENUE",
-            "\$4.2M",
-            "+12.5%",
-            Icons.payments,
-            Colors.indigo[50]!,
-            Colors.indigo,
-          ),
-          _buildStatCard(
-            "ACTIVE AUCTIONS",
-            "142",
-            "Hot",
-            Icons.gavel,
-            Colors.orange[50]!,
-            Colors.orange,
-          ),
-          _buildStatCard(
-            "PENDING VERIFICATIONS",
-            "28",
-            "Priority",
-            Icons.verified,
-            Colors.teal[50]!,
-            Colors.teal,
-          ),
-          const SizedBox(height: 30),
-          _buildSectionTitle(
-            "Market Activity",
-            "Last 7 days volume",
-            "Weekly View",
-          ),
-          _buildSimpleBarChart(),
-          const SizedBox(height: 30),
-          _buildSectionTitle("Recent Activity", "", "LIVE", isBadge: true),
-          const SizedBox(height: 10),
-          // Activity List
-          _buildActivityTile(
-            "New Bid: \$1.2M",
-            "Skyline Penthouse • 2m ago",
-            "/images/auction.png",
-            Icons.trending_up,
-            Colors.green,
-          ),
-          _buildActivityTile(
-            "Property Verified",
-            "Oak Ridge Manor • 15m ago",
-            "/images/verify.png",
-            Icons.verified_user,
-            Colors.blue,
-          ),
-          _buildActivityTile(
-            "Sale Confirmed",
-            "Azure Shores Villa • 42m ago",
-            "/images/clipboard.png",
-            Icons.check_circle,
-            Colors.teal,
-          ),
-        ],
+      appBar: _buildAppBar(),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader("Global Performance", "Real-time ecosystem health"),
+            const SizedBox(height: 20),
+
+            _buildStatCard(
+              "TOTAL REVENUE",
+              "\$4.2M",
+              "+12.5%",
+              Icons.payments,
+              Colors.indigo[50]!,
+              Colors.indigo,
+            ),
+            _buildStatCard(
+              "ACTIVE AUCTIONS",
+              "142",
+              "Hot",
+              Icons.gavel,
+              Colors.orange[50]!,
+              Colors.orange,
+            ),
+            _buildStatCard(
+              "PENDING VERIFICATIONS",
+              "28",
+              "Priority",
+              Icons.verified,
+              Colors.teal[50]!,
+              Colors.teal,
+            ),
+
+            const SizedBox(height: 30),
+            _buildSectionTitle(
+              "Market Activity",
+              "Last 7 days volume",
+              "Weekly View",
+            ),
+            _buildSimpleBarChart(),
+
+            const SizedBox(height: 30),
+            _buildSectionTitle("Recent Activity", "", "LIVE", isBadge: true),
+            const SizedBox(height: 10),
+
+            // Activity List
+            _buildActivityTile(
+              "New Bid: \$1.2M",
+              "Skyline Penthouse • 2m ago",
+              "/images/auction.png",
+              Icons.trending_up,
+              Colors.green,
+            ),
+            _buildActivityTile(
+              "Property Verified",
+              "Oak Ridge Manor • 15m ago",
+              "/images/verify.png",
+              Icons.verified_user,
+              Colors.blue,
+            ),
+            _buildActivityTile(
+              "Sale Confirmed",
+              "Azure Shores Villa • 42m ago",
+              "/images/clipboard.png",
+              Icons.check_circle,
+              Colors.teal,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -366,31 +349,4 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  Widget _buildBottomNav() {
-    return BottomNavigationBar(
-      currentIndex: _currentIndex,
-      onTap: (index) {
-        setState(() {
-          _currentIndex = index;
-        });
-      },
-      selectedItemColor: Colors.blue[800],
-      unselectedItemColor: Colors.grey,
-      showUnselectedLabels: true,
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.grid_view_rounded),
-          label: 'Dashboard',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.apartment),
-          label: 'Properties',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.people_outline),
-          label: 'Users',
-        ),
-      ],
-    );
-  }
 }

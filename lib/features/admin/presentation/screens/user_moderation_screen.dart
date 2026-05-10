@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bet/core/widgets/app_logo.dart';
+import 'user_details_screen.dart';
 
 class UsersScreen extends StatefulWidget {
   const UsersScreen({super.key});
@@ -9,55 +10,67 @@ class UsersScreen extends StatefulWidget {
 }
 
 class _UsersScreenState extends State<UsersScreen> {
-  String current_filter = "";
+  String currentFilter = "";
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeader(
-            "User Moderation",
-            "Review pending submissions for quality assurance.",
-          ),
-          SizedBox(height: 20),
-          _currentStats(),
-          SizedBox(height: 20),
-          _filterBar(),
-          SizedBox(height: 20),
-          _usersCard(
-            "Bekalu",
-            "Seller",
-            "susbended due to fraud",
-            "/images/bekalu.png",
-            true,
-          ),
-          SizedBox(height: 20),
-          _usersCard(
-            "Bety",
-            "buyer",
-            "Listed 1 property",
-            "/images/bety.png",
-            false,
-          ),
-          SizedBox(height: 20),
-          _usersCard(
-            "Fita",
-            "Buyer",
-            "Pending Verification",
-            "/images/profile.png",
-            true,
-          ),
-          SizedBox(height: 20),
-          _usersCard(
-            "Lemi",
-            "Seller",
-            "Listed 12 properties",
-            "/images/lemi.png",
-            false,
-          ),
-        ],
+    return Scaffold(
+      backgroundColor: Color.fromRGBO(248, 249, 255, 1),
+
+      appBar: _buildAppBar(),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(
+              "Property Approvals",
+              "Review pending submissions for quality assurance.",
+            ),
+
+            SizedBox(height: 20),
+            _currentStats(),
+            SizedBox(height: 20),
+            _filterBar(),
+            SizedBox(height: 20),
+            _usersCard(
+              context,
+              "Bekalu",
+              "Seller",
+              "susbended due to fraud",
+              "/images/bekalu.png",
+              true,
+            ),
+            SizedBox(height: 20),
+
+            _usersCard(
+              context,
+              "Bety",
+              "buyer",
+              "Listed 1 property",
+              "/images/bety.png",
+              false,
+            ),
+            SizedBox(height: 20),
+            _usersCard(
+              context,
+              "Fita",
+              "Buyer",
+              "Pending Verification",
+              "/images/profile.png",
+              true,
+            ),
+
+            SizedBox(height: 20),
+            _usersCard(
+              context,
+              "Lemi",
+              "Seller",
+              "Listed 12 properties",
+              "/images/lemi.png",
+              false,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -123,7 +136,7 @@ class _UsersScreenState extends State<UsersScreen> {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1), // shadow color
+                color: Colors.black.withValues(alpha: 0.1), // shadow color
                 blurRadius: 10, // softness
                 offset: Offset(0, 5), // position (x, y)
               ),
@@ -148,7 +161,7 @@ class _UsersScreenState extends State<UsersScreen> {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1), // shadow color
+                color: Colors.black.withValues(alpha: 0.1), // shadow color
                 blurRadius: 10, // softness
                 offset: Offset(0, 5), // position (x, y)
               ),
@@ -180,7 +193,7 @@ class _UsersScreenState extends State<UsersScreen> {
               206,
               204,
               204,
-            ).withOpacity(0.05), // shadow color
+            ).withValues(alpha: 0.05), // shadow color
             blurRadius: 5, // softness
             offset: Offset(0, 3), // position (x, y)
           ),
@@ -194,7 +207,7 @@ class _UsersScreenState extends State<UsersScreen> {
           ),
           const Spacer(),
           Text(
-            "Filtered by $current_filter",
+            "Filtered by $currentFilter",
             style: TextStyle(
               color: const Color.fromARGB(255, 109, 36, 205),
               fontWeight: FontWeight.bold,
@@ -214,7 +227,7 @@ class _UsersScreenState extends State<UsersScreen> {
       icon: const Icon(Icons.filter_list),
       onSelected: (value) {
         setState(() {
-          current_filter = value;
+          currentFilter = value;
         });
       },
       itemBuilder: (context) {
@@ -226,9 +239,10 @@ class _UsersScreenState extends State<UsersScreen> {
   }
 
   Widget _usersCard(
+    BuildContext context,
     String name,
     String role,
-    String status_discription,
+    String statusDiscription,
     String imageUrl,
     bool isSeller, {
     Color roleColor = const Color.fromARGB(255, 147, 198, 239),
@@ -240,7 +254,7 @@ class _UsersScreenState extends State<UsersScreen> {
       decoration: BoxDecoration(
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05), // shadow color
+            color: Colors.black.withValues(alpha: 0.05), // shadow color
             blurRadius: 5, // softness
             offset: Offset(0, 3), // position (x, y)
           ),
@@ -268,11 +282,11 @@ class _UsersScreenState extends State<UsersScreen> {
               Column(
                 children: [
                   Text(
-                    "$name",
+                    "name",
                     style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 3),
-                  Text("$status_discription", style: TextStyle(fontSize: 14)),
+                  Text("statusDiscription", style: TextStyle(fontSize: 14)),
                 ],
               ),
               const Spacer(),
@@ -287,7 +301,7 @@ class _UsersScreenState extends State<UsersScreen> {
                 ),
 
                 child: Text(
-                  "$role",
+                  "role",
                   style: TextStyle(
                     color: const Color.fromARGB(255, 255, 254, 254),
                   ),
@@ -306,49 +320,35 @@ class _UsersScreenState extends State<UsersScreen> {
                   color: const Color.fromARGB(255, 135, 187, 230),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Text("Suspend"),
                 alignment: Alignment.center,
+                child: Text("Suspend"),
               ),
 
-              Container(
-                width: 150,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 43, 63, 240),
-                  borderRadius: BorderRadius.circular(12),
+              TextButton(
+                style: TextButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 43, 63, 240),
+                  fixedSize: const Size(150, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
-                child: Text(
-                  "Veiw Details",
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const UserDetailScreen(),
+                    ),
+                  );
+                },
+                child: const Text(
+                  "View Details",
                   style: TextStyle(color: Colors.white),
                 ),
-                alignment: Alignment.center,
               ),
             ],
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildBottomNav() {
-    return BottomNavigationBar(
-      selectedItemColor: Colors.blue[800],
-      unselectedItemColor: Colors.grey,
-      showUnselectedLabels: true,
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.grid_view_rounded),
-          label: 'Dashboard',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.apartment),
-          label: 'Properties',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.people_outline),
-          label: 'Users',
-        ),
-      ],
     );
   }
 }
