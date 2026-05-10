@@ -138,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: PropertyCard(
                               property: property,
                               onTap: () {
-                                context.push(BuyerRoutes.detail, extra: property);
+                                context.push('${BuyerRoutes.detail}/${property.id}', extra: property);
                               },
                             ),
                           );

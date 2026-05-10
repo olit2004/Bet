@@ -15,14 +15,30 @@ class BuyerRoutes {
           path: '$detail/:id',
           builder: (context, state) {
             final id = state.pathParameters['id']!;
-            final extra = state.extra as Property?;
+            final extra = state.extra;
+            
+            Property? property;
+            String? imageUrl;
+            String? title;
+            String? location;
+
+            if (extra is Property) {
+              property = extra;
+              imageUrl = property.imageUrls.isNotEmpty ? property.imageUrls.first : null;
+              title = property.title;
+              location = property.address;
+            } else if (extra is Map<String, dynamic>) {
+              imageUrl = extra['imageUrl'] as String?;
+              title = extra['title'] as String?;
+              location = extra['location'] as String?;
+            }
 
             return PropertyDetailsScreen(
               propertyId: id,
-              imageUrl: extra?.imageUrls.first ?? 'assets/images/properties/apartment.png',
-              title: extra?.title ?? 'Property Details',
-              location: extra?.address ?? 'Addis Ababa',
-              property: extra,
+              imageUrl: imageUrl ?? 'assets/images/properties/apartment.png',
+              title: title ?? 'Property Details',
+              location: location ?? 'Addis Ababa',
+              property: property,
             );
           },
         ),
