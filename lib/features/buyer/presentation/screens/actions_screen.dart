@@ -64,54 +64,56 @@ class _ActionsScreenState extends State<ActionsScreen> with SingleTickerProvider
           const SizedBox(width: 8),
         ],
       ),
-      body: Column(
-        children: [
-          // 1. Stats Grid
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-            child: GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
-              crossAxisSpacing: 20,
-              mainAxisSpacing: 20,
-              childAspectRatio: 1.4,
-              children: [
-                _buildStatCard('12', 'ACTIVE BIDS', const Color(0xFF374CE2)),
-                _buildStatCard('4', 'PROPOSALS', const Color(0xFF059669)),
-                _buildStatCard('\$4.2M', 'ASSET VALUE', const Color(0xFF05345C)),
-                _buildStatCard('7', 'HOUSES RENTED', const Color(0xFF9CA3AF)),
-              ],
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // 1. Stats Grid
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+              child: GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: 2,
+                crossAxisSpacing: 20,
+                mainAxisSpacing: 20,
+                childAspectRatio: 1.4,
+                children: [
+                  _buildStatCard('12', 'ACTIVE BIDS', const Color(0xFF374CE2)),
+                  _buildStatCard('4', 'PROPOSALS', const Color(0xFF059669)),
+                  _buildStatCard('\$4.2M', 'ASSET VALUE', const Color(0xFF05345C)),
+                  _buildStatCard('7', 'HOUSES RENTED', const Color(0xFF9CA3AF)),
+                ],
+              ),
             ),
-          ),
-          
-          // 2. Tab Bar (Pill Toggle)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Row(
-              children: [
-                _buildPillTab('Active Bids', _tabController.index == 0, () {
-                  setState(() => _tabController.index = 0);
-                }),
-                const Spacer(),
-                _buildPillTab('History', _tabController.index == 1, () {
-                  setState(() => _tabController.index = 1);
-                }),
-              ],
+            
+            // 2. Tab Bar (Pill Toggle)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Row(
+                children: [
+                  _buildPillTab('Active Bids', _tabController.index == 0, () {
+                    setState(() => _tabController.index = 0);
+                  }),
+                  const Spacer(),
+                  _buildPillTab('History', _tabController.index == 1, () {
+                    setState(() => _tabController.index = 1);
+                  }),
+                ],
+              ),
             ),
-          ),
-          
-          const SizedBox(height: 12),
-          const Divider(height: 1, color: Color(0xFFE5E7EB)),
-          const SizedBox(height: 20),
-          
-          // 3. Activity List
-          Expanded(
-            child: _tabController.index == 0 
+            
+            const SizedBox(height: 12),
+            const Divider(height: 1, color: Color(0xFFE5E7EB)),
+            const SizedBox(height: 20),
+            
+            // 3. Activity List
+            _tabController.index == 0 
                 ? _buildActiveBidsList() 
                 : _buildHistoryList(),
-          ),
-        ],
+            
+            const SizedBox(height: 32), // Add bottom padding for better scroll experience
+          ],
+        ),
       ),
     );
   }
@@ -190,6 +192,8 @@ class _ActionsScreenState extends State<ActionsScreen> with SingleTickerProvider
     final apartments = properties.firstWhere((p) => p.id == '2', orElse: () => properties.first);
 
     return ListView(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 20),
       children: [
         _buildBidCard(
@@ -227,6 +231,8 @@ class _ActionsScreenState extends State<ActionsScreen> with SingleTickerProvider
     final apartments = properties.firstWhere((p) => p.id == '2', orElse: () => properties.first);
 
     return ListView(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 20),
       children: [
         _buildHistoryCard(
