@@ -14,6 +14,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final _buyerFormKey = GlobalKey<FormState>();
+  final _sellerFormKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
@@ -85,19 +87,31 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ],
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                  child: Form(
+                    key: _isBuyer ? _buyerFormKey : _sellerFormKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                       _buildRoleToggle(),
                       const SizedBox(height: 32),
                       CustomTextField(
                         hintText: 'Email address',
                         controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
                         prefixIcon: const Icon(
                           Icons.alternate_email,
                           color: AppColors.secondaryText,
                           size: 20,
                         ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter your email address';
+                          }
+                          if (!value.contains('@')) {
+                            return 'Please enter a valid email address';
+                          }
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 16),
                       CustomTextField(
@@ -109,6 +123,15 @@ class _LoginScreenState extends State<LoginScreen> {
                           color: AppColors.secondaryText,
                           size: 20,
                         ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your password';
+                          }
+                          if (value.length < 8) {
+                            return 'Password must be at least 8 characters long';
+                          }
+                          return null;
+                        },
                         suffixIcon: IconButton(
                           icon: Icon(
                             _obscurePassword
@@ -144,18 +167,22 @@ class _LoginScreenState extends State<LoginScreen> {
                       CustomButton(
                         text: 'Sign In',
                         onPressed: () {
-                          // Handle sign in based on role
-                          if (_emailController.text == 'admin@beth.com') {
-                            context.go('/admin-dashboard');
-                          } else if (_isBuyer) {
-                            context.go('/home');
-                          } else {
-                            context.go('/seller-dashboard');
+                          final activeFormKey = _isBuyer ? _buyerFormKey : _sellerFormKey;
+                          if (activeFormKey.currentState!.validate()) {
+                            // Handle sign in based on role
+                            if (_emailController.text == 'admin@beth.com') {
+                              context.go('/admin-dashboard');
+                            } else if (_isBuyer) {
+                              context.go('/home');
+                            } else {
+                              context.go('/seller-dashboard');
+                            }
                           }
                         },
                       ),
                       const SizedBox(height: 32),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),

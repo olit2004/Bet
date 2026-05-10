@@ -15,6 +15,7 @@ class ForgotPasswordScreen extends StatefulWidget {
 }
 
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+  final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
 
   @override
@@ -61,7 +62,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       ),
                     ],
                   ),
-                  child: Column(
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
                     children: [
                       const AppLogo(size: 32),
                       const SizedBox(height: 32),
@@ -101,12 +104,24 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       CustomTextField(
                         hintText: 'fita@example.com',
                         controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter your email address';
+                          }
+                          if (!value.contains('@')) {
+                            return 'Please enter a valid email address';
+                          }
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 32),
                       CustomButton(
                         text: 'Send Reset Link',
                         onPressed: () {
-                          // Handle reset link logic
+                          if (_formKey.currentState!.validate()) {
+                            // Handle reset link logic
+                          }
                         },
                       ),
                       const SizedBox(height: 40),
@@ -131,7 +146,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           ),
                         ),
                       ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
