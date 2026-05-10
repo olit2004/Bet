@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
 import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/features/admin/presentation/screens/admin_settings_screen.dart';
 
@@ -123,32 +124,26 @@ class ProfileScreen extends StatelessWidget {
             // 5. Logout Button
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32.0),
-              child: OutlinedButton(
+              child: OutlinedButton.icon(
                 onPressed: () {
-                  // TODO: Implement logout
+                  context.go('/login');
                 },
+                icon: const Icon(Icons.logout, color: Color(0xFFFF4B4B)),
+                label: Text(
+                  'LOGOUT',
+                  style: GoogleFonts.manrope(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFFFF4B4B),
+                    letterSpacing: 1.2,
+                  ),
+                ),
                 style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
                   side: const BorderSide(color: Color(0xFFFF4B4B), width: 1.5),
+                  minimumSize: const Size(double.infinity, 56),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.logout, color: Color(0xFFFF4B4B), size: 22),
-                    const SizedBox(width: 8),
-                    Text(
-                      'LOGOUT',
-                      style: GoogleFonts.manrope(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFFFF4B4B),
-                        letterSpacing: 1.5,
-                      ),
-                    ),
-                  ],
                 ),
               ),
             ),
