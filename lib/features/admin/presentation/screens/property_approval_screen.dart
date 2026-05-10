@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bet/core/widgets/app_logo.dart';
+import 'package:bet/features/admin/presentation/screens/identity_review_screen.dart';
+import 'package:bet/core/widgets/custom_button.dart';
 
 class PropertiesScreen extends StatelessWidget {
   const PropertiesScreen({super.key});
@@ -24,28 +26,32 @@ class PropertiesScreen extends StatelessWidget {
             SizedBox(height: 20),
 
             _houseCard(
-              "/images/skyline-retreat.png",
+              context,
+              "assets/images/skyline-retreat.png",
               "Grand x",
               "4,000,000",
               "Lemi Gobena",
             ),
 
             _houseCard(
-              "/images/garden-state.png",
+              context,
+              "assets/images/garden-state.png",
               "Grand x",
               "30,000,000",
               "Bekalu Addissu",
             ),
 
             _houseCard(
-              "/images/Industrial-loft.png",
+              context,
+              "assets/images/Industrial-loft.png",
               "Grand x",
               "20,000,000",
               "Olit jira",
             ),
 
             _houseCard(
-              "/images/the-glass-Pavillion.png",
+              context,
+              "assets/images/the-glass-Pavillion.png",
               "Grand x",
               "20,000,000",
               "misganaw andualem",
@@ -53,7 +59,6 @@ class PropertiesScreen extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomNav(),
     );
   }
 
@@ -70,10 +75,10 @@ class PropertiesScreen extends StatelessWidget {
           const SizedBox(width: 8),
         ],
       ),
-      actions: const [        
+      actions: const [
         CircleAvatar(
           radius: 18,
-          backgroundImage: AssetImage("/images/avater.png"),
+          backgroundImage: AssetImage("assets/images/avater.png"),
         ),
         SizedBox(width: 15),
       ],
@@ -136,6 +141,7 @@ class PropertiesScreen extends StatelessWidget {
   }
 
   Widget _houseCard(
+    BuildContext context,
     String houseImage,
     String name,
     String price,
@@ -210,17 +216,11 @@ class PropertiesScreen extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Container(
-                      height: 60,
-                      width: 250,
-                      decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 52, 16, 234),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      alignment: Alignment.center,
-                      child: const Text(
-                        "Review & Approve",
-                        style: TextStyle(color: Colors.white, fontSize: 20),
+                    SizedBox(
+                      width: 180,
+                      child: CustomButton(
+                        text: "Review & approve",
+                        onPressed: () => _buttonAction(context),
                       ),
                     ),
 
@@ -246,20 +246,11 @@ class PropertiesScreen extends StatelessWidget {
       ),
     );
   }
-}
 
-Widget _buildBottomNav() {
-  return BottomNavigationBar(
-    selectedItemColor: Colors.blue[800],
-    unselectedItemColor: Colors.grey,
-    showUnselectedLabels: true,
-    items: const [
-      BottomNavigationBarItem(
-        icon: Icon(Icons.grid_view_rounded),
-        label: 'Dashboard',
-      ),
-      BottomNavigationBarItem(icon: Icon(Icons.apartment), label: 'Properties'),
-      BottomNavigationBarItem(icon: Icon(Icons.people_outline), label: 'Users'),
-    ],
-  );
+  void _buttonAction(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => IdentityReviewScreen()),
+    );
+  }
 }

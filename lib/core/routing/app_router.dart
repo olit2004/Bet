@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:bet/features/auth/screens/landing_screen.dart';
 import 'package:bet/features/auth/screens/signup_screen.dart';
+import 'package:bet/features/admin/presentation/widgets/admin_routing.dart';
 
 /// Defines the global routing configuration using GoRouter.
 class AppRouter {
@@ -9,16 +10,10 @@ class AppRouter {
 
   static final GoRouter router = GoRouter(
     initialLocation: '/',
-    errorBuilder: (context, state) => const Scaffold(
-      body: Center(
-        child: Text('Page not found.'),
-      ),
-    ),
+    errorBuilder: (context, state) =>
+        const Scaffold(body: Center(child: Text('Page not found.'))),
     routes: [
-      GoRoute(
-        path: '/',
-        builder: (context, state) => const LandingScreen(),
-      ),
+      GoRoute(path: '/', builder: (context, state) => const LandingScreen()),
       GoRoute(
         path: '/login',
         builder: (context, state) => const Scaffold(
@@ -40,6 +35,10 @@ class AppRouter {
         builder: (context, state) => const Scaffold(
           body: Center(child: Text('Home Screen Placeholder')),
         ),
+      ),
+      GoRoute(
+        path: '/admin',
+        builder: (context, state) => const AdminHomeScreen(),
       ),
     ],
   );

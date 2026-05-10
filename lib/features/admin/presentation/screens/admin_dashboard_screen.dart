@@ -81,7 +81,6 @@ class AdminDashboardScreen extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomNav(),
     );
   }
 
@@ -350,25 +349,4 @@ class AdminDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomNav() {
-    return BottomNavigationBar(
-      selectedItemColor: Colors.blue[800],
-      unselectedItemColor: Colors.grey,
-      showUnselectedLabels: true,
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.grid_view_rounded),
-          label: 'Dashboard',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.apartment),
-          label: 'Properties',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.people_outline),
-          label: 'Users',
-        ),
-      ],
-    );
-  }
 }
