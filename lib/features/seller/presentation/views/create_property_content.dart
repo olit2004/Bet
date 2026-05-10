@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:bet/core/constants/app_colors.dart';
+import 'package:bet/features/seller/presentation/widgets/seller_button.dart';
 import 'package:bet/features/seller/presentation/widgets/listing_success_overlay.dart';
 
 class CreatePropertyContent extends StatefulWidget {
@@ -18,6 +19,7 @@ class _CreatePropertyContentState extends State<CreatePropertyContent> {
   final _valueController = TextEditingController();
   final _sqFootageController = TextEditingController();
   final _priceController = TextEditingController();
+  final _endDateController = TextEditingController();
 
   // 0 = Fixed Price, 1 = Auction
   int _listingType = 0;
@@ -36,6 +38,7 @@ class _CreatePropertyContentState extends State<CreatePropertyContent> {
     _valueController.dispose();
     _sqFootageController.dispose();
     _priceController.dispose();
+    _endDateController.dispose();
     super.dispose();
   }
 
@@ -126,16 +129,53 @@ class _CreatePropertyContentState extends State<CreatePropertyContent> {
           _buildListingTypeToggle(context),
           const SizedBox(height: 24),
 
-          // Fixed Price / Starting Bid
-          _buildSectionLabel(
-            context,
-            _listingType == 0 ? 'FIXED PRICE' : 'STARTING BID',
-          ),
-          const SizedBox(height: 10),
-          _buildTextField(
-            controller: _priceController,
-            hint: 'e.g. 2,000,000 (Birr)',
-            keyboardType: TextInputType.number,
+          // Fixed Price / Starting Price (Dynamic Fields)
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            transitionBuilder: (Widget child, Animation<double> animation) {
+              return FadeTransition(
+                opacity: animation,
+                child: SizeTransition(
+                  sizeFactor: animation,
+                  axisAlignment: -1.0,
+                  child: child,
+                ),
+              );
+            },
+            child: _listingType == 0
+                ? Column(
+                    key: const ValueKey('fixed_price_fields'),
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildSectionLabel(context, 'FIXED PRICE'),
+                      const SizedBox(height: 10),
+                      _buildTextField(
+                        controller: _priceController,
+                        hint: 'e.g. 2,000,000 (Birr)',
+                        keyboardType: TextInputType.number,
+                      ),
+                    ],
+                  )
+                : Column(
+                    key: const ValueKey('auction_fields'),
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildSectionLabel(context, 'STARTING PRICE'),
+                      const SizedBox(height: 10),
+                      _buildTextField(
+                        controller: _priceController,
+                        hint: 'e.g. 2,000,000 (Birr)',
+                        keyboardType: TextInputType.number,
+                      ),
+                      const SizedBox(height: 24),
+                      _buildSectionLabel(context, 'ENDING DATE'),
+                      const SizedBox(height: 10),
+                      _buildTextField(
+                        controller: _endDateController,
+                        hint: 'e.g. Apr 20, 18:00',
+                      ),
+                    ],
+                  ),
           ),
           const SizedBox(height: 28),
 
@@ -487,64 +527,34 @@ class _CreatePropertyContentState extends State<CreatePropertyContent> {
   // Create Property Button
 
   Widget _buildCreateButton(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: AppColors.primaryGradient,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primaryBlue.withValues(alpha: 0.35),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
+    return SellerButton(
+      text: 'Create property',
+      onPressed: () {
+        if (_titleController.text.isEmpty || _priceController.text.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Please fill in at least the title and price.',
+                style: GoogleFonts.inter(),
+              ),
+              backgroundColor: AppColors.error,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-          ],
-        ),
-        child: ElevatedButton(
-          onPressed: () {
-            if (_titleController.text.isEmpty || _priceController.text.isEmpty) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'Please fill in at least the title and price.',
-                    style: GoogleFonts.inter(),
-                  ),
-                  backgroundColor: AppColors.error,
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              );
-              return;
-            }
+          );
+          return;
+        }
 
-            showListingSuccessOverlay(
-              context,
-              onReturnToDashboard: () {
-                Navigator.of(context).maybePop();
-              },
-            );
+        showListingSuccessOverlay(
+          context,
+          onReturnToDashboard: () {
+            Navigator.of(context).maybePop();
           },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.transparent,
-            shadowColor: Colors.transparent,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            padding: const EdgeInsets.symmetric(vertical: 18),
-          ),
-          child: Text(
-            'Create property',
-            style: GoogleFonts.manrope(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 17,
-            ),
-          ),
-        ),
-      ),
+        );
+      },
+      height: 60,
     );
   }
 

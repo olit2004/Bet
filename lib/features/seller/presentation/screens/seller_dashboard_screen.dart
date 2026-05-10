@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bet/core/constants/app_colors.dart';
+import 'package:go_router/go_router.dart';
 import '../views/seller_profile_content.dart';
 import '../views/create_property_content.dart';
 import '../views/my_listings_content.dart';
@@ -45,7 +46,27 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
               backgroundColor: Colors.white,
               foregroundColor: AppColors.primaryText,
               elevation: 0,
+              scrolledUnderElevation: 3.0,
               centerTitle: true,
+              actions: [
+                _currentIndex == 3
+                    ? IconButton(
+                        icon: const Icon(
+                          Icons.settings_outlined,
+                          color: AppColors.primaryBlue,
+                        ),
+                        onPressed: () {
+                          context.push('/settings');
+                        },
+                      )
+                    : CircleAvatar(
+                        radius: 18,
+                        backgroundImage: const AssetImage(
+                          'assets/images/seller_profile.png',
+                        ),
+                      ),
+                const SizedBox(width: 16),
+              ],
             )
           : null,
       body: SafeArea(

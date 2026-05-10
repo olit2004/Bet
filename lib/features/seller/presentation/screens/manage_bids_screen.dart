@@ -31,6 +31,15 @@ class ManageBidsScreen extends StatelessWidget {
             fontWeight: FontWeight.w800,
           ),
         ),
+        actions: [
+          CircleAvatar(
+            radius: 18,
+            backgroundImage: const AssetImage(
+              'assets/images/seller_profile.png',
+            ),
+          ),
+          const SizedBox(width: 16),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -185,7 +194,7 @@ class ManageBidsScreen extends StatelessWidget {
               name: 'Abebe Tesfaye',
               price: '4,850,000 Birr',
               timeAgo: '2 MINS AGO',
-              imageUrl: 'https://i.pravatar.cc/150?img=11',
+              imageUrl: 'assets/images/bidder_1.png',
               isHighest: true,
               isAcceptable: true,
             ),
@@ -194,7 +203,7 @@ class ManageBidsScreen extends StatelessWidget {
               name: 'Selam Kebede',
               price: '4,825,000 Birr',
               timeAgo: '15 MINS AGO',
-              imageUrl: 'https://i.pravatar.cc/150?img=5',
+              imageUrl: 'assets/images/bidder_2.png',
               isHighest: false,
               isAcceptable: false,
             ),
@@ -203,7 +212,7 @@ class ManageBidsScreen extends StatelessWidget {
               name: 'Tola Bedhesa',
               price: '4,790,000 Birr',
               timeAgo: '1 HOUR AGO',
-              imageUrl: 'https://i.pravatar.cc/150?img=33',
+              imageUrl: 'assets/images/tola_gobena.avif',
               isHighest: false,
               isAcceptable: false,
             ),
@@ -233,15 +242,7 @@ class ManageBidsScreen extends StatelessWidget {
                     children: [
                       CircleAvatar(
                         radius: 16,
-                        backgroundColor: AppColors.primaryLightBlue.withValues(alpha: 0.2),
-                        child: Text(
-                          'SC',
-                          style: GoogleFonts.inter(
-                            color: AppColors.primaryBlue,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
+                        backgroundImage: const AssetImage('assets/images/bety.png'),
                       ),
                       const SizedBox(width: 12),
                       Text(
@@ -357,7 +358,7 @@ class _BidCard extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 20,
-                      backgroundImage: NetworkImage(imageUrl),
+                      backgroundImage: AssetImage(imageUrl),
                     ),
                     const SizedBox(width: 12),
                     Expanded(

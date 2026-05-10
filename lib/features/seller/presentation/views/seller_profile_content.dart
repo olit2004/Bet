@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:bet/core/constants/app_colors.dart';
+import 'package:bet/features/seller/presentation/widgets/seller_button.dart';
 import 'package:bet/features/seller/presentation/widgets/performance_card.dart';
 import 'package:bet/features/seller/presentation/widgets/profile_stat.dart';
 
@@ -36,35 +38,42 @@ class SellerProfileContent extends StatelessWidget {
           ],
 
           // ── Profile Avatar ──
-          const CircleAvatar(
-            radius: 40,
-            backgroundImage: NetworkImage(
-              'https://i.pravatar.cc/150?img=11',
+          Center(
+            child: const CircleAvatar(
+              radius: 50,
+              backgroundImage: AssetImage('assets/images/seller_profile.png'),
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
 
           // ── Name ──
-          Text(
-            'Fayera Gadisa',
-            style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                  color: AppColors.primaryText,
-                ),
+          Center(
+            child: Text(
+              'Fayera Gadisa',
+              style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                color: AppColors.primaryText,
+                fontSize: 28,
+              ),
+            ),
           ),
           const SizedBox(height: 12),
 
           // ── Bio ──
-          Text(
-            'Architect & Principal Curator focusing on modernist residential heritage and sustainable luxury estates.',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.secondaryText,
-                  height: 1.5,
-                ),
+          Center(
+            child: Text(
+              'Architect & Principal Curator focusing on modernist residential heritage and sustainable luxury estates.',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: AppColors.secondaryText,
+                height: 1.5,
+              ),
+            ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 32),
 
           // ── Inline Stats Row ──
-          const Row(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ProfileStat(
                 value: '8',
@@ -92,11 +101,11 @@ class SellerProfileContent extends StatelessWidget {
           Text(
             'SELLER PERFORMANCE',
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: AppColors.secondaryText,
-                  letterSpacing: 2.0,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 12,
-                ),
+              color: AppColors.secondaryText,
+              letterSpacing: 2.0,
+              fontWeight: FontWeight.w700,
+              fontSize: 12,
+            ),
           ),
           const SizedBox(height: 20),
 
@@ -117,7 +126,18 @@ class SellerProfileContent extends StatelessWidget {
             icon: Icons.access_time_rounded,
             valueColor: AppColors.primaryText,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
+          
+          // ── Logout Button ──
+          SellerButton(
+            text: 'LOGOUT',
+            onPressed: () => context.go('/login'),
+            icon: Icons.logout_rounded,
+            color: Colors.white,
+            textColor: Colors.redAccent,
+            border: Border.all(color: Colors.redAccent, width: 1.5),
+          ),
+          const SizedBox(height: 40),
         ],
       ),
     );
@@ -150,7 +170,7 @@ class SellerProfileContent extends StatelessWidget {
         ),
         GestureDetector(
           onTap: () {
-            // TODO: Navigate to settings
+            context.push('/settings');
           },
           child: Icon(
             Icons.settings_outlined,

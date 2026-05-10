@@ -111,7 +111,7 @@ class ReviewBidScreen extends StatelessWidget {
                     children: [
                       CircleAvatar(
                         radius: 28,
-                        backgroundImage: const NetworkImage('https://i.pravatar.cc/150?img=11'),
+                        backgroundImage: const AssetImage('assets/images/bidder_1.png'),
                       ),
                       const SizedBox(width: 16),
                       Expanded(

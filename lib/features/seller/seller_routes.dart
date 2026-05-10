@@ -6,6 +6,7 @@ import 'presentation/screens/review_bid_screen.dart';
 import 'presentation/screens/seller_profile_screen.dart';
 import 'presentation/screens/active_auctions_screen.dart';
 import 'presentation/screens/seller_dashboard_screen.dart';
+import 'presentation/screens/property_details_screen.dart';
 
 class SellerRoutes {
   static const String dashboard = '/seller-dashboard';
@@ -15,12 +16,29 @@ class SellerRoutes {
   static const String reviewBid = '/review-bid';
   static const String activeAuctions = '/active-auctions';
   static const String profile = '/seller-profile';
+  static const String propertyDetail = '/seller-property';
 
   static List<RouteBase> get routes => [
         // 0. Seller Dashboard (Main Entry Point)
         GoRoute(
           path: dashboard,
           builder: (context, state) => const SellerDashboardScreen(),
+        ),
+
+        // Property Detail (Seller Specific)
+        GoRoute(
+          path: '$propertyDetail/:id',
+          builder: (context, state) {
+            final id = state.pathParameters['id']!;
+            final extra = state.extra as Map<String, dynamic>?;
+
+            return PropertyDetailsScreen(
+              propertyId: id,
+              imageUrl: extra?['imageUrl'] ?? 'assets/images/properties/apartment.png',
+              title: extra?['title'] ?? 'Property Details',
+              location: extra?['location'] ?? 'Addis Ababa',
+            );
+          },
         ),
 
         // 1. My Listings (Portfolio Overview)
