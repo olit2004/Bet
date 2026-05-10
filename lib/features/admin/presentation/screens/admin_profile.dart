@@ -120,6 +120,39 @@ class ProfileScreen extends StatelessWidget {
 
             const SizedBox(height: 32),
 
+            // 5. Logout Button
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32.0),
+              child: OutlinedButton(
+                onPressed: () {
+                  // TODO: Implement logout
+                },
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  side: const BorderSide(color: Color(0xFFFF4B4B), width: 1.5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.logout, color: Color(0xFFFF4B4B), size: 22),
+                    const SizedBox(width: 8),
+                    Text(
+                      'LOGOUT',
+                      style: GoogleFonts.manrope(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFFFF4B4B),
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
             const SizedBox(height: 40),
           ],
         ),
