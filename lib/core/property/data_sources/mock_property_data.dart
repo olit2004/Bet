@@ -11,7 +11,7 @@ class MockPropertyData {
       currency: 'ETB',
       address: 'Garment',
       imageUrls: [
-        'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+        'assets/images/the-glass-Pavillion.png',
       ],
       category: PropertyCategory.buy,
       specs: [
@@ -21,6 +21,8 @@ class MockPropertyData {
       ],
       isVerified: true,
       isFeatured: true,
+      sellerName: 'Abebe Tola',
+      locale: 'Bole Medhanialem',
     ),
     Property(
       id: '2',
@@ -31,7 +33,7 @@ class MockPropertyData {
       currency: 'ETB',
       address: 'Tsehay Realstate',
       imageUrls: [
-        'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+        'assets/images/properties/apartment.png',
       ],
       category: PropertyCategory.commercial,
       specs: [
@@ -40,6 +42,8 @@ class MockPropertyData {
         PropertySpec(label: 'Studios', value: '25', icon: 'bed'),
       ],
       isVerified: true,
+      sellerName: 'Mikias Yared',
+      locale: 'Sarbet',
     ),
     Property(
       id: '3',
@@ -59,6 +63,8 @@ class MockPropertyData {
           icon: 'local_parking',
         ),
       ],
+      sellerName: 'Yonas Habte',
+      locale: 'Mexico',
     ),
   ];
 }

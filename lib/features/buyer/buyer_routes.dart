@@ -12,6 +12,7 @@ class BuyerRoutes {
   static List<RouteBase> get routes => [
         // 1. Property Details
         GoRoute(
+          name: 'property-detail',
           path: '$detail/:id',
           builder: (context, state) {
             final id = state.pathParameters['id']!;
@@ -29,6 +30,7 @@ class BuyerRoutes {
 
         // 2. Place Bid Screen
         GoRoute(
+          name: 'place-bid',
           path: '$placeBid/:id',
           builder: (context, state) {
             final property = state.extra as Property;
@@ -38,6 +40,7 @@ class BuyerRoutes {
 
         // 3. Counter Offer Screen
         GoRoute(
+          name: 'counter-offer',
           path: '$counterOffer/:id',
           builder: (context, state) {
             final property = state.extra as Property;

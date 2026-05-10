@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:bet/core/property/providers/property_provider.dart';
 import 'package:bet/features/buyer/presentation/widgets/property_card.dart';
 import 'package:bet/features/buyer/presentation/widgets/search_bar.dart';
-import 'package:bet/features/buyer/buyer_routes.dart';
+
 import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/core/widgets/app_logo.dart';
 import 'package:bet/core/providers/navigation_provider.dart';
@@ -36,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: AppColors.background,
         elevation: 0,
         scrolledUnderElevation: 0,
-        title: const AppLogo(size: 20),
+        title: const AppLogo(size: 20, isClickable: false),
         actions: [
           GestureDetector(
             onTap: () => context.read<NavigationProvider>().setIndex(2),
@@ -138,7 +138,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: PropertyCard(
                               property: property,
                               onTap: () {
-                                context.push(BuyerRoutes.detail, extra: property);
+                                context.pushNamed(
+                                  'property-detail',
+                                  pathParameters: {'id': property.id},
+                                  extra: property,
+                                );
                               },
                             ),
                           );
