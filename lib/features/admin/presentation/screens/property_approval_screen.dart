@@ -63,7 +63,7 @@ class PropertiesScreen extends StatelessWidget {
     );
   }
 
-  // UI COMPONENTS
+
 
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(

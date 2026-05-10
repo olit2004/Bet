@@ -93,7 +93,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             CustomButton(
               text: 'Update Password',
               onPressed: () {
-                // Logic to update password
+
               },
             ),
             const SizedBox(height: 48),
@@ -195,7 +195,7 @@ class DeleteAccountDialog extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      // Logic to delete account
+
                       Navigator.pop(context);
                       context.go('/login');
                     },

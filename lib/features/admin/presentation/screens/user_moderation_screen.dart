@@ -75,7 +75,7 @@ class _UsersScreenState extends State<UsersScreen> {
     );
   }
 
-  // UI COMPONENTS
+
 
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
@@ -120,9 +120,9 @@ class _UsersScreenState extends State<UsersScreen> {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1), // shadow color
-                blurRadius: 10, // softness
-                offset: Offset(0, 5), // position (x, y)
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 10,
+                offset: Offset(0, 5),
               ),
             ],
           ),
@@ -145,9 +145,9 @@ class _UsersScreenState extends State<UsersScreen> {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1), // shadow color
-                blurRadius: 10, // softness
-                offset: Offset(0, 5), // position (x, y)
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 10,
+                offset: Offset(0, 5),
               ),
             ],
           ),
@@ -177,9 +177,9 @@ class _UsersScreenState extends State<UsersScreen> {
               206,
               204,
               204,
-            ).withValues(alpha: 0.05), // shadow color
-            blurRadius: 5, // softness
-            offset: Offset(0, 3), // position (x, y)
+            ).withValues(alpha: 0.05),
+            blurRadius: 5,
+            offset: Offset(0, 3),
           ),
         ],
       ),
@@ -244,9 +244,9 @@ class _UsersScreenState extends State<UsersScreen> {
               255,
               255,
               255,
-            ).withValues(alpha: 0.05), // shadow color
-            blurRadius: 5, // softness
-            offset: Offset(0, 3), // position (x, y)
+            ).withValues(alpha: 0.05),
+            blurRadius: 5,
+            offset: Offset(0, 3),
           ),
         ],
       ),
@@ -308,7 +308,7 @@ class _UsersScreenState extends State<UsersScreen> {
 
   Widget _buildButtonRow(BuildContext context, int type) {
     if (type == 1) {
-      // Type 1: Suspend and View Details
+
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
@@ -318,7 +318,7 @@ class _UsersScreenState extends State<UsersScreen> {
               text: "Suspend",
               textColor: Colors.black,
               onPressed: () {
-                // TODO: Implement suspend action
+
               },
               color: const Color.fromARGB(255, 229, 238, 255),
             ),
@@ -342,7 +342,7 @@ class _UsersScreenState extends State<UsersScreen> {
         ],
       );
     } else if (type == 2) {
-      // Type 2: Approve Seller only
+
       return Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -351,7 +351,7 @@ class _UsersScreenState extends State<UsersScreen> {
             child: CustomButton(
               text: "Approve Seller",
               onPressed: () {
-                // TODO: Implement approve action
+
               },
               color: const Color.fromARGB(255, 0, 121, 66),
             ),
@@ -359,7 +359,7 @@ class _UsersScreenState extends State<UsersScreen> {
         ],
       );
     } else if (type == 3) {
-      // Type 3: Restrict and Verify Identity
+
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
@@ -369,7 +369,7 @@ class _UsersScreenState extends State<UsersScreen> {
               text: "Restrict",
               textColor: Colors.white,
               onPressed: () {
-                // TODO: Implement restrict action
+
               },
               color: const Color.fromARGB(255, 245, 129, 156),
             ),

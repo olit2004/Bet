@@ -56,7 +56,7 @@ class AdminDashboardScreen extends StatelessWidget {
             _buildSectionTitle("Recent Activity", "", "LIVE", isBadge: true),
             const SizedBox(height: 10),
 
-            // Activity List
+
             _buildActivityTile(
               "New Bid: \$1.2M",
               "Skyline Penthouse • 2m ago",
@@ -84,7 +84,7 @@ class AdminDashboardScreen extends StatelessWidget {
     );
   }
 
-  // UI COMPONENTS
+
 
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
@@ -277,7 +277,7 @@ class AdminDashboardScreen extends StatelessWidget {
   }
 
   Widget _buildSimpleBarChart() {
-    // This creates a simple visual bar chart using Containers
+
     return Container(
       height: 200,
       margin: const EdgeInsets.symmetric(vertical: 15),

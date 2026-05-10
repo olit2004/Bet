@@ -45,7 +45,7 @@ class ProfileScreen extends StatelessWidget {
           children: [
             const SizedBox(height: 30),
 
-            // 1. Avatar with subtle glow
+
             Center(
               child: Container(
                 padding: const EdgeInsets.all(4),
@@ -72,7 +72,7 @@ class ProfileScreen extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            // 2. Name
+
             Text(
               'Lemi Fita',
               style: GoogleFonts.manrope(
@@ -85,7 +85,7 @@ class ProfileScreen extends StatelessWidget {
 
             const SizedBox(height: 12),
 
-            // 3. Client Badge
+
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
               decoration: BoxDecoration(
@@ -104,7 +104,7 @@ class ProfileScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            // 4. Bio
+
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32.0),
               child: Text(
@@ -121,7 +121,7 @@ class ProfileScreen extends StatelessWidget {
 
             const SizedBox(height: 32),
 
-            // 5. Logout Button
+
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32.0),
               child: OutlinedButton.icon(

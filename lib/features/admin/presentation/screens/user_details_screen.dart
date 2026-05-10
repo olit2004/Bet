@@ -39,7 +39,7 @@ PreferredSizeWidget _profileAppBar(BuildContext context) {
     title: const Text(
       "User Profile",
       style: TextStyle(
-        color: Color(0xFF0D1B3E), // Dark navy text
+        color: Color(0xFF0D1B3E),
         fontWeight: FontWeight.bold,
         fontSize: 22,
       ),
