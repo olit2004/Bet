@@ -13,6 +13,9 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  final _bioFormKey = GlobalKey<FormState>();
+  final _passwordFormKey = GlobalKey<FormState>();
+
   final _oldPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -70,18 +73,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            CustomTextField(
-              label: 'Bio',
-              hintText: 'Tell us about yourself',
-              controller: _bioController,
-              maxLines: 4,
-            ),
-            const SizedBox(height: 16),
-            CustomButton(
-              text: 'Update Bio',
-              onPressed: () {
-                // Logic to update bio
-              },
+            Form(
+              key: _bioFormKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CustomTextField(
+                    label: 'Bio',
+                    hintText: 'Tell us about yourself',
+                    controller: _bioController,
+                    maxLines: 4,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Bio cannot be empty';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  CustomButton(
+                    text: 'Update Bio',
+                    onPressed: () {
+                      if (_bioFormKey.currentState!.validate()) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Bio updated successfully')),
+                        );
+                      }
+                    },
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 48),
             const Divider(),
@@ -95,32 +116,66 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            CustomTextField(
-              label: 'Old Password',
-              hintText: 'Enter old password',
-              controller: _oldPasswordController,
-              obscureText: true,
-            ),
-            const SizedBox(height: 16),
-            CustomTextField(
-              label: 'New Password',
-              hintText: 'Enter new password',
-              controller: _newPasswordController,
-              obscureText: true,
-            ),
-            const SizedBox(height: 16),
-            CustomTextField(
-              label: 'Confirm Password',
-              hintText: 'Re-enter new password',
-              controller: _confirmPasswordController,
-              obscureText: true,
-            ),
-            const SizedBox(height: 32),
-            CustomButton(
-              text: 'Update Password',
-              onPressed: () {
-                // Logic to update password
-              },
+            Form(
+              key: _passwordFormKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CustomTextField(
+                    label: 'Old Password',
+                    hintText: 'Enter old password',
+                    controller: _oldPasswordController,
+                    obscureText: true,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your old password';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  CustomTextField(
+                    label: 'New Password',
+                    hintText: 'Enter new password',
+                    controller: _newPasswordController,
+                    obscureText: true,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a new password';
+                      }
+                      if (value.length < 6) {
+                        return 'Password must be at least 6 characters';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  CustomTextField(
+                    label: 'Confirm Password',
+                    hintText: 'Re-enter new password',
+                    controller: _confirmPasswordController,
+                    obscureText: true,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please confirm your new password';
+                      }
+                      if (value != _newPasswordController.text) {
+                        return 'Passwords do not match';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 32),
+                  CustomButton(
+                    text: 'Update Password',
+                    onPressed: () {
+                      if (_passwordFormKey.currentState!.validate()) {
+                        _showSuccessDialog();
+                      }
+                    },
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 48),
             const Divider(),
@@ -156,6 +211,72 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: const BoxDecoration(
+                  color: Color(0xFFD1FAE5),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.check_circle_outline, color: Color(0xFF059669), size: 40),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Success!',
+                style: GoogleFonts.manrope(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.primaryText,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Password updated successfully.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  color: AppColors.secondaryText,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context); // Close dialog
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryBlue,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    'Done',
+                    style: GoogleFonts.inter(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

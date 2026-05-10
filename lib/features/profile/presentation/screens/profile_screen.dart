@@ -17,7 +17,7 @@ class ProfileScreen extends StatelessWidget {
         scrolledUnderElevation: 0,
         leading: const Padding(
           padding: EdgeInsets.only(left: 16.0),
-          child: AppLogo(size: 24, showText: false),
+          child: AppLogo(size: 24, showText: false, isClickable: false),
         ),
         leadingWidth: 100,
         title: Text(
@@ -59,8 +59,8 @@ class ProfileScreen extends StatelessWidget {
                 child: CircleAvatar(
                   radius: 70,
                   backgroundColor: AppColors.inputFill,
-                  backgroundImage: const NetworkImage(
-                    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
+                  backgroundImage: const AssetImage(
+                    'assets/images/lemi.png',
                   ),
                 ),
               ),
@@ -133,6 +133,38 @@ class ProfileScreen extends StatelessWidget {
                   _buildStatCard('\$4.2M', 'ASSET VALUE', const Color(0xFF05345C)),
                   _buildStatCard('100%', 'ESCROW SUCCESS', const Color(0xFF05345C)),
                 ],
+              ),
+            ),
+            
+            const SizedBox(height: 40),
+            
+            // 6. Logout Button
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    context.go('/login');
+                  },
+                  icon: const Icon(Icons.logout_rounded, color: Color(0xFFFF4D4F), size: 20),
+                  label: Text(
+                    'LOGOUT',
+                    style: GoogleFonts.manrope(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFFFF4D4F),
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    side: const BorderSide(color: Color(0xFFFF4D4F), width: 1.5),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                ),
               ),
             ),
             

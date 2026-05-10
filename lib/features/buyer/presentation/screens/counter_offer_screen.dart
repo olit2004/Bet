@@ -8,6 +8,7 @@ import 'package:bet/core/property/models/property_model.dart';
 import 'package:bet/core/property/widgets/bid_info_card.dart';
 import 'package:bet/core/property/widgets/upload_container.dart';
 import 'package:bet/core/property/widgets/legal_notice_card.dart';
+import 'package:bet/core/widgets/app_logo.dart';
 
 class CounterOfferScreen extends StatefulWidget {
   final Property property;
@@ -47,18 +48,7 @@ class _CounterOfferScreenState extends State<CounterOfferScreen> {
           icon: const Icon(Icons.close, color: AppColors.primaryText),
           onPressed: () => context.pop(),
         ),
-        title: Image.asset(
-          'assets/images/logo.png',
-          height: 32,
-          errorBuilder: (context, error, stackTrace) => Text(
-            'Beth',
-            style: GoogleFonts.manrope(
-              color: AppColors.primaryBlue,
-              fontWeight: FontWeight.w900,
-              fontSize: 24,
-            ),
-          ),
-        ),
+        title: const AppLogo(size: 24, showText: true, isClickable: false),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -223,10 +213,77 @@ class _CounterOfferScreenState extends State<CounterOfferScreen> {
             const SizedBox(height: 32),
             CustomButton(
               text: 'Submit',
-              onPressed: () {},
+              onPressed: _showSuccessDialog,
             ),
             const SizedBox(height: 40),
           ],
+        ),
+      ),
+    );
+  }
+
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: const BoxDecoration(
+                  color: Color(0xFFD1FAE5),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.check_circle_outline, color: Color(0xFF059669), size: 40),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Success!',
+                style: GoogleFonts.manrope(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.primaryText,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Your proposal has been submitted successfully.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  color: AppColors.secondaryText,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context); // Close dialog
+                    context.pop(); // Go back to previous screen
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryBlue,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    'Done',
+                    style: GoogleFonts.inter(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

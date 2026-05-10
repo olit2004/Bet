@@ -5,18 +5,75 @@ import 'package:bet/core/constants/app_colors.dart';
 
 class AppLogo extends StatelessWidget {
   final double size;
-  final bool showText; // Added to support icon-only mode
+  final bool showText;
+  final VoidCallback? onTap;
+  final bool isClickable;
 
   const AppLogo({
     super.key,
     required this.size,
     this.showText = true,
+    this.onTap,
+    this.isClickable = true,
   });
 
   @override
   Widget build(BuildContext context) {
+    final content = Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: size,
+            height: size,
+            child: CustomPaint(
+              painter: _LogoIconPainter(color: AppColors.primaryBlue),
+            ),
+          ),
+          if (showText) ...[
+            SizedBox(width: size * 0.3),
+            Flexible(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Beth',
+                    style: GoogleFonts.manrope(
+                      color: AppColors.primaryText,
+                      fontSize: size * 0.9,
+                      fontWeight: FontWeight.w800,
+                      height: 1.0,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'RENTAL & BIDDING',
+                    style: GoogleFonts.inter(
+                      color: AppColors.primaryLightBlue,
+                      fontSize: size * 0.22,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.2,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+
+    if (!isClickable) {
+      return content;
+    }
+
     return InkWell(
-      onTap: () {
+      onTap: onTap ?? () {
         final state = GoRouterState.of(context);
         if (state.uri.path == '/') {
           final scrollController = PrimaryScrollController.of(context);
@@ -32,54 +89,7 @@ class AppLogo extends StatelessWidget {
         }
       },
       borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.all(4.0),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: size,
-              height: size,
-              child: CustomPaint(
-                painter: _LogoIconPainter(color: AppColors.primaryBlue),
-              ),
-            ),
-            if (showText) ...[
-              SizedBox(width: size * 0.3),
-              Flexible(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Beth',
-                      style: GoogleFonts.manrope(
-                        color: AppColors.primaryText,
-                        fontSize: size * 0.9,
-                        fontWeight: FontWeight.w800,
-                        height: 1.0,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'RENTAL & BIDDING',
-                      style: GoogleFonts.inter(
-                        color: AppColors.primaryLightBlue,
-                        fontSize: size * 0.22,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.2,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
+      child: content,
     );
   }
 }

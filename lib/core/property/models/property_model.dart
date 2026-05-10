@@ -25,6 +25,8 @@ class Property {
   final bool isVerified;
   final bool isFeatured;
   final DateTime? createdAt;
+  final String? sellerName;
+  final String? locale;
 
   const Property({
     required this.id,
@@ -39,6 +41,8 @@ class Property {
     this.isVerified = false,
     this.isFeatured = false,
     this.createdAt,
+    this.sellerName,
+    this.locale,
   });
 
   /// Helper to get a string representation of the category
