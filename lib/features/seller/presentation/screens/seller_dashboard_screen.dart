@@ -6,9 +6,6 @@ import '../views/create_property_content.dart';
 import '../views/my_listings_content.dart';
 import '../views/active_auctions_content.dart';
 
-/// The seller dashboard acts as the shell for the seller experience.
-/// It owns the bottom navigation bar and swaps the body content
-/// based on the selected tab.
 class SellerDashboardScreen extends StatefulWidget {
   const SellerDashboardScreen({super.key});
 
@@ -39,9 +36,9 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
               title: Text(
                 _tabTitles[_currentIndex],
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: AppColors.primaryText,
-                      fontWeight: FontWeight.w700,
-                    ),
+                  color: AppColors.primaryText,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               backgroundColor: Colors.white,
               foregroundColor: AppColors.primaryText,
@@ -126,6 +123,4 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
       ),
     );
   }
-
-
 }

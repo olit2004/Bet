@@ -26,16 +26,14 @@ class SellerButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // If it's a simple button with no icon or border, we could use CustomButton.
-    // However, to maintain the professional seller look (shadows, specific heights),
-    // we'll implement it here to ensure consistency across the seller feature.
-    
     return Container(
       width: width ?? double.infinity,
       height: height ?? 56.0,
       decoration: BoxDecoration(
         color: color,
-        gradient: (color == null && border == null) ? AppColors.primaryGradient : null,
+        gradient: (color == null && border == null)
+            ? AppColors.primaryGradient
+            : null,
         borderRadius: BorderRadius.circular(20.0),
         border: border,
         boxShadow: (color == null && border == null)

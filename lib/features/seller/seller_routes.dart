@@ -19,71 +19,71 @@ class SellerRoutes {
   static const String propertyDetail = '/seller-property';
 
   static List<RouteBase> get routes => [
-        // 0. Seller Dashboard (Main Entry Point)
-        GoRoute(
-          path: dashboard,
-          builder: (context, state) => const SellerDashboardScreen(),
-        ),
+    // Seller Dashboard (Main Entry Point)
+    GoRoute(
+      path: dashboard,
+      builder: (context, state) => const SellerDashboardScreen(),
+    ),
 
-        // Property Detail (Seller Specific)
-        GoRoute(
-          path: '$propertyDetail/:id',
-          builder: (context, state) {
-            final id = state.pathParameters['id']!;
-            final extra = state.extra as Map<String, dynamic>?;
+    // Property Detail (Seller Specific)
+    GoRoute(
+      path: '$propertyDetail/:id',
+      builder: (context, state) {
+        final id = state.pathParameters['id']!;
+        final extra = state.extra as Map<String, dynamic>?;
 
-            return PropertyDetailsScreen(
-              propertyId: id,
-              imageUrl: extra?['imageUrl'] ?? 'assets/images/properties/apartment.png',
-              title: extra?['title'] ?? 'Property Details',
-              location: extra?['location'] ?? 'Addis Ababa',
-            );
-          },
-        ),
+        return PropertyDetailsScreen(
+          propertyId: id,
+          imageUrl:
+              extra?['imageUrl'] ?? 'assets/images/properties/apartment.png',
+          title: extra?['title'] ?? 'Property Details',
+          location: extra?['location'] ?? 'Addis Ababa',
+        );
+      },
+    ),
 
-        // 1. My Listings (Portfolio Overview)
-        GoRoute(
-          path: myListings,
-          builder: (context, state) => const MyListingsScreen(),
-        ),
+    // My Listings (Portfolio Overview)
+    GoRoute(
+      path: myListings,
+      builder: (context, state) => const MyListingsScreen(),
+    ),
 
-        // 5. Create Listing Flow
-        GoRoute(
-          path: createListing,
-          builder: (context, state) => const CreateListingScreen(),
-        ),
+    // Create Listing Flow
+    GoRoute(
+      path: createListing,
+      builder: (context, state) => const CreateListingScreen(),
+    ),
 
-        // 6. Bidding Management Flow
-        GoRoute(
-          path: '$manageBids/:propertyId',
-          builder: (context, state) {
-            final id = state.pathParameters['propertyId']!;
-            return ManageBidsScreen(propertyId: id);
-          },
-        ),
+    // Bidding Management Flow
+    GoRoute(
+      path: '$manageBids/:propertyId',
+      builder: (context, state) {
+        final id = state.pathParameters['propertyId']!;
+        return ManageBidsScreen(propertyId: id);
+      },
+    ),
 
-        // Sub-route for reviewing a specific bid
-        GoRoute(
-          path: '$reviewBid/:bidId',
-          builder: (context, state) {
-            final bidId = state.pathParameters['bidId']!;
-            return ReviewBidScreen(bidId: bidId);
-          },
-        ),
+    GoRoute(
+      path: '$reviewBid/:bidId',
+      builder: (context, state) {
+        final bidId = state.pathParameters['bidId']!;
+        return ReviewBidScreen(bidId: bidId);
+      },
+    ),
 
-        // 7. Active Auctions (The "Bids" tab in bottom nav)
-        GoRoute(
-          path: activeAuctions,
-          builder: (context, state) => const ActiveAuctionsScreen(),
-        ),
+    // Active Auctions
+    GoRoute(
+      path: activeAuctions,
+      builder: (context, state) => const ActiveAuctionsScreen(),
+    ),
 
-        // 8. Professional Seller Profile
-        GoRoute(
-          path: '$profile/:userId',
-          builder: (context, state) {
-            final userId = state.pathParameters['userId']!;
-            return SellerProfileScreen(userId: userId);
-          },
-        ),
-      ];
+    //  Seller Profile
+    GoRoute(
+      path: '$profile/:userId',
+      builder: (context, state) {
+        final userId = state.pathParameters['userId']!;
+        return SellerProfileScreen(userId: userId);
+      },
+    ),
+  ];
 }

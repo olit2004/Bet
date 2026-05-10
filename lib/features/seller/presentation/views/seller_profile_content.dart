@@ -6,16 +6,11 @@ import 'package:bet/features/seller/presentation/widgets/seller_button.dart';
 import 'package:bet/features/seller/presentation/widgets/performance_card.dart';
 import 'package:bet/features/seller/presentation/widgets/profile_stat.dart';
 
-/// The content body of the Seller Profile, without Scaffold or navigation.
-/// Reused inside the dashboard shell (as a tab) and SellerProfileScreen (as a pushed route).
 class SellerProfileContent extends StatelessWidget {
   final String userId;
 
-  /// When true, shows the header row with back arrow and settings icon.
-  /// Set to false when embedded inside the dashboard shell (header is not needed).
   final bool showHeader;
 
-  /// Called when the back arrow is tapped. Only relevant when [showHeader] is true.
   final VoidCallback? onBack;
 
   const SellerProfileContent({
@@ -127,7 +122,7 @@ class SellerProfileContent extends StatelessWidget {
             valueColor: AppColors.primaryText,
           ),
           const SizedBox(height: 24),
-          
+
           // ── Logout Button ──
           SellerButton(
             text: 'LOGOUT',
