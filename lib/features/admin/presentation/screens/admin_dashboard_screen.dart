@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bet/core/widgets/app_logo.dart';
-
+import 'package:bet/features/admin/presentation/screens/admin_profile.dart';
 
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});
@@ -10,7 +10,7 @@ class AdminDashboardScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color.fromRGBO(248, 249, 255, 1),
 
-      appBar: _buildAppBar(),
+      appBar: _buildAppBar(context),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -86,7 +86,7 @@ class AdminDashboardScreen extends StatelessWidget {
 
   // UI COMPONENTS
 
-  AppBar _buildAppBar() {
+  AppBar _buildAppBar(BuildContext context) {
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0,
@@ -97,12 +97,20 @@ class AdminDashboardScreen extends StatelessWidget {
           const SizedBox(width: 8),
         ],
       ),
-      actions: const [
-        CircleAvatar(
-          radius: 18,
-          backgroundImage: AssetImage("/images/avater.png"),
+      actions: [
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ProfileScreen()),
+            );
+          },
+          child: const CircleAvatar(
+            radius: 18,
+            backgroundImage: AssetImage("/images/avater.png"),
+          ),
         ),
-        SizedBox(width: 15),
+        const SizedBox(width: 15),
       ],
     );
   }
@@ -146,7 +154,7 @@ class AdminDashboardScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha:0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -275,7 +283,7 @@ class AdminDashboardScreen extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 15),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 154, 177, 240).withValues(alpha:0.3),
+        color: const Color.fromARGB(255, 154, 177, 240).withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -304,7 +312,12 @@ class AdminDashboardScreen extends StatelessWidget {
       width: 60,
       height: height,
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 112, 79, 218).withValues(alpha: opacity),
+        color: const Color.fromARGB(
+          255,
+          112,
+          79,
+          218,
+        ).withValues(alpha: opacity),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(6),
           topRight: Radius.circular(6),
@@ -348,5 +361,4 @@ class AdminDashboardScreen extends StatelessWidget {
       ),
     );
   }
-
 }

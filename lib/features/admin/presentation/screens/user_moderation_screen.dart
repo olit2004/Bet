@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bet/core/widgets/app_logo.dart';
+import 'package:bet/core/widgets/custom_button.dart';
+import 'package:bet/features/admin/presentation/screens/admin_profile.dart';
 import 'user_details_screen.dart';
 
 class UsersScreen extends StatefulWidget {
@@ -16,17 +18,12 @@ class _UsersScreenState extends State<UsersScreen> {
     return Scaffold(
       backgroundColor: Color.fromRGBO(248, 249, 255, 1),
 
-      appBar: _buildAppBar(),
+      appBar: _buildAppBar(context),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(
-              "Property Approvals",
-              "Review pending submissions for quality assurance.",
-            ),
-
             SizedBox(height: 20),
             _currentStats(),
             SizedBox(height: 20),
@@ -39,26 +36,9 @@ class _UsersScreenState extends State<UsersScreen> {
               "susbended due to fraud",
               "/images/bekalu.png",
               true,
+              type: 1,
             ),
             SizedBox(height: 20),
-
-            _usersCard(
-              context,
-              "Bety",
-              "buyer",
-              "Listed 1 property",
-              "/images/bety.png",
-              false,
-            ),
-            SizedBox(height: 20),
-            _usersCard(
-              context,
-              "Fita",
-              "Buyer",
-              "Pending Verification",
-              "/images/profile.png",
-              true,
-            ),
 
             SizedBox(height: 20),
             _usersCard(
@@ -68,6 +48,26 @@ class _UsersScreenState extends State<UsersScreen> {
               "Listed 12 properties",
               "/images/lemi.png",
               false,
+              type: 2,
+            ),
+            _usersCard(
+              context,
+              "Bety",
+              "buyer",
+              "Listed 1 property",
+              "/images/bety.png",
+              false,
+              type: 1,
+            ),
+            SizedBox(height: 20),
+            _usersCard(
+              context,
+              "Fita",
+              "Buyer",
+              "Pending Verification",
+              "/images/profile.png",
+              true,
+              type: 3,
             ),
           ],
         ),
@@ -77,7 +77,7 @@ class _UsersScreenState extends State<UsersScreen> {
 
   // UI COMPONENTS
 
-  AppBar _buildAppBar() {
+  AppBar _buildAppBar(BuildContext context) {
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0,
@@ -88,36 +88,20 @@ class _UsersScreenState extends State<UsersScreen> {
           const SizedBox(width: 8),
         ],
       ),
-      actions: const [
-        CircleAvatar(
-          radius: 18,
-          backgroundImage: AssetImage("/images/avater.png"),
-        ),
-        SizedBox(width: 15),
-      ],
-    );
-  }
-
-  Widget _buildHeader(String title, String subtitle) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.baseline,
-      textBaseline: TextBaseline.alphabetic,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 38,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF0D1B3E),
+      actions: [
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ProfileScreen()),
+            );
+          },
+          child: const CircleAvatar(
+            radius: 18,
+            backgroundImage: AssetImage("/images/avater.png"),
           ),
         ),
-        Text(
-          subtitle,
-          style: TextStyle(
-            color: Color.fromARGB(255, 73, 82, 129),
-            fontSize: 18,
-          ),
-        ),
+        const SizedBox(width: 15),
       ],
     );
   }
@@ -246,6 +230,7 @@ class _UsersScreenState extends State<UsersScreen> {
     String imageUrl,
     bool isSeller, {
     Color roleColor = const Color.fromARGB(255, 147, 198, 239),
+    int type = 1,
   }) {
     final Color finalRoleColor = isSeller
         ? const Color.fromARGB(255, 25, 166, 17)
@@ -254,7 +239,12 @@ class _UsersScreenState extends State<UsersScreen> {
       decoration: BoxDecoration(
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05), // shadow color
+            color: const Color.fromARGB(
+              255,
+              255,
+              255,
+              255,
+            ).withValues(alpha: 0.05), // shadow color
             blurRadius: 5, // softness
             offset: Offset(0, 3), // position (x, y)
           ),
@@ -282,11 +272,11 @@ class _UsersScreenState extends State<UsersScreen> {
               Column(
                 children: [
                   Text(
-                    "name",
+                    name,
                     style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 3),
-                  Text("statusDiscription", style: TextStyle(fontSize: 14)),
+                  Text(statusDiscription, style: TextStyle(fontSize: 14)),
                 ],
               ),
               const Spacer(),
@@ -310,45 +300,93 @@ class _UsersScreenState extends State<UsersScreen> {
             ],
           ),
           SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Container(
-                width: 150,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 135, 187, 230),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                alignment: Alignment.center,
-                child: Text("Suspend"),
-              ),
-
-              TextButton(
-                style: TextButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 43, 63, 240),
-                  fixedSize: const Size(150, 50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const UserDetailScreen(),
-                    ),
-                  );
-                },
-                child: const Text(
-                  "View Details",
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ],
-          ),
+          _buildButtonRow(context, type),
         ],
       ),
     );
+  }
+
+  Widget _buildButtonRow(BuildContext context, int type) {
+    if (type == 1) {
+      // Type 1: Suspend and View Details
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          SizedBox(
+            width: 140,
+            child: CustomButton(
+              text: "Suspend",
+              textColor: Colors.black,
+              onPressed: () {
+                // TODO: Implement suspend action
+              },
+              color: const Color.fromARGB(255, 229, 238, 255),
+            ),
+          ),
+
+          SizedBox(
+            width: 140,
+            child: CustomButton(
+              text: "View Details",
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const UserDetailScreen(),
+                  ),
+                );
+              },
+              color: const Color.fromARGB(255, 43, 63, 240),
+            ),
+          ),
+        ],
+      );
+    } else if (type == 2) {
+      // Type 2: Approve Seller only
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 300,
+            child: CustomButton(
+              text: "Approve Seller",
+              onPressed: () {
+                // TODO: Implement approve action
+              },
+              color: const Color.fromARGB(255, 0, 121, 66),
+            ),
+          ),
+        ],
+      );
+    } else if (type == 3) {
+      // Type 3: Restrict and Verify Identity
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          SizedBox(
+            width: 140,
+            child: CustomButton(
+              text: "Restrict",
+              textColor: Colors.white,
+              onPressed: () {
+                // TODO: Implement restrict action
+              },
+              color: const Color.fromARGB(255, 245, 129, 156),
+            ),
+          ),
+
+          SizedBox(
+            width: 140,
+            child: CustomButton(
+              text: "Verify Identity",
+              textColor: Colors.black,
+              onPressed: () {},
+              color: const Color.fromARGB(255, 200, 216, 243),
+            ),
+          ),
+        ],
+      );
+    }
+    return SizedBox.shrink();
   }
 }

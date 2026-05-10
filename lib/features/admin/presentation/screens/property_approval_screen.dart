@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bet/core/widgets/app_logo.dart';
+import 'package:bet/features/admin/presentation/screens/admin_profile.dart';
 import 'package:bet/features/admin/presentation/screens/identity_review_screen.dart';
 import 'package:bet/core/widgets/custom_button.dart';
 
@@ -11,7 +12,7 @@ class PropertiesScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Color.fromRGBO(248, 249, 255, 1),
 
-      appBar: _buildAppBar(),
+      appBar: _buildAppBar(context),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -64,7 +65,7 @@ class PropertiesScreen extends StatelessWidget {
 
   // UI COMPONENTS
 
-  AppBar _buildAppBar() {
+  AppBar _buildAppBar(BuildContext context) {
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0,
@@ -75,12 +76,20 @@ class PropertiesScreen extends StatelessWidget {
           const SizedBox(width: 8),
         ],
       ),
-      actions: const [
-        CircleAvatar(
-          radius: 18,
-          backgroundImage: AssetImage("assets/images/avater.png"),
+      actions: [
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ProfileScreen()),
+            );
+          },
+          child: const CircleAvatar(
+            radius: 18,
+            backgroundImage: AssetImage("assets/images/avater.png"),
+          ),
         ),
-        SizedBox(width: 15),
+        const SizedBox(width: 15),
       ],
     );
   }
