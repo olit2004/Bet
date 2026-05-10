@@ -121,6 +121,67 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
                             // Handle reset link logic
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return Dialog(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(24),
+                                  ),
+                                  backgroundColor: AppColors.surface,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(24.0),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(16),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.success.withValues(alpha: 0.1),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(
+                                            Icons.mark_email_read_rounded,
+                                            color: AppColors.success,
+                                            size: 32,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 24),
+                                        Text(
+                                          'Check your email',
+                                          style: GoogleFonts.manrope(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                            color: AppColors.primaryText,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 12),
+                                        Text(
+                                          'We have successfully sent the password reset link to your email address.',
+                                          textAlign: TextAlign.center,
+                                          style: GoogleFonts.inter(
+                                            fontSize: 14,
+                                            color: AppColors.secondaryText,
+                                            height: 1.5,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 24),
+                                        SizedBox(
+                                          width: double.infinity,
+                                          child: CustomButton(
+                                            text: 'Back to Login',
+                                            onPressed: () {
+                                              context.pop(); // Close dialog
+                                              context.pop(); // Go back to login screen
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
                           }
                         },
                       ),
