@@ -12,6 +12,7 @@ class CustomTextField extends StatelessWidget {
   final TextInputType keyboardType;
   final ValueChanged<String>? onChanged;
   final int maxLines;
+  final String? Function(String?)? validator;
 
   const CustomTextField({
     super.key,
@@ -24,6 +25,7 @@ class CustomTextField extends StatelessWidget {
     this.keyboardType = TextInputType.text,
     this.onChanged,
     this.maxLines = 1,
+    this.validator,
   });
 
   @override
@@ -42,11 +44,13 @@ class CustomTextField extends StatelessWidget {
           ),
           const SizedBox(height: 8),
         ],
-        TextField(
+        TextFormField(
           controller: controller,
           obscureText: obscureText,
           onChanged: onChanged,
           maxLines: maxLines,
+          keyboardType: keyboardType,
+          validator: validator,
           style: GoogleFonts.inter(
             color: AppColors.primaryText,
           ),
@@ -71,6 +75,15 @@ class CustomTextField extends StatelessWidget {
               borderRadius: BorderRadius.circular(16.0),
               borderSide: BorderSide.none,
             ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16.0),
+              borderSide: const BorderSide(color: AppColors.error),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16.0),
+              borderSide: const BorderSide(color: AppColors.error),
+            ),
+            errorStyle: GoogleFonts.inter(color: AppColors.error),
             contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
           ),
         ),
