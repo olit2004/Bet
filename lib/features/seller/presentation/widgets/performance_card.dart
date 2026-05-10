@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:bet/core/constants/app_colors.dart';
 
-/// A reusable card for displaying a performance metric with a large value,
-/// subtitle description, and a decorative icon.
-/// Used on the Seller Profile and potentially on analytics screens.
 class PerformanceCard extends StatelessWidget {
   final String label;
   final String value;

@@ -31,6 +31,15 @@ class ManageBidsScreen extends StatelessWidget {
             fontWeight: FontWeight.w800,
           ),
         ),
+        actions: [
+          CircleAvatar(
+            radius: 18,
+            backgroundImage: const AssetImage(
+              'assets/images/seller_profile.png',
+            ),
+          ),
+          const SizedBox(width: 16),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -51,9 +60,9 @@ class ManageBidsScreen extends StatelessWidget {
             Text(
               'Skyline Penthouse',
               style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                    color: const Color(0xFF0C2442), // Deep blue/black
-                    fontWeight: FontWeight.w900,
-                  ),
+                color: const Color(0xFF0C2442), // Deep blue/black
+                fontWeight: FontWeight.w900,
+              ),
             ),
             const SizedBox(height: 24),
 
@@ -64,7 +73,9 @@ class ManageBidsScreen extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF1F3F6), // Slightly lighter gray than bg
+                      color: const Color(
+                        0xFFF1F3F6,
+                      ), // Slightly lighter gray than bg
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Column(
@@ -101,7 +112,9 @@ class ManageBidsScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.primaryLightBlue.withValues(alpha: 0.2),
+                          color: AppColors.primaryLightBlue.withValues(
+                            alpha: 0.2,
+                          ),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),
@@ -185,7 +198,7 @@ class ManageBidsScreen extends StatelessWidget {
               name: 'Abebe Tesfaye',
               price: '4,850,000 Birr',
               timeAgo: '2 MINS AGO',
-              imageUrl: 'https://i.pravatar.cc/150?img=11',
+              imageUrl: 'assets/images/bidder_1.png',
               isHighest: true,
               isAcceptable: true,
             ),
@@ -194,7 +207,7 @@ class ManageBidsScreen extends StatelessWidget {
               name: 'Selam Kebede',
               price: '4,825,000 Birr',
               timeAgo: '15 MINS AGO',
-              imageUrl: 'https://i.pravatar.cc/150?img=5',
+              imageUrl: 'assets/images/bidder_2.png',
               isHighest: false,
               isAcceptable: false,
             ),
@@ -203,7 +216,7 @@ class ManageBidsScreen extends StatelessWidget {
               name: 'Tola Bedhesa',
               price: '4,790,000 Birr',
               timeAgo: '1 HOUR AGO',
-              imageUrl: 'https://i.pravatar.cc/150?img=33',
+              imageUrl: 'assets/images/tola_gobena.avif',
               isHighest: false,
               isAcceptable: false,
             ),
@@ -233,14 +246,8 @@ class ManageBidsScreen extends StatelessWidget {
                     children: [
                       CircleAvatar(
                         radius: 16,
-                        backgroundColor: AppColors.primaryLightBlue.withValues(alpha: 0.2),
-                        child: Text(
-                          'SC',
-                          style: GoogleFonts.inter(
-                            color: AppColors.primaryBlue,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                          ),
+                        backgroundImage: const AssetImage(
+                          'assets/images/bety.png',
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -302,7 +309,7 @@ class _BidCard extends StatelessWidget {
                   color: Colors.black.withValues(alpha: 0.04),
                   blurRadius: 20,
                   offset: const Offset(-8, 4),
-                )
+                ),
               ]
             : [],
       ),
@@ -322,7 +329,7 @@ class _BidCard extends StatelessWidget {
                 ),
               ),
             ),
-          
+
           Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -333,7 +340,10 @@ class _BidCard extends StatelessWidget {
                   Align(
                     alignment: Alignment.topRight,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFF67E2A9),
                         borderRadius: BorderRadius.circular(12),
@@ -350,14 +360,14 @@ class _BidCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                 ],
-                
+
                 // User info and bid row
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     CircleAvatar(
                       radius: 20,
-                      backgroundImage: NetworkImage(imageUrl),
+                      backgroundImage: AssetImage(imageUrl),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -389,7 +399,9 @@ class _BidCard extends StatelessWidget {
                         Text(
                           price,
                           style: GoogleFonts.manrope(
-                            color: isHighest ? const Color(0xFF00684A) : const Color(0xFF0C2442),
+                            color: isHighest
+                                ? const Color(0xFF00684A)
+                                : const Color(0xFF0C2442),
                             fontSize: 18,
                             fontWeight: FontWeight.w800,
                           ),
@@ -409,7 +421,7 @@ class _BidCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 20),
-                
+
                 // Actions row
                 Row(
                   children: [
@@ -424,7 +436,9 @@ class _BidCard extends StatelessWidget {
                             },
                             style: OutlinedButton.styleFrom(
                               side: BorderSide(
-                                color: AppColors.primaryBlue.withValues(alpha: 0.2),
+                                color: AppColors.primaryBlue.withValues(
+                                  alpha: 0.2,
+                                ),
                                 width: 1.5,
                               ),
                               shape: RoundedRectangleBorder(
@@ -461,8 +475,8 @@ class _BidCard extends StatelessWidget {
                             }
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: isAcceptable 
-                                ? AppColors.primaryLightBlue 
+                            backgroundColor: isAcceptable
+                                ? AppColors.primaryLightBlue
                                 : const Color(0xFFD6DFE8),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -472,7 +486,9 @@ class _BidCard extends StatelessWidget {
                           child: Text(
                             isAcceptable ? 'Accept Bid' : 'Review Bidder',
                             style: GoogleFonts.manrope(
-                              color: isAcceptable ? Colors.white : const Color(0xFF0C2442),
+                              color: isAcceptable
+                                  ? Colors.white
+                                  : const Color(0xFF0C2442),
                               fontSize: 14,
                               fontWeight: FontWeight.w800,
                             ),

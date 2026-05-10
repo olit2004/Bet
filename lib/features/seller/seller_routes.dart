@@ -6,6 +6,7 @@ import 'presentation/screens/review_bid_screen.dart';
 import 'presentation/screens/seller_profile_screen.dart';
 import 'presentation/screens/active_auctions_screen.dart';
 import 'presentation/screens/seller_dashboard_screen.dart';
+import 'presentation/screens/property_details_screen.dart';
 
 class SellerRoutes {
   static const String dashboard = '/seller-dashboard';
@@ -15,57 +16,74 @@ class SellerRoutes {
   static const String reviewBid = '/review-bid';
   static const String activeAuctions = '/active-auctions';
   static const String profile = '/seller-profile';
+  static const String propertyDetail = '/seller-property';
 
   static List<RouteBase> get routes => [
-        // 0. Seller Dashboard (Main Entry Point)
-        GoRoute(
-          path: dashboard,
-          builder: (context, state) => const SellerDashboardScreen(),
-        ),
+    // Seller Dashboard (Main Entry Point)
+    GoRoute(
+      path: dashboard,
+      builder: (context, state) => const SellerDashboardScreen(),
+    ),
 
-        // 1. My Listings (Portfolio Overview)
-        GoRoute(
-          path: myListings,
-          builder: (context, state) => const MyListingsScreen(),
-        ),
+    // Property Detail (Seller Specific)
+    GoRoute(
+      path: '$propertyDetail/:id',
+      builder: (context, state) {
+        final id = state.pathParameters['id']!;
+        final extra = state.extra as Map<String, dynamic>?;
 
-        // 5. Create Listing Flow
-        GoRoute(
-          path: createListing,
-          builder: (context, state) => const CreateListingScreen(),
-        ),
+        return PropertyDetailsScreen(
+          propertyId: id,
+          imageUrl:
+              extra?['imageUrl'] ?? 'assets/images/properties/apartment.png',
+          title: extra?['title'] ?? 'Property Details',
+          location: extra?['location'] ?? 'Addis Ababa',
+        );
+      },
+    ),
 
-        // 6. Bidding Management Flow
-        GoRoute(
-          path: '$manageBids/:propertyId',
-          builder: (context, state) {
-            final id = state.pathParameters['propertyId']!;
-            return ManageBidsScreen(propertyId: id);
-          },
-        ),
+    // My Listings (Portfolio Overview)
+    GoRoute(
+      path: myListings,
+      builder: (context, state) => const MyListingsScreen(),
+    ),
 
-        // Sub-route for reviewing a specific bid
-        GoRoute(
-          path: '$reviewBid/:bidId',
-          builder: (context, state) {
-            final bidId = state.pathParameters['bidId']!;
-            return ReviewBidScreen(bidId: bidId);
-          },
-        ),
+    // Create Listing Flow
+    GoRoute(
+      path: createListing,
+      builder: (context, state) => const CreateListingScreen(),
+    ),
 
-        // 7. Active Auctions (The "Bids" tab in bottom nav)
-        GoRoute(
-          path: activeAuctions,
-          builder: (context, state) => const ActiveAuctionsScreen(),
-        ),
+    // Bidding Management Flow
+    GoRoute(
+      path: '$manageBids/:propertyId',
+      builder: (context, state) {
+        final id = state.pathParameters['propertyId']!;
+        return ManageBidsScreen(propertyId: id);
+      },
+    ),
 
-        // 8. Professional Seller Profile
-        GoRoute(
-          path: '$profile/:userId',
-          builder: (context, state) {
-            final userId = state.pathParameters['userId']!;
-            return SellerProfileScreen(userId: userId);
-          },
-        ),
-      ];
+    GoRoute(
+      path: '$reviewBid/:bidId',
+      builder: (context, state) {
+        final bidId = state.pathParameters['bidId']!;
+        return ReviewBidScreen(bidId: bidId);
+      },
+    ),
+
+    // Active Auctions
+    GoRoute(
+      path: activeAuctions,
+      builder: (context, state) => const ActiveAuctionsScreen(),
+    ),
+
+    //  Seller Profile
+    GoRoute(
+      path: '$profile/:userId',
+      builder: (context, state) {
+        final userId = state.pathParameters['userId']!;
+        return SellerProfileScreen(userId: userId);
+      },
+    ),
+  ];
 }

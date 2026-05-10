@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bet/core/constants/app_colors.dart';
 
-/// A reusable widget that displays a single statistic with a label and value.
-/// Used on the Seller Dashboard, Seller Profile, and Manage Bids screens.
 class StatItem extends StatelessWidget {
   final String label;
   final String value;
@@ -25,18 +23,18 @@ class StatItem extends StatelessWidget {
         const SizedBox(height: 16),
         Text(
           label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.secondaryText,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: AppColors.secondaryText),
         ),
         const SizedBox(height: 8),
         Text(
           value,
           style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                color: valueColor,
-                fontWeight: FontWeight.w800,
-                fontSize: 36,
-              ),
+            color: valueColor,
+            fontWeight: FontWeight.w800,
+            fontSize: 36,
+          ),
         ),
         if (showDivider) ...[
           const SizedBox(height: 16),
