@@ -14,7 +14,8 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
-  final _formKey = GlobalKey<FormState>();
+  final _buyerFormKey = GlobalKey<FormState>();
+  final _sellerFormKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
@@ -59,7 +60,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.all(32.0),
                     child: Form(
-                      key: _formKey,
+                      key: _isBuyer ? _buyerFormKey : _sellerFormKey,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -205,7 +206,8 @@ class _SignupScreenState extends State<SignupScreen> {
                         CustomButton(
                           text: 'Create Account',
                           onPressed: () {
-                            if (_formKey.currentState!.validate()) {
+                            final activeFormKey = _isBuyer ? _buyerFormKey : _sellerFormKey;
+                            if (activeFormKey.currentState!.validate()) {
                               if (_emailController.text == 'admin@beth.com') {
                                 context.go('/admin-dashboard');
                               } else if (_isBuyer) {
