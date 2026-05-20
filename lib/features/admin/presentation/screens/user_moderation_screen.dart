@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:bet/core/widgets/app_logo.dart';
 import 'package:bet/core/widgets/custom_button.dart';
@@ -13,65 +15,85 @@ class UsersScreen extends StatefulWidget {
 
 class _UsersScreenState extends State<UsersScreen> {
   String currentFilter = "";
+  List<dynamic> users = [];
+  bool isLoading = true;
+  String errorMessage = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUsers();
+  }
+
+  Future<void> _fetchUsers() async {
+    try {
+      final response = await http.get(Uri.parse('http://localhost:8080/api/admin/users'));
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = json.decode(response.body);
+        if (mounted) {
+          setState(() {
+            users = responseData['data'] ?? [];
+            isLoading = false;
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            errorMessage = 'Failed to load users: ${response.statusCode}';
+            isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          errorMessage = 'Error connecting to server. Is the backend running?';
+          isLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromRGBO(248, 249, 255, 1),
-
       appBar: _buildAppBar(context),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 20),
-            _currentStats(),
-            SizedBox(height: 20),
-            _filterBar(),
-            SizedBox(height: 20),
-            _usersCard(
-              context,
-              "Bekalu",
-              "Seller",
-              "susbended due to fraud",
-              "/images/bekalu.png",
-              true,
-              type: 1,
-            ),
-            SizedBox(height: 20),
-
-            SizedBox(height: 20),
-            _usersCard(
-              context,
-              "Lemi",
-              "Seller",
-              "Listed 12 properties",
-              "/images/lemi.png",
-              false,
-              type: 2,
-            ),
-            _usersCard(
-              context,
-              "Bety",
-              "buyer",
-              "Listed 1 property",
-              "/images/bety.png",
-              false,
-              type: 1,
-            ),
-            SizedBox(height: 20),
-            _usersCard(
-              context,
-              "Fita",
-              "Buyer",
-              "Pending Verification",
-              "/images/profile.png",
-              true,
-              type: 3,
-            ),
-          ],
-        ),
-      ),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : errorMessage.isNotEmpty
+              ? Center(child: Text(errorMessage, style: const TextStyle(color: Colors.red)))
+              : SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 20),
+                      _currentStats(),
+                      SizedBox(height: 20),
+                      _filterBar(),
+                      SizedBox(height: 20),
+                      if (users.isEmpty)
+                        const Center(child: Text("No users found in database.")),
+                      ...users.map((user) {
+                        return Column(
+                          children: [
+                            _usersCard(
+                              context,
+                              user['email']?.split('@')[0] ?? 'Unknown', // Use prefix as name
+                              user['role'] ?? 'GUEST',
+                              user['isVerified'] ? "Verified" : "Pending Verification",
+                              "/images/profile.png", // Generic fallback avatar
+                              user['role'] == 'SELLER',
+                              type: user['isVerified'] ? 1 : 3,
+                            ),
+                            SizedBox(height: 20),
+                          ],
+                        );
+                      }),
+                    ],
+                  ),
+                ),
     );
   }
 
@@ -107,6 +129,9 @@ class _UsersScreenState extends State<UsersScreen> {
   }
 
   Widget _currentStats() {
+    final totalUsers = users.length;
+    final pendingUsers = users.where((u) => u['isVerified'] == false).length;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
@@ -114,7 +139,6 @@ class _UsersScreenState extends State<UsersScreen> {
           padding: EdgeInsets.all(10),
           width: 150,
           height: 100,
-
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             color: Colors.white,
@@ -127,10 +151,11 @@ class _UsersScreenState extends State<UsersScreen> {
             ],
           ),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(Icons.person, color: Colors.blue),
-              Text("Total Curators"),
-              Text("1,200"),
+              Text("Total Users"),
+              Text("$totalUsers", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
             ],
           ),
         ),
@@ -139,7 +164,6 @@ class _UsersScreenState extends State<UsersScreen> {
           padding: EdgeInsets.all(10),
           width: 150,
           height: 100,
-
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             color: Colors.white,
@@ -152,10 +176,11 @@ class _UsersScreenState extends State<UsersScreen> {
             ],
           ),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(Icons.flag, color: Colors.red),
-              Text("Flaged"),
-              Text("14"),
+              Text("Pending"),
+              Text("$pendingUsers", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
             ],
           ),
         ),
@@ -291,7 +316,7 @@ class _UsersScreenState extends State<UsersScreen> {
                 ),
 
                 child: Text(
-                  "role",
+                  role,
                   style: TextStyle(
                     color: const Color.fromARGB(255, 255, 254, 254),
                   ),

@@ -30,7 +30,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Future<void> _fetchDashboardData() async {
     try {
       // Connect to our NodeJS backend
-      final response = await http.get(Uri.parse('http://localhost:5000/api/admin/dashboard'));
+      final response = await http.get(Uri.parse('http://localhost:8080/api/admin/dashboard'));
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
