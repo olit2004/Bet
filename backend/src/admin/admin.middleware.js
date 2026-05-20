@@ -1,21 +1,12 @@
 const jwt = require('jsonwebtoken');
 const prisma = require('../shared/db');
-
-/**
- * Middleware to protect admin routes.
- * Verifies JWT token and checks if the user has the 'ADMIN' role.
- * Supports a development-only bypass flag to ease early stages of integration.
- */
 const protectAdmin = async (req, res, next) => {
   try {
-    // 1. Check for Development Bypass
     if (
       process.env.NODE_ENV === 'development' &&
       process.env.BYPASS_ADMIN_AUTH === 'true'
     ) {
       console.log('⚠️ [DEV-BYPASS]: Admin authentication bypassed. Injecting mock Admin account.');
-      
-      // Inject a mock admin user
       req.user = {
         id: 'dev-admin-uuid-1234',
         email: 'dev-admin@bet.com',
@@ -24,67 +15,51 @@ const protectAdmin = async (req, res, next) => {
       };
       return next();
     }
-
     let token;
-
-    // Check for Bearer token in Authorization header
     if (
       req.headers.authorization &&
       req.headers.authorization.startsWith('Bearer')
     ) {
       token = req.headers.authorization.split(' ')[1];
     }
-
     if (!token) {
       return res.status(401).json({
         success: false,
         message: 'Access denied. No authorization token was provided.',
       });
     }
-
-    // Decode and verify the JWT
     const secret = process.env.JWT_SECRET || 'bet_secret_development_key_12345';
     const decoded = jwt.verify(token, secret);
-
-    // Retrieve the user from database along with their admin relation
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
       include: { admin: true },
     });
-
     if (!user) {
       return res.status(401).json({
         success: false,
         message: 'Access denied. The user associated with this token does not exist.',
       });
     }
-
-    // Verify the user's role is ADMIN
     if (user.role !== 'ADMIN') {
       return res.status(403).json({
         success: false,
         message: 'Access denied. Administrator privileges are required to perform this action.',
       });
     }
-
-    // Attach user information to request object
     req.user = user;
     next();
   } catch (error) {
     console.error('Admin authentication middleware error:', error.message);
-    
     if (error.name === 'TokenExpiredError') {
       return res.status(401).json({
         success: false,
         message: 'Access token has expired. Please log in again.',
       });
     }
-
     return res.status(401).json({
       success: false,
       message: 'Authentication failed. Invalid or malformed token.',
     });
   }
 };
-
 module.exports = { protectAdmin };
