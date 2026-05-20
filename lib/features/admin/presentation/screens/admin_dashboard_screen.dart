@@ -1,86 +1,138 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:bet/core/widgets/app_logo.dart';
 import 'package:bet/features/admin/presentation/screens/admin_profile.dart';
-
-class AdminDashboardScreen extends StatelessWidget {
+class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
+
+  @override
+  State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
+}
+
+class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
+  bool isLoading = true;
+  String errorMessage = '';
+
+  // Data variables
+  double revenue = 0.0;
+  int activeAuctions = 0;
+  int pendingVerifications = 0;
+  List<dynamic> recentActivities = [];
+  List<dynamic> weeklyChartData = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchDashboardData();
+  }
+
+  Future<void> _fetchDashboardData() async {
+    try {
+      // Connect to our NodeJS backend
+      final response = await http.get(Uri.parse('http://localhost:5000/api/admin/dashboard'));
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = json.decode(response.body);
+        final data = responseData['data'];
+
+        if (mounted) {
+          setState(() {
+            // Update the screen with the fetched data
+            revenue = data['revenue']?.toDouble() ?? 0.0;
+            activeAuctions = data['activeAuctions'] ?? 0;
+            pendingVerifications = data['pendingVerifications'] ?? 0;
+            recentActivities = data['recentActivities'] ?? [];
+            weeklyChartData = data['weeklyChartData'] ?? [];
+            isLoading = false;
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            errorMessage = 'Failed to load data: ${response.statusCode}';
+            isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          errorMessage = 'Error connecting to server. Is the backend running?';
+          isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromRGBO(248, 249, 255, 1),
-
       appBar: _buildAppBar(context),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader("Global Performance", "Real-time ecosystem health"),
-            const SizedBox(height: 20),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : errorMessage.isNotEmpty
+              ? Center(child: Text(errorMessage, style: const TextStyle(color: Colors.red)))
+              : SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildHeader("Global Performance", "Real-time ecosystem health"),
+                      const SizedBox(height: 20),
 
-            _buildStatCard(
-              "TOTAL REVENUE",
-              "\$4.2M",
-              "+12.5%",
-              Icons.payments,
-              Colors.indigo[50]!,
-              Colors.indigo,
-            ),
-            _buildStatCard(
-              "ACTIVE AUCTIONS",
-              "142",
-              "Hot",
-              Icons.gavel,
-              Colors.orange[50]!,
-              Colors.orange,
-            ),
-            _buildStatCard(
-              "PENDING VERIFICATIONS",
-              "28",
-              "Priority",
-              Icons.verified,
-              Colors.teal[50]!,
-              Colors.teal,
-            ),
+                      // Now using our REAL backend variables!
+                      _buildStatCard(
+                        "TOTAL REVENUE",
+                        "\$${(revenue / 1000000).toStringAsFixed(1)}M", 
+                        "+12.5%",
+                        Icons.payments,
+                        Colors.indigo[50]!,
+                        Colors.indigo,
+                      ),
+                      _buildStatCard(
+                        "ACTIVE AUCTIONS",
+                        "$activeAuctions",
+                        "Hot",
+                        Icons.gavel,
+                        Colors.orange[50]!,
+                        Colors.orange,
+                      ),
+                      _buildStatCard(
+                        "PENDING VERIFICATIONS",
+                        "$pendingVerifications",
+                        "Priority",
+                        Icons.verified,
+                        Colors.teal[50]!,
+                        Colors.teal,
+                      ),
 
-            const SizedBox(height: 30),
-            _buildSectionTitle(
-              "Market Activity",
-              "Last 7 days volume",
-              "Weekly View",
-            ),
-            _buildSimpleBarChart(),
+                      const SizedBox(height: 30),
+                      _buildSectionTitle(
+                        "Market Activity",
+                        "Last 7 days volume",
+                        "Weekly View",
+                      ),
+                      _buildSimpleBarChart(),
 
-            const SizedBox(height: 30),
-            _buildSectionTitle("Recent Activity", "", "LIVE", isBadge: true),
-            const SizedBox(height: 10),
+                      const SizedBox(height: 30),
+                      _buildSectionTitle("Recent Activity", "", "LIVE", isBadge: true),
+                      const SizedBox(height: 10),
 
-
-            _buildActivityTile(
-              "New Bid: \$1.2M",
-              "Skyline Penthouse • 2m ago",
-              "/images/auction.png",
-              Icons.trending_up,
-              Colors.green,
-            ),
-            _buildActivityTile(
-              "Property Verified",
-              "Oak Ridge Manor • 15m ago",
-              "/images/verify.png",
-              Icons.verified_user,
-              Colors.blue,
-            ),
-            _buildActivityTile(
-              "Sale Confirmed",
-              "Azure Shores Villa • 42m ago",
-              "/images/clipboard.png",
-              Icons.check_circle,
-              Colors.teal,
-            ),
-          ],
-        ),
-      ),
+                      // Generate dynamic list of recent activities from backend
+                      ...recentActivities.map((activity) {
+                        return _buildActivityTile(
+                          activity['title'] ?? 'Activity',
+                          activity['subtitle'] ?? '',
+                          activity['avatar'] ?? '/images/verify.png',
+                          Icons.notifications_active,
+                          Colors.blue,
+                        );
+                      }),
+                    ],
+                  ),
+                ),
     );
   }
 
