@@ -11,6 +11,9 @@ app.use(express.json());
 const buyerRoutes = require('./buyer/buyer.routes');
 app.use('/api/buyer', buyerRoutes);
 
+const authRoutes = require('./user/user.routes');
+app.use('/api/auth', authRoutes);
+
 // --- Health Check ---
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'success', message: 'Bet API is running.' });
