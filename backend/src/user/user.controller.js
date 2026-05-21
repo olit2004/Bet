@@ -2,9 +2,9 @@
  * Auth Controller
  * Handles user registration, login, and account deletion.
  */
-const userService = require('./user.service');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+import userService from './user.service.js';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 // --- Register ---
 const register = async (req, res, next) => {
@@ -136,4 +136,4 @@ const deleteAccount = async (req, res, next) => {
   }
 };
 
-module.exports = { register, login, deleteAccount };
+export { register, login, deleteAccount };

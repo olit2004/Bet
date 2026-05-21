@@ -1,8 +1,8 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const { register, login, deleteAccount } = require('./user.controller');
+import { register, login, deleteAccount } from './user.controller.js';
 
-const { verifyToken } = require('./user.middleware');
+import { verifyToken } from './user.middleware.js';
 
 // POST /api/auth/register
 router.post('/register', register);
@@ -13,4 +13,4 @@ router.post('/login', login);
 // DELETE /api/auth/account
 router.delete('/account', verifyToken, deleteAccount);
 
-module.exports = router;
+export default router;

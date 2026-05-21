@@ -2,7 +2,7 @@
  * User Service
  * Handles database operations for the User model via Prisma.
  */
-const prisma = require('../shared/db');
+import prisma from '../shared/prisma.client.js';
 
 /**
  * Create a new user in the database.
@@ -55,7 +55,7 @@ const deleteUserById = async (id) => {
   });
 };
 
-module.exports = {
+export default {
   createUser,
   findUserByEmail,
   findUserById,
