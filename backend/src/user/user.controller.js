@@ -111,8 +111,25 @@ const login = async (req, res, next) => {
 
 // --- Delete Account ---
 const deleteAccount = async (req, res, next) => {
-  // TODO: Implement delete account logic
-  res.status(501).json({ message: 'Delete account not implemented yet' });
+  try {
+    const userId = req.user.id; // Extracted from verifyToken middleware
+
+    await userService.deleteUserById(userId);
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Account deleted successfully.',
+    });
+  } catch (error) {
+    if (error.code === 'P2025') {
+      // Prisma error: Record to delete does not exist.
+      return res.status(404).json({
+        status: 'fail',
+        message: 'User not found.',
+      });
+    }
+    next(error);
+  }
 };
 
 module.exports = { register, login, deleteAccount };
