@@ -7,13 +7,24 @@ const prisma = require('../shared/db');
 /**
  * Create a new user in the database.
  */
-const createUser = async ({ email, passwordHash, role }) => {
+const createUser = async ({ email, passwordHash, role, name, phone, company }) => {
+  const userData = {
+    email,
+    passwordHash,
+    role,
+    name,
+    phone,
+  };
+
+  // Use Prisma nested writes to automatically create the related role profile
+  if (role === 'BUYER') {
+    userData.buyer = { create: {} };
+  } else if (role === 'SELLER') {
+    userData.seller = { create: { company: company || null } };
+  }
+
   return prisma.user.create({
-    data: {
-      email,
-      passwordHash,
-      role,
-    },
+    data: userData,
   });
 };
 

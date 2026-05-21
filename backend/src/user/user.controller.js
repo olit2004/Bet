@@ -9,13 +9,13 @@ const jwt = require('jsonwebtoken');
 // --- Register ---
 const register = async (req, res, next) => {
   try {
-    const { email, password, role } = req.body;
+    const { email, password, role, name, phone, company } = req.body;
 
     // Validate required fields
-    if (!email || !password) {
+    if (!email || !password || !name || !phone) {
       return res.status(400).json({
         status: 'fail',
-        message: 'Email and password are required.',
+        message: 'Name, email, phone, and password are required.',
       });
     }
 
@@ -36,11 +36,14 @@ const register = async (req, res, next) => {
     const salt = await bcrypt.genSalt(12);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Create user with hashed password
+    // Create user with hashed password and additional info
     const user = await userService.createUser({
       email,
       passwordHash: hashedPassword,
       role: userRole,
+      name,
+      phone,
+      company: userRole === 'SELLER' ? company : undefined,
     });
 
     res.status(201).json({
@@ -50,6 +53,7 @@ const register = async (req, res, next) => {
         id: user.id,
         email: user.email,
         role: user.role,
+        name: user.name,
       },
     });
   } catch (error) {
