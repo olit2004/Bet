@@ -1,39 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-}
-
-generator client {
-  provider = "prisma-client-js"
 }
 
 model User {
   id            String         @id @default(uuid())
   email         String         @unique
   passwordHash  String
-  role          String         @default("GUEST") // GUEST, BUYER, SELLER, ADMIN
-  isVerified    Boolean        @default(false) // Fayda verification flag
-  faydaId       String?        @unique // Fayda ID stored locally
+  role          String         @default("GUEST")
+  isVerified    Boolean        @default(false)
+  faydaId       String?        @unique
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
-  buyer         Buyer?
-  seller        Seller?
+  name          String?
+  phone         String?
   admin         Admin?
-  notifications Notification[]
   auditLogs     AuditLog[]
+  buyer         Buyer?
+  notifications Notification[]
+  seller        Seller?
 }
 
 model Buyer {
   id        String     @id
-  user      User       @relation(fields: [id], references: [id], onDelete: Cascade)
   bids      Bid[]
+  user      User       @relation(fields: [id], references: [id], onDelete: Cascade)
   proposals Proposal[]
 }
 
 model Seller {
   id         String     @id
-  user       User       @relation(fields: [id], references: [id], onDelete: Cascade)
+  company    String?
   properties Property[]
+  user       User       @relation(fields: [id], references: [id], onDelete: Cascade)
 }
 
 model Admin {
@@ -48,55 +51,67 @@ model Property {
   price       Float
   latitude    Float
   longitude   Float
-  type        String // SALE, RENT
-  status      String     @default("ACTIVE") // ACTIVE, ENDED, CLOSED
+  type        String
+  status      String     @default("ACTIVE")
   ownerId     String
-  owner       Seller     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  bids        Bid[]
-  proposals   Proposal[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+  address     String?
+  baths       Int?
+  beds        Int?
+  endTime     DateTime?
+  imageUrls   String[]
+  listingType String     @default("FIXED")
+  locale      String?
+  sqFootage   Float?
+  value       Float?
+  bids        Bid[]
+  owner       Seller     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  proposals   Proposal[]
 }
 
 model Bid {
-  id         String   @id @default(uuid())
-  propertyId String
-  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  bidderId   String
-  bidder     Buyer    @relation(fields: [bidderId], references: [id], onDelete: Cascade)
-  amount     Float
-  status     String   @default("ACTIVE") // ACTIVE, RETRACTED
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id               String   @id @default(uuid())
+  propertyId       String
+  bidderId         String
+  amount           Float
+  status           String   @default("ACTIVE")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  bankStatementUrl String?
+  bidder           Buyer    @relation(fields: [bidderId], references: [id], onDelete: Cascade)
+  property         Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 }
 
 model Proposal {
   id         String   @id @default(uuid())
   propertyId String
-  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   bidderId   String
-  bidder     Buyer    @relation(fields: [bidderId], references: [id], onDelete: Cascade)
   details    String
-  status     String   @default("PENDING") // PENDING, ACCEPTED, REJECTED
+  status     String   @default("PENDING")
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  amount     Float?
+  fileUrl    String?
+  bidder     Buyer    @relation(fields: [bidderId], references: [id], onDelete: Cascade)
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 }
 
 model Notification {
   id        String   @id @default(uuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   message   String
-  type      String // OUTBID, AUCTION_ENDED, PROPOSAL_UPDATE, EVENT
+  type      String
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model AuditLog {
   id        String   @id @default(uuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   action    String
   details   String
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
