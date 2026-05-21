@@ -27,7 +27,9 @@ class _UsersScreenState extends State<UsersScreen> {
 
   Future<void> _fetchUsers() async {
     try {
-      final response = await http.get(Uri.parse('http://localhost:8080/api/admin/users'));
+      final response = await http.get(
+        Uri.parse('http://localhost:8080/api/admin/users'),
+      );
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
         if (mounted) {
@@ -62,42 +64,49 @@ class _UsersScreenState extends State<UsersScreen> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : errorMessage.isNotEmpty
-              ? Center(child: Text(errorMessage, style: const TextStyle(color: Colors.red)))
-              : SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(height: 20),
-                      _currentStats(),
-                      SizedBox(height: 20),
-                      _filterBar(),
-                      SizedBox(height: 20),
-                      if (users.isEmpty)
-                        const Center(child: Text("No users found in database.")),
-                      ...users.map((user) {
-                        return Column(
-                          children: [
-                            _usersCard(
-                              context,
-                              user['email']?.split('@')[0] ?? 'Unknown', // Use prefix as name
-                              user['role'] ?? 'GUEST',
-                              user['isVerified'] ? "Verified" : "Pending Verification",
-                              "/images/profile.png", // Generic fallback avatar
-                              user['role'] == 'SELLER',
-                              type: user['isVerified'] ? 1 : 3,
-                            ),
-                            SizedBox(height: 20),
-                          ],
-                        );
-                      }),
-                    ],
-                  ),
-                ),
+          ? Center(
+              child: Text(
+                errorMessage,
+                style: const TextStyle(color: Colors.red),
+              ),
+            )
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 20),
+                  _currentStats(),
+                  SizedBox(height: 20),
+                  _filterBar(),
+                  SizedBox(height: 20),
+                  if (users.isEmpty)
+                    const Center(child: Text("No users found in database.")),
+                  ...users.map((user) {
+                    return Column(
+                      children: [
+                        _usersCard(
+                          context,
+                          user['email']?.split('@')[0] ??
+                              'Unknown', // Use prefix as name
+                          user['role'] ?? 'GUEST',
+                          user['isVerified']
+                              ? "Verified"
+                              : "Pending Verification",
+                          "/images/profile.png", // Generic fallback avatar
+                          user['role'] == 'SELLER',
+                          user['id'] ?? '', // Pass the user ID
+                          type: user['isVerified'] ? 1 : 3,
+                        ),
+                        SizedBox(height: 20),
+                      ],
+                    );
+                  }),
+                ],
+              ),
+            ),
     );
   }
-
-
 
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
@@ -155,7 +164,10 @@ class _UsersScreenState extends State<UsersScreen> {
             children: [
               Icon(Icons.person, color: Colors.blue),
               Text("Total Users"),
-              Text("$totalUsers", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              Text(
+                "$totalUsers",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
             ],
           ),
         ),
@@ -180,7 +192,10 @@ class _UsersScreenState extends State<UsersScreen> {
             children: [
               Icon(Icons.flag, color: Colors.red),
               Text("Pending"),
-              Text("$pendingUsers", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              Text(
+                "$pendingUsers",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
             ],
           ),
         ),
@@ -253,7 +268,8 @@ class _UsersScreenState extends State<UsersScreen> {
     String role,
     String statusDiscription,
     String imageUrl,
-    bool isSeller, {
+    bool isSeller,
+    String userId, {
     Color roleColor = const Color.fromARGB(255, 147, 198, 239),
     int type = 1,
   }) {
@@ -307,7 +323,7 @@ class _UsersScreenState extends State<UsersScreen> {
               const Spacer(),
 
               Container(
-                width: 50,
+                width: 60,
                 height: 25,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
@@ -325,15 +341,14 @@ class _UsersScreenState extends State<UsersScreen> {
             ],
           ),
           SizedBox(height: 20),
-          _buildButtonRow(context, type),
+          _buildButtonRow(context, type, userId),
         ],
       ),
     );
   }
 
-  Widget _buildButtonRow(BuildContext context, int type) {
+  Widget _buildButtonRow(BuildContext context, int type, String userId) {
     if (type == 1) {
-
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
@@ -342,8 +357,25 @@ class _UsersScreenState extends State<UsersScreen> {
             child: CustomButton(
               text: "Suspend",
               textColor: Colors.black,
-              onPressed: () {
-
+              onPressed: () async {
+                try {
+                  final response = await http.patch(
+                    Uri.parse('http://localhost:8080/api/admin/users/$userId/moderate'),
+                    headers: {'Content-Type': 'application/json'},
+                    body: json.encode({
+                      'role': 'GUEST',
+                      'isVerified': false,
+                    }),
+                  );
+                  if (response.statusCode == 200) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('User suspended successfully.')),
+                      );
+                      _fetchUsers();
+                    }
+                  }
+                } catch (_) {}
               },
               color: const Color.fromARGB(255, 229, 238, 255),
             ),
@@ -357,7 +389,7 @@ class _UsersScreenState extends State<UsersScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const UserDetailScreen(),
+                    builder: (context) => UserDetailScreen(userId: userId),
                   ),
                 );
               },
@@ -367,7 +399,6 @@ class _UsersScreenState extends State<UsersScreen> {
         ],
       );
     } else if (type == 2) {
-
       return Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -375,8 +406,24 @@ class _UsersScreenState extends State<UsersScreen> {
             width: 300,
             child: CustomButton(
               text: "Approve Seller",
-              onPressed: () {
-
+              onPressed: () async {
+                try {
+                  final response = await http.patch(
+                    Uri.parse('http://localhost:8080/api/admin/users/$userId/moderate'),
+                    headers: {'Content-Type': 'application/json'},
+                    body: json.encode({
+                      'isVerified': true,
+                    }),
+                  );
+                  if (response.statusCode == 200) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Seller approved successfully.')),
+                      );
+                      _fetchUsers();
+                    }
+                  }
+                } catch (_) {}
               },
               color: const Color.fromARGB(255, 0, 121, 66),
             ),
@@ -384,7 +431,6 @@ class _UsersScreenState extends State<UsersScreen> {
         ],
       );
     } else if (type == 3) {
-
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
@@ -393,8 +439,25 @@ class _UsersScreenState extends State<UsersScreen> {
             child: CustomButton(
               text: "Restrict",
               textColor: Colors.white,
-              onPressed: () {
-
+              onPressed: () async {
+                try {
+                  final response = await http.patch(
+                    Uri.parse('http://localhost:8080/api/admin/users/$userId/moderate'),
+                    headers: {'Content-Type': 'application/json'},
+                    body: json.encode({
+                      'role': 'GUEST',
+                      'isVerified': false,
+                    }),
+                  );
+                  if (response.statusCode == 200) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('User restricted successfully.')),
+                      );
+                      _fetchUsers();
+                    }
+                  }
+                } catch (_) {}
               },
               color: const Color.fromARGB(255, 245, 129, 156),
             ),
