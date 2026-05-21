@@ -55,13 +55,16 @@ model Property {
   longitude   Float
   address     String?    // Human-readable address
   locale      String?    // Local neighborhood
-  imageUrls   String[]   // Property image URLs
+  location    String     @default("Unknown Location")
   beds        Int?
   baths       Int?
   sqFootage   Float?     // Area size in m²
   type        String     // SALE, RENT
   status      String     @default("ACTIVE") // ACTIVE, ENDED, CLOSED
+  views       Int        @default(0)
+  imageUrls   String[]   // Property image URLs
   endTime     DateTime?  // Auction end date/time
+  endingAt    DateTime?
   ownerId     String
   owner       Seller     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   bids        Bid[]
