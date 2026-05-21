@@ -33,6 +33,30 @@ class PropertyController {
     }
   }
 
+  async getPropertiesBySeller(req, res, next) {
+    try {
+      const properties = await propertyService.getPropertiesBySeller(req.params.sellerId);
+      res.status(200).json({
+        success: true,
+        data: properties,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getSellerStats(req, res, next) {
+    try {
+      const stats = await propertyService.getSellerStats(req.params.sellerId);
+      res.status(200).json({
+        success: true,
+        data: stats,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async getPropertyById(req, res, next) {
     try {
       const property = await propertyService.getPropertyById(req.params.id);
@@ -52,8 +76,8 @@ class PropertyController {
     try {
       // SECURITY: Prevent mass-assignment. We only extract fields that are safe to update.
       // This prevents a user from maliciously changing the ownerId or the property id.
-      const { title, description, price, latitude, longitude, type, status } = req.body;
-      const updateData = { title, description, price, latitude, longitude, type, status };
+      const { title, description, price, location, latitude, longitude, type, status, imageUrls, endingAt } = req.body;
+      const updateData = { title, description, price, location, latitude, longitude, type, status, imageUrls, endingAt };
       
       // Remove undefined fields so Prisma doesn't try to update them
       Object.keys(updateData).forEach(key => updateData[key] === undefined && delete updateData[key]);

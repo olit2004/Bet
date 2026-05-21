@@ -48,8 +48,12 @@ model Property {
   price       Float
   latitude    Float
   longitude   Float
+  location    String     @default("Unknown Location")
   type        String // SALE, RENT
   status      String     @default("ACTIVE") // ACTIVE, ENDED, CLOSED
+  views       Int        @default(0)
+  imageUrls   String[]
+  endingAt    DateTime?
   ownerId     String
   owner       Seller     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   bids        Bid[]
