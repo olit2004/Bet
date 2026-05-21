@@ -11,6 +11,8 @@ model User {
   id            String         @id @default(uuid())
   email         String         @unique
   passwordHash  String
+  name          String?        // Full Name
+  phone         String?        // Phone Number
   role          String         @default("GUEST") // GUEST, BUYER, SELLER, ADMIN
   isVerified    Boolean        @default(false) // Fayda verification flag
   faydaId       String?        @unique // Fayda ID stored locally
@@ -33,6 +35,7 @@ model Buyer {
 model Seller {
   id         String     @id
   user       User       @relation(fields: [id], references: [id], onDelete: Cascade)
+  company    String?    // Company / Agency name
   properties Property[]
 }
 
@@ -45,11 +48,20 @@ model Property {
   id          String     @id @default(uuid())
   title       String
   description String
-  price       Float
+  price       Float      // Starting price or fixed price
+  value       Float?     // Value point / overall valuation
+  listingType String     @default("FIXED") // FIXED or AUCTION
   latitude    Float
   longitude   Float
-  type        String // SALE, RENT
+  address     String?    // Human-readable address
+  locale      String?    // Local neighborhood
+  imageUrls   String[]   // Property image URLs
+  beds        Int?
+  baths       Int?
+  sqFootage   Float?     // Area size in m²
+  type        String     // SALE, RENT
   status      String     @default("ACTIVE") // ACTIVE, ENDED, CLOSED
+  endTime     DateTime?  // Auction end date/time
   ownerId     String
   owner       Seller     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   bids        Bid[]
@@ -59,15 +71,16 @@ model Property {
 }
 
 model Bid {
-  id         String   @id @default(uuid())
-  propertyId String
-  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  bidderId   String
-  bidder     Buyer    @relation(fields: [bidderId], references: [id], onDelete: Cascade)
-  amount     Float
-  status     String   @default("ACTIVE") // ACTIVE, RETRACTED
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id               String   @id @default(uuid())
+  propertyId       String
+  property         Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  bidderId         String
+  bidder           Buyer    @relation(fields: [bidderId], references: [id], onDelete: Cascade)
+  amount           Float
+  bankStatementUrl String?  // Link to uploaded bank statement PDF
+  status           String   @default("ACTIVE") // ACTIVE, RETRACTED, ACCEPTED, DECLINED
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 model Proposal {
@@ -76,7 +89,9 @@ model Proposal {
   property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   bidderId   String
   bidder     Buyer    @relation(fields: [bidderId], references: [id], onDelete: Cascade)
+  amount     Float?   // Optional counter-offer rental price
   details    String
+  fileUrl    String?  // Link to uploaded proposal PDF
   status     String   @default("PENDING") // PENDING, ACCEPTED, REJECTED
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
