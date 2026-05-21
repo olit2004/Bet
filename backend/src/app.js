@@ -3,6 +3,9 @@ import cors from 'cors';
 
 import propertyRoutes from './property/property.routes.js';
 import proposalsRoutes from './proposals/proposals.routes.js';
+import buyerRoutes from './buyer/buyer.routes.js';
+
+import errorMiddleware from './shared/error.middleware.js';
 
 const app = express();
 
@@ -10,19 +13,20 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Routes
+// Feature Routers
 app.use('/api/properties', propertyRoutes);
 app.use('/api/proposals', proposalsRoutes);
+app.use('/api/buyer', buyerRoutes);
 
-// Base route for health check
-app.get('/', (req, res) => {
-  res.status(200).json({ message: 'Bet App API is running' });
+// Health Check
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    status: 'success',
+    message: 'Bet API is running.'
+  });
 });
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Internal Server Error', error: err.message });
-});
+// Global Error Handler
+app.use(errorMiddleware);
 
 export default app;
