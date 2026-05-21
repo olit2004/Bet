@@ -12,7 +12,10 @@ app.use('/public/uploads', express.static(path.join(__dirname, '../public/upload
 
 // --- Feature Routers ---
 const buyerRoutes = require('./buyer/buyer.routes');
+const bidRoutes = require('./bid/bid.routes');
+
 app.use('/api/buyer', buyerRoutes);
+app.use('/api', bidRoutes); // Mounts /api/properties/... and /api/bids/...
 
 // --- Health Check ---
 app.get('/api/health', (req, res) => {
