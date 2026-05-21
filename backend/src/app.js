@@ -7,6 +7,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const path = require('path');
+app.use('/public/uploads', express.static(path.join(__dirname, '../public/uploads')));
+
 // --- Feature Routers ---
 const buyerRoutes = require('./buyer/buyer.routes');
 app.use('/api/buyer', buyerRoutes);
