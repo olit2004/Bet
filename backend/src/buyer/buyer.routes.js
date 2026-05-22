@@ -13,8 +13,8 @@ router.get('/profile', verifyToken, authorizeRoles('BUYER'), buyerController.get
 // PUT /api/buyer/profile — Update buyer profile
 router.put('/profile', verifyToken, authorizeRoles('BUYER'), buyerController.updateProfile);
 
-// POST /api/buyer/verify-fayda — Verify Fayda Digital ID
-router.post('/verify-fayda', verifyToken, authorizeRoles('BUYER'), buyerController.verifyFayda);
+// PATCH /api/buyer/verify-fayda — Verify Fayda Digital ID
+router.patch('/verify-fayda', verifyToken, authorizeRoles('BUYER'), buyerController.verifyFayda);
 
 // GET /api/buyer/dashboard — Get buyer dashboard statistics
 router.get('/dashboard', verifyToken, authorizeRoles('BUYER'), buyerController.getDashboard);
