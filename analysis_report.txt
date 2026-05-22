@@ -1,0 +1,20 @@
+Analyzing Bet...                                                
+
+warning • The declaration '_buildAppBar' isn't referenced • lib/features/admin/presentation/screens/property_approval_screen.dart:52:10 • unused_element
+warning • The declaration '_buildBottomNav' isn't referenced • lib/features/admin/presentation/screens/property_approval_screen.dart:241:8 • unused_element
+   info • The variable name 'current_filter' isn't a lowerCamelCase identifier • lib/features/admin/presentation/screens/user_moderation_screen.dart:12:10 • non_constant_identifier_names
+warning • The declaration '_buildAppBar' isn't referenced • lib/features/admin/presentation/screens/user_moderation_screen.dart:67:10 • unused_element
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/presentation/screens/user_moderation_screen.dart:126:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/presentation/screens/user_moderation_screen.dart:151:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/presentation/screens/user_moderation_screen.dart:183:15 • deprecated_member_use
+   info • The variable name 'status_discription' isn't a lowerCamelCase identifier • lib/features/admin/presentation/screens/user_moderation_screen.dart:231:12 • non_constant_identifier_names
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/presentation/screens/user_moderation_screen.dart:243:33 • deprecated_member_use
+   info • Unnecessary use of string interpolation • lib/features/admin/presentation/screens/user_moderation_screen.dart:271:21 • unnecessary_string_interpolations
+   info • Unnecessary use of string interpolation • lib/features/admin/presentation/screens/user_moderation_screen.dart:275:24 • unnecessary_string_interpolations
+   info • Unnecessary use of string interpolation • lib/features/admin/presentation/screens/user_moderation_screen.dart:290:19 • unnecessary_string_interpolations
+   info • The 'child' argument should be last in widget constructor invocations • lib/features/admin/presentation/screens/user_moderation_screen.dart:309:17 • sort_child_properties_last
+   info • The 'child' argument should be last in widget constructor invocations • lib/features/admin/presentation/screens/user_moderation_screen.dart:320:17 • sort_child_properties_last
+warning • The declaration '_buildBottomNav' isn't referenced • lib/features/admin/presentation/screens/user_moderation_screen.dart:333:10 • unused_element
+warning • Unused import: 'package:bet/features/buyer/buyer_routes.dart' • lib/features/seller/presentation/views/my_listings_content.dart:7:8 • unused_import
+
+16 issues found. (ran in 4.9s)
