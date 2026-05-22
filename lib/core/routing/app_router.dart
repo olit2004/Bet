@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:bet/features/auth/application/providers/auth_provider.dart';
 import 'package:bet/features/auth/screens/landing_screen.dart';
 import 'package:bet/features/auth/screens/signup_screen.dart';
 import 'package:bet/features/auth/screens/login_screen.dart';
@@ -10,11 +13,46 @@ import 'package:bet/features/seller/seller_routes.dart';
 import 'package:bet/features/profile/presentation/screens/settings_screen.dart';
 import 'package:bet/core/widgets/main_wrapper.dart';
 
-class AppRouter {
-  AppRouter._();
+class GoRouterRefreshStream extends ChangeNotifier {
+  GoRouterRefreshStream(Stream<dynamic> stream) {
+    notifyListeners();
+    _subscription = stream.asBroadcastStream().listen(
+      (dynamic _) => notifyListeners(),
+    );
+  }
+  late final StreamSubscription<dynamic> _subscription;
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
+}
 
-  static final GoRouter router = GoRouter(
+final routerProvider = Provider<GoRouter>((ref) {
+  return GoRouter(
     initialLocation: '/',
+    refreshListenable: GoRouterRefreshStream(ref.watch(authNotifierProvider.notifier).stream),
+    redirect: (context, state) {
+      final authState = ref.read(authNotifierProvider);
+      final isAuth = authState.status == AuthState.authenticated;
+      final isLoggingIn = state.matchedLocation == '/login' || 
+                          state.matchedLocation == '/signup' || 
+                          state.matchedLocation == '/';
+
+      if (authState.status == AuthState.loading || authState.status == AuthState.initial) {
+        return null; // Don't redirect while checking status
+      }
+
+      if (!isAuth && !isLoggingIn) return '/';
+      
+      if (isAuth && isLoggingIn) {
+        if (authState.user?.role == 'ADMIN') return '/admin-dashboard';
+        if (authState.user?.role == 'SELLER') return '/seller-dashboard';
+        return '/home';
+      }
+      
+      return null;
+    },
     errorBuilder: (context, state) =>
         const Scaffold(body: Center(child: Text('Page not found.'))),
     routes: [
@@ -41,4 +79,4 @@ class AppRouter {
       ...SellerRoutes.routes,
     ],
   );
-}
+});
