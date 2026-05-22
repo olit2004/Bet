@@ -72,76 +72,78 @@ class _ListingSuccessOverlayState extends State<ListingSuccessOverlay>
                     ),
                   ],
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 72,
-                      height: 72,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF28A745).withValues(alpha: 0.15),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.check_circle,
-                        color: Color(0xFF28A745),
-                        size: 44,
-                      ),
-                    ),
-                    const SizedBox(height: 28),
-
-                    // Title
-                    Text(
-                      'Listing Published\nSuccessfully!',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.manrope(
-                        color: AppColors.primaryText,
-                        fontSize: 24,
-                        fontWeight: FontWeight.w800,
-                        height: 1.3,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Subtitle
-                    Text(
-                      'Your architectural masterpiece\nis now live in the global curator\nnetwork.',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(
-                        color: AppColors.secondaryText,
-                        fontSize: 14,
-                        height: 1.6,
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-
-                    //  Return to Dashboard button
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton(
-                        onPressed: widget.onReturnToDashboard,
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.primaryBlue,
-                          side: BorderSide(
-                            color: AppColors.primaryBlue.withValues(alpha: 0.4),
-                            width: 1.5,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 72,
+                        height: 72,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF28A745).withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
                         ),
-                        child: Text(
-                          'Return to Dashboard',
-                          style: GoogleFonts.manrope(
-                            color: AppColors.primaryBlue,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                          ),
+                        child: const Icon(
+                          Icons.check_circle,
+                          color: Color(0xFF28A745),
+                          size: 44,
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 28),
+
+                      // Title
+                      Text(
+                        'Listing Published\nSuccessfully!',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.manrope(
+                          color: AppColors.primaryText,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w800,
+                          height: 1.3,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Subtitle
+                      Text(
+                        'Your architectural masterpiece\nis now live in the global curator\nnetwork.',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.inter(
+                          color: AppColors.secondaryText,
+                          fontSize: 14,
+                          height: 1.6,
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+
+                      //  Return to Dashboard button
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton(
+                          onPressed: widget.onReturnToDashboard,
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.primaryBlue,
+                            side: BorderSide(
+                              color: AppColors.primaryBlue.withValues(alpha: 0.4),
+                              width: 1.5,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                          ),
+                          child: Text(
+                            'Return to Dashboard',
+                            style: GoogleFonts.manrope(
+                              color: AppColors.primaryBlue,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

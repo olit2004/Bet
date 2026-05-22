@@ -1,19 +1,25 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/features/seller/presentation/widgets/seller_button.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:bet/features/seller/presentation/widgets/listing_success_overlay.dart';
+import 'package:bet/features/seller/presentation/providers/create_property_provider.dart';
 
-class CreatePropertyContent extends StatefulWidget {
+class CreatePropertyContent extends ConsumerStatefulWidget {
   const CreatePropertyContent({super.key});
 
   @override
-  State<CreatePropertyContent> createState() => _CreatePropertyContentState();
+  ConsumerState<CreatePropertyContent> createState() => _CreatePropertyContentState();
 }
 
-class _CreatePropertyContentState extends State<CreatePropertyContent> {
+class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
+  bool _isSubmitting = false;
+  final List<XFile> _selectedImages = [];
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _valueController = TextEditingController();
@@ -44,6 +50,9 @@ class _CreatePropertyContentState extends State<CreatePropertyContent> {
 
   @override
   Widget build(BuildContext context) {
+    final createState = ref.watch(createPropertyNotifierProvider);
+    final isLoading = createState.status == CreatePropertyStatus.loading || _isSubmitting;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
       child: Column(
@@ -184,7 +193,7 @@ class _CreatePropertyContentState extends State<CreatePropertyContent> {
           const SizedBox(height: 32),
 
           //Create Property Button
-          _buildCreateButton(context),
+          _buildCreateButton(context, isLoading),
           const SizedBox(height: 24),
         ],
       ),
@@ -195,54 +204,109 @@ class _CreatePropertyContentState extends State<CreatePropertyContent> {
   // Image Upload Area
 
   Widget _buildImageUploadArea(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (_selectedImages.isNotEmpty)
+          SizedBox(
+            height: 120,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: _selectedImages.length + 1,
+              separatorBuilder: (context, index) => const SizedBox(width: 12),
+              itemBuilder: (context, index) {
+                if (index == _selectedImages.length) {
+                  return _buildAddMoreImagesButton();
+                }
+                return _buildImageThumbnail(_selectedImages[index], index);
+              },
+            ),
+          )
+        else
+          GestureDetector(
+            onTap: _pickImages,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
+              decoration: BoxDecoration(
+                color: AppColors.inputFill,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: AppColors.primaryBlue.withValues(alpha: 0.15),
+                  width: 1.5,
+                ),
+              ),
+              child: Column(
+                children: [
+                  // Camera icon
+                  Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryBlue.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Icon(
+                      Icons.add_a_photo_outlined,
+                      color: AppColors.primaryBlue,
+                      size: 32,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Upload Architectural\nImagery',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.manrope(
+                      color: AppColors.primaryText,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      height: 1.3,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Tap to select high-resolution captures\nof the property.',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.inter(
+                      color: AppColors.secondaryText.withValues(alpha: 0.7),
+                      fontSize: 13,
+                      height: 1.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildAddMoreImagesButton() {
     return GestureDetector(
-      onTap: () {},
+      onTap: _pickImages,
       child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
+        width: 100,
+        height: 120,
         decoration: BoxDecoration(
           color: AppColors.inputFill,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: AppColors.primaryBlue.withValues(alpha: 0.15),
+            color: AppColors.primaryBlue.withValues(alpha: 0.2),
             width: 1.5,
+            style: BorderStyle.solid,
           ),
         ),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Camera icon
-            Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: AppColors.primaryBlue.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Icon(
-                Icons.add_a_photo_outlined,
-                color: AppColors.primaryBlue,
-                size: 32,
-              ),
-            ),
-            const SizedBox(height: 20),
+            Icon(Icons.add_photo_alternate, color: AppColors.primaryBlue, size: 32),
+            const SizedBox(height: 8),
             Text(
-              'Upload Architectural\nImagery',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.manrope(
-                color: AppColors.primaryText,
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                height: 1.3,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Drag and drop high-resolution captures\nof the property.',
-              textAlign: TextAlign.center,
+              'Add More',
               style: GoogleFonts.inter(
-                color: AppColors.secondaryText.withValues(alpha: 0.7),
-                fontSize: 13,
-                height: 1.5,
+                color: AppColors.primaryBlue,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ],
@@ -250,6 +314,54 @@ class _CreatePropertyContentState extends State<CreatePropertyContent> {
       ),
     );
   }
+
+  Widget _buildImageThumbnail(XFile file, int index) {
+    return Stack(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Image.file(
+            File(file.path),
+            width: 120,
+            height: 120,
+            fit: BoxFit.cover,
+          ),
+        ),
+        Positioned(
+          top: 6,
+          right: 6,
+          child: GestureDetector(
+            onTap: () {
+              setState(() {
+                _selectedImages.removeAt(index);
+              });
+            },
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: const BoxDecoration(
+                color: Colors.black54,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.close, color: Colors.white, size: 16),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _pickImages() async {
+    final ImagePicker picker = ImagePicker();
+    final List<XFile> images = await picker.pickMultiImage(
+      imageQuality: 80,
+    );
+    if (images.isNotEmpty) {
+      setState(() {
+        _selectedImages.addAll(images);
+      });
+    }
+  }
+
 
   // Geographic Anchor (Interactive Map)
   Widget _buildGeographicAnchor(BuildContext context) {
@@ -526,36 +638,111 @@ class _CreatePropertyContentState extends State<CreatePropertyContent> {
 
   // Create Property Button
 
-  Widget _buildCreateButton(BuildContext context) {
+  Widget _buildCreateButton(BuildContext context, bool isLoading) {
     return SellerButton(
-      text: 'Create property',
-      onPressed: () {
-        if (_titleController.text.isEmpty || _priceController.text.isEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Please fill in at least the title and price.',
-                style: GoogleFonts.inter(),
-              ),
-              backgroundColor: AppColors.error,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          );
-          return;
-        }
-
-        showListingSuccessOverlay(
-          context,
-          onReturnToDashboard: () {
-            Navigator.of(context).maybePop();
-          },
-        );
-      },
+      text: isLoading ? 'Creating...' : 'Create property',
+      onPressed: isLoading ? () {} : () => _submitProperty(),
       height: 60,
     );
+  }
+
+  Future<void> _submitProperty() async {
+    // Validation
+    if (_titleController.text.trim().isEmpty || _priceController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Please fill in at least the title and price.',
+            style: GoogleFonts.inter(),
+          ),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
+      return;
+    }
+
+    if (_selectedImages.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Please upload at least one image of the property.',
+            style: GoogleFonts.inter(),
+          ),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+
+    // Build payload from form fields
+    final payload = <String, dynamic>{
+      'title': _titleController.text.trim(),
+      'description': _descriptionController.text.trim().isNotEmpty
+          ? _descriptionController.text.trim()
+          : 'No description provided.',
+      'price': _priceController.text.trim().replaceAll(',', ''),
+      'latitude': _selectedLocation.latitude,
+      'longitude': _selectedLocation.longitude,
+      'location': _locationName,
+      'listingType': _listingType == 0 ? 'FIXED' : 'AUCTION',
+      'type': _listingIntent == 0 ? 'SALE' : 'RENT',
+    };
+
+    // Optional fields
+    if (_valueController.text.trim().isNotEmpty) {
+      payload['value'] = _valueController.text.trim().replaceAll(',', '');
+    }
+    if (_sqFootageController.text.trim().isNotEmpty) {
+      payload['sqFootage'] = _sqFootageController.text.trim().replaceAll(',', '');
+    }
+    if (_listingType == 1 && _endDateController.text.trim().isNotEmpty) {
+      payload['endingAt'] = _endDateController.text.trim();
+    }
+    if (_selectedImages.isNotEmpty) {
+      payload['images'] = _selectedImages;
+    }
+
+    final success = await ref
+        .read(createPropertyNotifierProvider.notifier)
+        .createProperty(payload);
+
+    if (!mounted) return;
+    setState(() => _isSubmitting = false);
+
+    if (success) {
+      // Reset provider state for next creation
+      ref.read(createPropertyNotifierProvider.notifier).reset();
+      showListingSuccessOverlay(
+        context,
+        onReturnToDashboard: () {
+          Navigator.of(context).maybePop();
+        },
+      );
+    } else {
+      final errorMsg =
+          ref.read(createPropertyNotifierProvider).errorMessage ??
+              'Failed to create listing.';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMsg, style: GoogleFonts.inter()),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
+    }
   }
 
   // Shared Helpers

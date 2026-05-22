@@ -3,9 +3,15 @@ import propertyService from './property.service.js';
 class PropertyController {
   async createProperty(req, res, next) {
     try {
-      // NOTE: ownerId must reference an existing Seller ID in the database
-      // Once Auth is built, we will extract this from req.user.id
-      const property = await propertyService.createProperty(req.body);
+      // Extract ownerId from authenticated user
+      const propertyData = { ...req.body, ownerId: req.user.id };
+      
+      // Handle uploaded images
+      if (req.files && req.files.length > 0) {
+        propertyData.imageUrls = req.files.map(file => `/public/uploads/${file.filename}`);
+      }
+      
+      const property = await propertyService.createProperty(propertyData);
       res.status(201).json({
         success: true,
         data: property,
