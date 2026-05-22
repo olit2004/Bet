@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:bet/core/widgets/app_logo.dart';
 import 'package:bet/features/admin/presentation/screens/admin_profile.dart';
-import 'package:bet/features/admin/presentation/screens/identity_review_screen.dart';
+import 'package:bet/features/admin/presentation/screens/property_review.dart';
 import 'package:bet/core/widgets/custom_button.dart';
 
 class PropertiesScreen extends StatefulWidget {
@@ -86,6 +86,7 @@ class _PropertiesScreenState extends State<PropertiesScreen> {
                       ...properties.map((property) {
                         return _houseCard(
                           context,
+                          property,
                           "assets/images/skyline-retreat.png", // Generic fallback image
                           property['title'] ?? 'Untitled Property',
                           property['startingPrice']?.toString() ?? '0',
@@ -186,6 +187,7 @@ class _PropertiesScreenState extends State<PropertiesScreen> {
 
   Widget _houseCard(
     BuildContext context,
+    Map<String, dynamic> property,
     String houseImage,
     String name,
     String price,
@@ -264,7 +266,7 @@ class _PropertiesScreenState extends State<PropertiesScreen> {
                       width: 180,
                       child: CustomButton(
                         text: "Review & approve",
-                        onPressed: () => _buttonAction(context),
+                        onPressed: () => _buttonAction(context, property),
                       ),
                     ),
 
@@ -291,10 +293,10 @@ class _PropertiesScreenState extends State<PropertiesScreen> {
     );
   }
 
-  void _buttonAction(BuildContext context) {
+  void _buttonAction(BuildContext context, Map<String, dynamic> property) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => IdentityReviewScreen()),
+      MaterialPageRoute(builder: (context) => PropertyReview(property: property)),
     );
   }
 }

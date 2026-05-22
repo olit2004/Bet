@@ -22,7 +22,7 @@ async function main() {
   const adminUser = await prisma.user.create({
     data: {
       email: 'admin@bet.com',
-      passwordHash: '$2b$10$w6K29T5B/PZpx8bpxZ9Eee75Tj3c1VjR1t0gD01.uB2h2P2w1Z1yS', // Hash of 'password'
+      passwordHash: '$2a$12$HDEJTC/vvQI8.LdD6jLGP.OPgboNGvu5j/CkEm1LLRXKY0n0spVj2', // Hash of 'password'
       role: 'ADMIN',
       isVerified: true,
       faydaId: 'FAYDA-ETH-777',
@@ -34,7 +34,7 @@ async function main() {
   const buyerUser1 = await prisma.user.create({
     data: {
       email: 'lemi@buyer.com',
-      passwordHash: '$2b$10$w6K29T5B/PZpx8bpxZ9Eee75Tj3c1VjR1t0gD01.uB2h2P2w1Z1yS',
+      passwordHash: '$2a$12$HDEJTC/vvQI8.LdD6jLGP.OPgboNGvu5j/CkEm1LLRXKY0n0spVj2',
       role: 'BUYER',
       isVerified: true,
       faydaId: 'FAYDA-ETH-101',
@@ -45,7 +45,7 @@ async function main() {
   const buyerUser2 = await prisma.user.create({
     data: {
       email: 'misganaw@buyer.com',
-      passwordHash: '$2b$10$w6K29T5B/PZpx8bpxZ9Eee75Tj3c1VjR1t0gD01.uB2h2P2w1Z1yS',
+      passwordHash: '$2a$12$HDEJTC/vvQI8.LdD6jLGP.OPgboNGvu5j/CkEm1LLRXKY0n0spVj2',
       role: 'BUYER',
       isVerified: false,
       faydaId: 'FAYDA-ETH-102',
@@ -57,7 +57,7 @@ async function main() {
   const sellerUser1 = await prisma.user.create({
     data: {
       email: 'samuel@seller.com',
-      passwordHash: '$2b$10$w6K29T5B/PZpx8bpxZ9Eee75Tj3c1VjR1t0gD01.uB2h2P2w1Z1yS',
+      passwordHash: '$2a$12$HDEJTC/vvQI8.LdD6jLGP.OPgboNGvu5j/CkEm1LLRXKY0n0spVj2',
       role: 'SELLER',
       isVerified: true,
       faydaId: 'FAYDA-ETH-201',
@@ -68,7 +68,7 @@ async function main() {
   const sellerUser2 = await prisma.user.create({
     data: {
       email: 'reza@seller.com',
-      passwordHash: '$2b$10$w6K29T5B/PZpx8bpxZ9Eee75Tj3c1VjR1t0gD01.uB2h2P2w1Z1yS',
+      passwordHash: '$2a$12$HDEJTC/vvQI8.LdD6jLGP.OPgboNGvu5j/CkEm1LLRXKY0n0spVj2',
       role: 'SELLER',
       isVerified: false,
       faydaId: 'FAYDA-ETH-202',
@@ -88,6 +88,9 @@ async function main() {
       longitude: 38.74,
       type: 'SALE',
       status: 'ACTIVE',
+      beds: 5,
+      baths: 4,
+      sqFootage: 2400.0,
       ownerId: sellerUser1.id,
     },
   });
@@ -101,6 +104,9 @@ async function main() {
       longitude: 38.79,
       type: 'SALE',
       status: 'ACTIVE',
+      beds: 4,
+      baths: 3,
+      sqFootage: 1800.0,
       ownerId: sellerUser1.id,
     },
   });
@@ -114,6 +120,9 @@ async function main() {
       longitude: 37.39,
       type: 'SALE',
       status: 'CLOSED', // Counted as revenue in stats
+      beds: 6,
+      baths: 5,
+      sqFootage: 3500.0,
       ownerId: sellerUser2.id,
     },
   });
