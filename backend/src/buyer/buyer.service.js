@@ -1,6 +1,6 @@
-const prisma = require('../shared/db');
+import prisma from '../shared/prisma.client.js';
 
-async function registerAsBuyer(userId) {
+export const registerAsBuyer = async (userId) => {
   const user = await prisma.user.findUnique({ where: { id: userId } });
 
   if (!user) {
@@ -25,6 +25,65 @@ async function registerAsBuyer(userId) {
   });
 
   return updatedUser;
-}
+};
 
-module.exports = { registerAsBuyer };
+export const getBuyerProfile = async (userId) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      email: true,
+      role: true,
+      isVerified: true,
+      faydaId: true,
+      createdAt: true,
+      updatedAt: true,
+    }
+  });
+
+  if (!user) {
+    const error = new Error('User not found.');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  return user;
+};
+
+export const updateBuyerProfile = async (userId, data) => {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) {
+    const error = new Error('User not found.');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  // Ensure email uniqueness if updating email
+  if (data.email && data.email !== user.email) {
+    const existingEmail = await prisma.user.findUnique({ where: { email: data.email } });
+    if (existingEmail) {
+      const error = new Error('Email is already taken.');
+      error.statusCode = 400;
+      throw error;
+    }
+  }
+
+  // Update user profile
+  const updatedUser = await prisma.user.update({
+    where: { id: userId },
+    data: {
+      ...(data.email && { email: data.email })
+    },
+    select: {
+      id: true,
+      email: true,
+      role: true,
+      isVerified: true,
+      faydaId: true,
+      createdAt: true,
+      updatedAt: true,
+    }
+  });
+
+  return updatedUser;
+};
