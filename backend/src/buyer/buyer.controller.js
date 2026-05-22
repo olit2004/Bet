@@ -26,3 +26,23 @@ export const updateProfile = async (req, res, next) => {
     next(error);
   }
 };
+
+export const verifyFayda = async (req, res, next) => {
+  try {
+    const { faydaId } = req.body;
+    
+    if (!faydaId) {
+      return res.status(400).json({ status: 'fail', message: 'Please provide a faydaId in the request body.' });
+    }
+
+    const updatedUser = await buyerService.verifyFayda(req.user.id, faydaId);
+    
+    res.status(200).json({ 
+      status: 'success', 
+      message: 'Fayda ID successfully verified.', 
+      data: updatedUser 
+    });
+  } catch (error) {
+    next(error);
+  }
+};

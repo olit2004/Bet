@@ -87,3 +87,51 @@ export const updateBuyerProfile = async (userId, data) => {
 
   return updatedUser;
 };
+
+export const verifyFayda = async (userId, faydaId) => {
+  if (!faydaId || typeof faydaId !== 'string' || faydaId.trim().length < 10) {
+    const error = new Error('Invalid Fayda ID format. Must be at least 10 characters long.');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  
+  if (!user) {
+    const error = new Error('User not found.');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  if (user.isVerified) {
+    const error = new Error('User is already verified with a Fayda ID.');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const existingFayda = await prisma.user.findUnique({ where: { faydaId: faydaId.trim() } });
+  if (existingFayda) {
+    const error = new Error('This Fayda ID is already registered to another user.');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: { id: userId },
+    data: {
+      isVerified: true,
+      faydaId: faydaId.trim(),
+    },
+    select: {
+      id: true,
+      email: true,
+      role: true,
+      isVerified: true,
+      faydaId: true,
+      createdAt: true,
+      updatedAt: true,
+    }
+  });
+
+  return updatedUser;
+};
