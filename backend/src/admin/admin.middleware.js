@@ -1,12 +1,12 @@
-const jwt = require('jsonwebtoken');
-const prisma = require('../shared/db');
+import jwt from 'jsonwebtoken';
+import prisma from '../shared/db.js';
+
 const protectAdmin = async (req, res, next) => {
   try {
     if (
       process.env.NODE_ENV === 'development' &&
       process.env.BYPASS_ADMIN_AUTH === 'true'
     ) {
-      console.log('⚠️ [DEV-BYPASS]: Admin authentication bypassed. Injecting mock Admin account.');
       req.user = {
         id: 'dev-admin-uuid-1234',
         email: 'dev-admin@bet.com',
@@ -62,4 +62,5 @@ const protectAdmin = async (req, res, next) => {
     });
   }
 };
-module.exports = { protectAdmin };
+
+export { protectAdmin };

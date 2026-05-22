@@ -1,4 +1,5 @@
-const adminService = require('./admin.service');
+import adminService from './admin.service.js';
+
 const getDashboard = async (req, res, next) => {
   try {
     const stats = await adminService.getDashboardStats();
@@ -10,6 +11,7 @@ const getDashboard = async (req, res, next) => {
     next(error);
   }
 };
+
 const getUsers = async (req, res, next) => {
   try {
     const users = await adminService.getAllUsers(req.query);
@@ -22,6 +24,7 @@ const getUsers = async (req, res, next) => {
     next(error);
   }
 };
+
 const getUser = async (req, res, next) => {
   try {
     const user = await adminService.getUserById(req.params.id);
@@ -39,6 +42,7 @@ const getUser = async (req, res, next) => {
     next(error);
   }
 };
+
 const moderateUser = async (req, res, next) => {
   try {
     const updatedUser = await adminService.moderateUser(
@@ -55,6 +59,7 @@ const moderateUser = async (req, res, next) => {
     next(error);
   }
 };
+
 const getPendingIdentities = async (req, res, next) => {
   try {
     const pendingList = await adminService.getPendingIdentities();
@@ -67,6 +72,7 @@ const getPendingIdentities = async (req, res, next) => {
     next(error);
   }
 };
+
 const verifyIdentity = async (req, res, next) => {
   try {
     const { approve } = req.body;
@@ -90,6 +96,7 @@ const verifyIdentity = async (req, res, next) => {
     next(error);
   }
 };
+
 const getPropertiesForReview = async (req, res, next) => {
   try {
     const properties = await adminService.getPropertiesForReview();
@@ -102,6 +109,7 @@ const getPropertiesForReview = async (req, res, next) => {
     next(error);
   }
 };
+
 const reviewProperty = async (req, res, next) => {
   try {
     const { status } = req.body;
@@ -125,7 +133,8 @@ const reviewProperty = async (req, res, next) => {
     next(error);
   }
 };
-module.exports = {
+
+export default {
   getDashboard,
   getUsers,
   getUser,

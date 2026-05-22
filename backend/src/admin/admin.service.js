@@ -1,4 +1,5 @@
-const prisma = require('../shared/db');
+import prisma from '../shared/db.js';
+
 const getDashboardStats = async () => {
   const activeAuctionsCount = await prisma.property.count({
     where: { status: 'ACTIVE' },
@@ -83,6 +84,7 @@ const getDashboardStats = async () => {
     weeklyChartData,
   };
 };
+
 const getAllUsers = async (query = {}) => {
   const { role, isVerified, search } = query;
   const where = {};
@@ -112,6 +114,7 @@ const getAllUsers = async (query = {}) => {
     orderBy: { createdAt: 'desc' },
   });
 };
+
 const getUserById = async (userId) => {
   return await prisma.user.findUnique({
     where: { id: userId },
@@ -132,6 +135,7 @@ const getUserById = async (userId) => {
     },
   });
 };
+
 const moderateUser = async (userId, data, adminUserId) => {
   const { role, isVerified } = data;
   const updatedUser = await prisma.user.update({
@@ -150,6 +154,7 @@ const moderateUser = async (userId, data, adminUserId) => {
   });
   return updatedUser;
 };
+
 const getPendingIdentities = async () => {
   return await prisma.user.findMany({
     where: {
@@ -166,6 +171,7 @@ const getPendingIdentities = async () => {
     orderBy: { createdAt: 'desc' },
   });
 };
+
 const verifyUserIdentity = async (userId, approve, adminUserId) => {
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) throw new Error('User not found');
@@ -185,6 +191,7 @@ const verifyUserIdentity = async (userId, approve, adminUserId) => {
   });
   return updatedUser;
 };
+
 const getPropertiesForReview = async () => {
   return await prisma.property.findMany({
     include: {
@@ -201,6 +208,7 @@ const getPropertiesForReview = async () => {
     orderBy: { createdAt: 'desc' },
   });
 };
+
 const reviewProperty = async (propertyId, status, adminUserId) => {
   const property = await prisma.property.findUnique({
     where: { id: propertyId },
@@ -220,7 +228,8 @@ const reviewProperty = async (propertyId, status, adminUserId) => {
   });
   return updatedProperty;
 };
-module.exports = {
+
+export default {
   getDashboardStats,
   getAllUsers,
   getUserById,
