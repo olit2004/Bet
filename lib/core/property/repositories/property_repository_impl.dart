@@ -1,30 +1,39 @@
 import '../models/property_model.dart';
 import './property_repository.dart';
 import '../data_sources/mock_property_data.dart';
+import '../data_sources/property_remote_data_source.dart';
 
 class PropertyRepositoryImpl implements PropertyRepository {
+  final PropertyRemoteDataSource _remoteDataSource = PropertyRemoteDataSource();
+
   @override
   Future<List<Property>> getProperties() async {
-    // Simulate network delay
-    await Future.delayed(const Duration(milliseconds: 500));
-    return MockPropertyData.properties;
+    try {
+      return await _remoteDataSource.getProperties();
+    } catch (_) {
+      // Fallback to mock data if the server is unreachable
+      return MockPropertyData.properties;
+    }
   }
 
   @override
   Future<Property?> getPropertyById(String id) async {
-    await Future.delayed(const Duration(milliseconds: 300));
     try {
-      return MockPropertyData.properties.firstWhere((p) => p.id == id);
+      return await _remoteDataSource.getPropertyById(id);
     } catch (_) {
-      return null;
+      try {
+        return MockPropertyData.properties.firstWhere((p) => p.id == id);
+      } catch (_) {
+        return null;
+      }
     }
   }
 
   @override
   Future<List<Property>> searchProperties(String query) async {
-    await Future.delayed(const Duration(milliseconds: 500));
+    final all = await getProperties();
     final lowercaseQuery = query.toLowerCase();
-    return MockPropertyData.properties.where((p) {
+    return all.where((p) {
       return p.title.toLowerCase().contains(lowercaseQuery) ||
              p.address.toLowerCase().contains(lowercaseQuery) ||
              p.description.toLowerCase().contains(lowercaseQuery);
@@ -33,7 +42,7 @@ class PropertyRepositoryImpl implements PropertyRepository {
 
   @override
   Future<List<Property>> getPropertiesByCategory(PropertyCategory category) async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    return MockPropertyData.properties.where((p) => p.category == category).toList();
+    final all = await getProperties();
+    return all.where((p) => p.category == category).toList();
   }
 }
