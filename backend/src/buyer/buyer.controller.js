@@ -1,4 +1,4 @@
-const buyerService = require('./buyer.service');
+import buyerService from './buyer.service.js';
 
 async function register(req, res, next) {
   try {
@@ -9,4 +9,4 @@ async function register(req, res, next) {
   }
 }
 
-module.exports = { register };
+export default { register };

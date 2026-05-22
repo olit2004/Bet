@@ -1,5 +1,5 @@
-const jwt = require('jsonwebtoken');
-const prisma = require('../shared/db');
+import jwt from 'jsonwebtoken';
+import prisma from '../shared/db.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'bet_jwt_super_secret_key_12345';
 
@@ -82,7 +82,7 @@ function restrictTo(...roles) {
   };
 }
 
-module.exports = {
+export {
   protect,
   restrictTo,
 };

@@ -1,4 +1,4 @@
-const prisma = require('../shared/db');
+import prisma from '../shared/db.js';
 
 
 async function placeBid(propertyId, bidderId, amount, bankStatementUrl = null) {
@@ -181,7 +181,7 @@ async function acceptBid(bidId, sellerId) {
     });
 }
 
-module.exports = {
+export default {
     placeBid,
     retractBid,
     acceptBid

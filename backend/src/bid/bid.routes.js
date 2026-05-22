@@ -1,8 +1,9 @@
-const express = require('express');
+import express from 'express';
+import bidController from './bid.controller.js';
+import { protect, restrictTo } from '../auth/auth.middleware.js';
+import upload from '../shared/upload.middleware.js';
+
 const router = express.Router();
-const bidController = require('./bid.controller');
-const { protect, restrictTo } = require('../auth/auth.middleware');
-const upload = require('../shared/upload.middleware');
 
 // Note: Since bids relate directly to properties, these routes handle both
 // /api/bids and /api/properties/:propertyId/bids logic. 
@@ -37,4 +38,4 @@ router.patch('/bids/:id/accept', protect, restrictTo('SELLER'), bidController.ac
 
 // Optional: Admin deletion route could go here.
 
-module.exports = router;
+export default router;

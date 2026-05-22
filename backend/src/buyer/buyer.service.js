@@ -1,4 +1,4 @@
-const prisma = require('../shared/db');
+import prisma from '../shared/db.js';
 
 async function registerAsBuyer(userId) {
   const user = await prisma.user.findUnique({ where: { id: userId } });
@@ -27,4 +27,4 @@ async function registerAsBuyer(userId) {
   return updatedUser;
 }
 
-module.exports = { registerAsBuyer };
+export default { registerAsBuyer };
