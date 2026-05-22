@@ -1,7 +1,5 @@
-import bidService from './bid.service.js';
-import prisma from '../shared/db.js';
-
-
+import * as bidService from './bid.service.js';
+import prisma from '../shared/prisma.client.js';
 
 async function placeBid(req, res, next) {
   try {
@@ -108,9 +106,4 @@ async function getPropertyBids(req, res, next) {
   }
 }
 
-export default {
-  placeBid,
-  retractBid,
-  acceptBid,
-  getPropertyBids
-};
+export { placeBid, retractBid, acceptBid, getPropertyBids };

@@ -1,7 +1,7 @@
 import express from 'express';
 const router = express.Router();
-import bidController from './bid.controller.js';
-import { protect, restrictTo } from '../auth/auth.middleware.js';
+import * as bidController from './bid.controller.js';
+import { verifyToken, authorizeRoles } from '../user/user.middleware.js';
 import upload from '../shared/upload.middleware.js';
 
 // Note: Since bids relate directly to properties, these routes handle both
@@ -13,14 +13,14 @@ import upload from '../shared/upload.middleware.js';
 // ----------------------------------------------------
 
 // Retrieve all bids for a specific property (Accessible to any authenticated user)
-router.get('/properties/:propertyId/bids', protect, bidController.getPropertyBids);
+router.get('/properties/:propertyId/bids', verifyToken, bidController.getPropertyBids);
 
 // Place a new bid (Only BUYER can bid)
 // Expects an optional PDF/Image file upload in the 'bankStatement' field
 router.post(
   '/properties/:propertyId/bids',
-  protect,
-  restrictTo('BUYER'),
+  verifyToken,
+  authorizeRoles('BUYER'),
   upload.single('bankStatement'),
   bidController.placeBid
 );
@@ -30,10 +30,10 @@ router.post(
 // ----------------------------------------------------
 
 // Retract a bid (Only BUYER who owns the bid can retract)
-router.patch('/bids/:id/retract', protect, restrictTo('BUYER'), bidController.retractBid);
+router.patch('/bids/:id/retract', verifyToken, authorizeRoles('BUYER'), bidController.retractBid);
 
 // Accept a bid (Only SELLER who owns the property can accept)
-router.patch('/bids/:id/accept', protect, restrictTo('SELLER'), bidController.acceptBid);
+router.patch('/bids/:id/accept', verifyToken, authorizeRoles('SELLER'), bidController.acceptBid);
 
 // Optional: Admin deletion route could go here.
 
