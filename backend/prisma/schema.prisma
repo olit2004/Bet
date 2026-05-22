@@ -16,6 +16,8 @@ model User {
   role          String         @default("GUEST") // GUEST, BUYER, SELLER, ADMIN
   isVerified    Boolean        @default(false) // Fayda verification flag
   faydaId       String?        @unique // Fayda ID stored locally
+  faydaImageUrl String?                        // Uploaded Fayda ID card image URL
+  faydaStatus   String?        @default("PENDING") // PENDING, VERIFIED, REJECTED
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   admin         Admin?
@@ -26,10 +28,13 @@ model User {
 }
 
 model Buyer {
-  id        String     @id
-  bids      Bid[]
-  user      User       @relation(fields: [id], references: [id], onDelete: Cascade)
-  proposals Proposal[]
+  id                    String     @id
+  bids                  Bid[]
+  user                  User       @relation(fields: [id], references: [id], onDelete: Cascade)
+  proposals             Proposal[]
+  budget                Float?     // Buyer's budget
+  preferredPropertyType String?    // e.g. RENT, SALE
+  preferredLocations    String[]   // e.g. ["Addis Ababa", "Bole"]
 }
 
 model Seller {

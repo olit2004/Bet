@@ -33,11 +33,22 @@ export const getBuyerProfile = async (userId) => {
     select: {
       id: true,
       email: true,
+      name: true,
+      phone: true,
       role: true,
       isVerified: true,
       faydaId: true,
+      faydaImageUrl: true,
+      faydaStatus: true,
       createdAt: true,
       updatedAt: true,
+      buyer: {
+        select: {
+          budget: true,
+          preferredPropertyType: true,
+          preferredLocations: true,
+        }
+      }
     }
   });
 
@@ -68,29 +79,55 @@ export const updateBuyerProfile = async (userId, data) => {
     }
   }
 
-  // Update user profile
+  // Update user profile and buyer attributes
   const updatedUser = await prisma.user.update({
     where: { id: userId },
     data: {
-      ...(data.email && { email: data.email })
+      ...(data.email && { email: data.email }),
+      ...(data.name && { name: data.name }),
+      ...(data.phone && { phone: data.phone }),
+      buyer: {
+        update: {
+          ...(data.budget !== undefined && { budget: data.budget }),
+          ...(data.preferredPropertyType !== undefined && { preferredPropertyType: data.preferredPropertyType }),
+          ...(data.preferredLocations !== undefined && { preferredLocations: data.preferredLocations }),
+        }
+      }
     },
     select: {
       id: true,
       email: true,
+      name: true,
+      phone: true,
       role: true,
       isVerified: true,
       faydaId: true,
+      faydaImageUrl: true,
+      faydaStatus: true,
       createdAt: true,
       updatedAt: true,
+      buyer: {
+        select: {
+          budget: true,
+          preferredPropertyType: true,
+          preferredLocations: true,
+        }
+      }
     }
   });
 
   return updatedUser;
 };
 
-export const verifyFayda = async (userId, faydaId) => {
+export const verifyFayda = async (userId, faydaId, faydaImageUrl) => {
   if (!faydaId || typeof faydaId !== 'string' || faydaId.trim().length < 10) {
     const error = new Error('Invalid Fayda ID format. Must be at least 10 characters long.');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (!faydaImageUrl) {
+    const error = new Error('A Fayda ID card image is required for verification.');
     error.statusCode = 400;
     throw error;
   }
@@ -103,24 +140,28 @@ export const verifyFayda = async (userId, faydaId) => {
     throw error;
   }
 
-  if (user.isVerified) {
+  if (user.faydaStatus === 'VERIFIED') {
     const error = new Error('User is already verified with a Fayda ID.');
     error.statusCode = 400;
     throw error;
   }
 
-  const existingFayda = await prisma.user.findUnique({ where: { faydaId: faydaId.trim() } });
-  if (existingFayda) {
-    const error = new Error('This Fayda ID is already registered to another user.');
-    error.statusCode = 400;
-    throw error;
+  // Check uniqueness only if it's a new faydaId submission
+  if (faydaId.trim() !== user.faydaId) {
+    const existingFayda = await prisma.user.findUnique({ where: { faydaId: faydaId.trim() } });
+    if (existingFayda) {
+      const error = new Error('This Fayda ID is already registered to another user.');
+      error.statusCode = 400;
+      throw error;
+    }
   }
 
   const updatedUser = await prisma.user.update({
     where: { id: userId },
     data: {
-      isVerified: true,
       faydaId: faydaId.trim(),
+      faydaImageUrl: faydaImageUrl,
+      faydaStatus: 'PENDING', // Admin must approve before isVerified becomes true
     },
     select: {
       id: true,
@@ -128,6 +169,8 @@ export const verifyFayda = async (userId, faydaId) => {
       role: true,
       isVerified: true,
       faydaId: true,
+      faydaImageUrl: true,
+      faydaStatus: true,
       createdAt: true,
       updatedAt: true,
     }

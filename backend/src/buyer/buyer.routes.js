@@ -1,6 +1,7 @@
 import express from 'express';
 import * as buyerController from './buyer.controller.js';
 import { verifyToken, authorizeRoles } from '../user/user.middleware.js';
+import upload from '../shared/upload.middleware.js';
 
 const router = express.Router();
 
@@ -13,8 +14,8 @@ router.get('/profile', verifyToken, authorizeRoles('BUYER'), buyerController.get
 // PUT /api/buyer/profile — Update buyer profile
 router.put('/profile', verifyToken, authorizeRoles('BUYER'), buyerController.updateProfile);
 
-// PATCH /api/buyer/verify-fayda — Verify Fayda Digital ID
-router.patch('/verify-fayda', verifyToken, authorizeRoles('BUYER'), buyerController.verifyFayda);
+// PATCH /api/buyer/verify-fayda — Verify Fayda Digital ID (with image upload)
+router.patch('/verify-fayda', verifyToken, authorizeRoles('BUYER'), upload.single('faydaImage'), buyerController.verifyFayda);
 
 // GET /api/buyer/dashboard — Get buyer dashboard statistics
 router.get('/dashboard', verifyToken, authorizeRoles('BUYER'), buyerController.getDashboard);

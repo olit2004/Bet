@@ -35,11 +35,14 @@ export const verifyFayda = async (req, res, next) => {
       return res.status(400).json({ status: 'fail', message: 'Please provide a faydaId in the request body.' });
     }
 
-    const updatedUser = await buyerService.verifyFayda(req.user.id, faydaId);
+    // Get uploaded file URL (served from /public/uploads/)
+    const faydaImageUrl = req.file ? `/public/uploads/${req.file.filename}` : null;
+
+    const updatedUser = await buyerService.verifyFayda(req.user.id, faydaId, faydaImageUrl);
     
     res.status(200).json({ 
       status: 'success', 
-      message: 'Fayda ID successfully verified.', 
+      message: 'Fayda ID submitted for admin verification. Your status is now PENDING.', 
       data: updatedUser 
     });
   } catch (error) {
