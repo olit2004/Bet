@@ -65,7 +65,6 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
     });
 
     try {
-      // Suspend by demoting role to GUEST and resetting verification flag
       final response = await http.patch(
         Uri.parse('http://localhost:8080/api/admin/users/${widget.userId}/moderate'),
         headers: {'Content-Type': 'application/json'},
@@ -80,7 +79,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('User account suspended successfully.')),
           );
-          _fetchUserDetails(); // Refresh screen state
+          _fetchUserDetails();
         }
       } else {
         if (mounted) {
@@ -388,7 +387,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
   }
 
   Widget _activeListing() {
-    return Container(); // Admin can view properties through the properties tab.
+    return Container();
   }
 
   Widget _activityLog() {

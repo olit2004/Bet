@@ -14,7 +14,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   bool isLoading = true;
   String errorMessage = '';
 
-  // Data variables
   double revenue = 0.0;
   int activeAuctions = 0;
   int pendingVerifications = 0;
@@ -29,7 +28,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   Future<void> _fetchDashboardData() async {
     try {
-      // Connect to our NodeJS backend
       final response = await http.get(Uri.parse('http://localhost:8080/api/admin/dashboard'));
 
       if (response.statusCode == 200) {
@@ -38,7 +36,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
         if (mounted) {
           setState(() {
-            // Update the screen with the fetched data
             revenue = data['revenue']?.toDouble() ?? 0.0;
             activeAuctions = data['activeAuctions'] ?? 0;
             pendingVerifications = data['pendingVerifications'] ?? 0;
@@ -82,7 +79,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       _buildHeader("Global Performance", "Real-time ecosystem health"),
                       const SizedBox(height: 20),
 
-                      // Now using our REAL backend variables!
                       _buildStatCard(
                         "TOTAL REVENUE",
                         "\$${(revenue / 1000000).toStringAsFixed(1)}M", 
@@ -120,7 +116,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       _buildSectionTitle("Recent Activity", "", "LIVE", isBadge: true),
                       const SizedBox(height: 10),
 
-                      // Generate dynamic list of recent activities from backend
                       ...recentActivities.map((activity) {
                         return _buildActivityTile(
                           activity['title'] ?? 'Activity',

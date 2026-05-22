@@ -88,14 +88,14 @@ class _UsersScreenState extends State<UsersScreen> {
                         _usersCard(
                           context,
                           user['email']?.split('@')[0] ??
-                              'Unknown', // Use prefix as name
+                              'Unknown',
                           user['role'] ?? 'GUEST',
                           user['isVerified']
                               ? "Verified"
                               : "Pending Verification",
-                          "/images/profile.png", // Generic fallback avatar
+                          "/images/profile.png",
                           user['role'] == 'SELLER',
-                          user['id'] ?? '', // Pass the user ID
+                          user['id'] ?? '',
                           type: user['isVerified'] ? 1 : 3,
                         ),
                         SizedBox(height: 20),
