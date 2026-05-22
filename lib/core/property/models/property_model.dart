@@ -56,4 +56,52 @@ class Property {
         return 'Commercial';
     }
   }
+
+  factory Property.fromJson(Map<String, dynamic> json) {
+    // Map backend type (SALE, RENT) to PropertyCategory
+    PropertyCategory mappedCategory;
+    final typeStr = (json['type'] as String?)?.toUpperCase() ?? 'SALE';
+    if (typeStr == 'RENT') {
+      mappedCategory = PropertyCategory.rent;
+    } else {
+      mappedCategory = PropertyCategory.buy;
+    }
+
+    // Build specs list dynamically from backend fields
+    final List<PropertySpec> specsList = [];
+    if (json['beds'] != null) {
+      specsList.add(PropertySpec(label: 'Beds', value: json['beds'].toString(), icon: 'bed'));
+    }
+    if (json['baths'] != null) {
+      specsList.add(PropertySpec(label: 'Baths', value: json['baths'].toString(), icon: 'bathtub'));
+    }
+    if (json['sqFootage'] != null) {
+      specsList.add(PropertySpec(label: 'SqFt', value: json['sqFootage'].toString(), icon: 'square_foot'));
+    }
+
+    // Parse image URLs and prepend backend URL if necessary
+    List<String> parsedImageUrls = [];
+    if (json['imageUrls'] != null) {
+      parsedImageUrls = (json['imageUrls'] as List).map((url) {
+        final urlStr = url.toString();
+        if (urlStr.startsWith('http')) return urlStr;
+        return 'http://localhost:8080$urlStr';
+      }).toList();
+    }
+
+    return Property(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      description: json['description'] as String,
+      price: (json['price'] as num).toDouble(),
+      address: json['address'] as String? ?? json['location'] as String? ?? 'Unknown Location',
+      imageUrls: parsedImageUrls,
+      category: mappedCategory,
+      specs: specsList,
+      locale: json['locale'] as String?,
+      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
+      isVerified: true, // Assuming properties fetched are verified
+      sellerName: json['owner']?['company'] ?? 'Unknown Seller',
+    );
+  }
 }
