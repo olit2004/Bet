@@ -87,7 +87,7 @@ class _PropertiesScreenState extends State<PropertiesScreen> {
                         return _houseCard(
                           context,
                           property,
-                          "assets/images/skyline-retreat.png", // Generic fallback image
+                          "assets/images/skyline-retreat.png",
                           property['title'] ?? 'Untitled Property',
                           property['startingPrice']?.toString() ?? '0',
                           property['seller'] != null ? property['seller']['email'].split('@')[0] : 'Unknown Seller',

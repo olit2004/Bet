@@ -4,7 +4,6 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Starting database seeding...');
 
-  // 1. Clean existing records in sequence
   console.log('🧹 Cleaning existing database records...');
   await prisma.auditLog.deleteMany({});
   await prisma.notification.deleteMany({});
@@ -18,11 +17,11 @@ async function main() {
 
   console.log('👥 Creating user accounts & profiles...');
 
-  // 2. Create System Admin
+
   const adminUser = await prisma.user.create({
     data: {
       email: 'admin@bet.com',
-      passwordHash: '$2a$12$HDEJTC/vvQI8.LdD6jLGP.OPgboNGvu5j/CkEm1LLRXKY0n0spVj2', // Hash of 'password'
+      passwordHash: '$2a$12$HDEJTC/vvQI8.LdD6jLGP.OPgboNGvu5j/CkEm1LLRXKY0n0spVj2',
       role: 'ADMIN',
       isVerified: true,
       faydaId: 'FAYDA-ETH-777',
@@ -30,7 +29,7 @@ async function main() {
     },
   });
 
-  // 3. Create Buyers
+
   const buyerUser1 = await prisma.user.create({
     data: {
       email: 'lemi@buyer.com',
@@ -53,7 +52,6 @@ async function main() {
     },
   });
 
-  // 4. Create Sellers
   const sellerUser1 = await prisma.user.create({
     data: {
       email: 'samuel@seller.com',
@@ -78,7 +76,7 @@ async function main() {
 
   console.log('🏡 Creating property listings...');
 
-  // 5. Create Properties (Auctions)
+
   const prop1 = await prisma.property.create({
     data: {
       title: 'Skyline Penthouse',
@@ -88,9 +86,6 @@ async function main() {
       longitude: 38.74,
       type: 'SALE',
       status: 'ACTIVE',
-      beds: 5,
-      baths: 4,
-      sqFootage: 2400.0,
       ownerId: sellerUser1.id,
     },
   });
@@ -104,9 +99,6 @@ async function main() {
       longitude: 38.79,
       type: 'SALE',
       status: 'ACTIVE',
-      beds: 4,
-      baths: 3,
-      sqFootage: 1800.0,
       ownerId: sellerUser1.id,
     },
   });
@@ -119,17 +111,13 @@ async function main() {
       latitude: 11.59,
       longitude: 37.39,
       type: 'SALE',
-      status: 'CLOSED', // Counted as revenue in stats
-      beds: 6,
-      baths: 5,
-      sqFootage: 3500.0,
+      status: 'CLOSED',
       ownerId: sellerUser2.id,
     },
   });
 
   console.log('🔨 Creating bids & proposal interactions...');
 
-  // 6. Create Bids
   await prisma.bid.create({
     data: {
       propertyId: prop1.id,
@@ -148,7 +136,6 @@ async function main() {
     },
   });
 
-  // 7. Create Proposals
   await prisma.proposal.create({
     data: {
       propertyId: prop2.id,
@@ -160,7 +147,6 @@ async function main() {
 
   console.log('📝 Recording audit logs...');
 
-  // 8. Create Audit Logs
   await prisma.auditLog.createMany({
     data: [
       {
