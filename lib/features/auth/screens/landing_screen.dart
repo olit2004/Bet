@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/core/widgets/custom_app_bar.dart';
 import 'package:bet/core/widgets/custom_button.dart';
 import 'package:bet/core/widgets/favorite_button.dart';
 import 'package:bet/core/property/providers/property_provider.dart';
+import 'package:bet/core/property/models/property_model.dart';
 
 class LandingScreen extends StatefulWidget {
   const LandingScreen({super.key});
