@@ -231,7 +231,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                         CustomButton(
                           text: authState.status == AuthState.loading ? 'Creating Account...' : 'Create Account',
                           onPressed: authState.status == AuthState.loading
-                              ? null
+                              ? () {}
                               : () {
                                   final activeFormKey = _isBuyer ? _buyerFormKey : _sellerFormKey;
                                   if (activeFormKey.currentState!.validate()) {

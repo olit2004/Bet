@@ -192,7 +192,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       CustomButton(
                         text: authState.status == AuthState.loading ? 'Signing In...' : 'Sign In',
                         onPressed: authState.status == AuthState.loading
-                            ? null
+                            ? () {}
                             : () {
                                 final activeFormKey = _isBuyer ? _buyerFormKey : _sellerFormKey;
                                 if (activeFormKey.currentState!.validate()) {

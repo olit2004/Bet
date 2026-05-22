@@ -56,12 +56,14 @@ class AuthStateData {
   }
 }
 
-class AuthNotifier extends StateNotifier<AuthStateData> {
-  final AuthRepository _repository;
+class AuthNotifier extends Notifier<AuthStateData> {
+  AuthRepository get _repository => ref.read(authRepositoryProvider);
 
-  AuthNotifier(this._repository)
-      : super(AuthStateData(status: AuthState.initial)) {
-    checkAuthStatus();
+  @override
+  AuthStateData build() {
+    // Start checking auth status asynchronously right after initialization
+    Future.microtask(() => checkAuthStatus());
+    return AuthStateData(status: AuthState.initial);
   }
 
   Future<void> checkAuthStatus() async {
@@ -119,6 +121,6 @@ class AuthNotifier extends StateNotifier<AuthStateData> {
   }
 }
 
-final authNotifierProvider = StateNotifierProvider<AuthNotifier, AuthStateData>((ref) {
-  return AuthNotifier(ref.watch(authRepositoryProvider));
+final authNotifierProvider = NotifierProvider<AuthNotifier, AuthStateData>(() {
+  return AuthNotifier();
 });
