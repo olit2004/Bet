@@ -1,9 +1,7 @@
 import express from 'express';
 import proposalsController from './proposals.controller.js';
-import authMiddleware from '../auth/auth.middleware.js';
+import { protect, restrictTo } from '../auth/auth.middleware.js';
 import upload from '../shared/upload.middleware.js';
-
-const { protect, restrictTo } = authMiddleware;
 const router = express.Router();
 
 // Get my proposals (Buyer) - Must be before /property/:propertyId to avoid param collision
