@@ -46,3 +46,16 @@ export const verifyFayda = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getDashboard = async (req, res, next) => {
+  try {
+    const dashboardData = await buyerService.getBuyerDashboard(req.user.id);
+    
+    res.status(200).json({ 
+      status: 'success', 
+      data: dashboardData 
+    });
+  } catch (error) {
+    next(error);
+  }
+};

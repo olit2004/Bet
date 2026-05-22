@@ -16,4 +16,7 @@ router.put('/profile', verifyToken, authorizeRoles('BUYER'), buyerController.upd
 // POST /api/buyer/verify-fayda — Verify Fayda Digital ID
 router.post('/verify-fayda', verifyToken, authorizeRoles('BUYER'), buyerController.verifyFayda);
 
+// GET /api/buyer/dashboard — Get buyer dashboard statistics
+router.get('/dashboard', verifyToken, authorizeRoles('BUYER'), buyerController.getDashboard);
+
 export default router;

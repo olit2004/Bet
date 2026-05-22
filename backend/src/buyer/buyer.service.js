@@ -135,3 +135,47 @@ export const verifyFayda = async (userId, faydaId) => {
 
   return updatedUser;
 };
+
+export const getBuyerDashboard = async (userId) => {
+  // We need to fetch aggregate data for the buyer
+  // The buyer ID is the same as the userId.
+  const buyer = await prisma.buyer.findUnique({
+    where: { id: userId },
+    include: {
+      bids: {
+        select: { id: true, amount: true, status: true, property: { select: { title: true, status: true } } }
+      },
+      proposals: {
+        select: { id: true, amount: true, status: true, property: { select: { title: true, status: true } } }
+      }
+    }
+  });
+
+  if (!buyer) {
+    const error = new Error('Buyer profile not found.');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  // Calculate statistics
+  const totalBids = buyer.bids.length;
+  const activeBids = buyer.bids.filter(bid => bid.status === 'ACTIVE').length;
+  const acceptedBids = buyer.bids.filter(bid => bid.status === 'ACCEPTED').length;
+
+  const totalProposals = buyer.proposals.length;
+  const pendingProposals = buyer.proposals.filter(prop => prop.status === 'PENDING').length;
+  const acceptedProposals = buyer.proposals.filter(prop => prop.status === 'ACCEPTED').length;
+
+  return {
+    statistics: {
+      totalBids,
+      activeBids,
+      acceptedBids,
+      totalProposals,
+      pendingProposals,
+      acceptedProposals
+    },
+    recentBids: buyer.bids.slice(0, 5), // Return the 5 most recent bids
+    recentProposals: buyer.proposals.slice(0, 5) // Return the 5 most recent proposals
+  };
+};
