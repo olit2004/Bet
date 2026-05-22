@@ -13,16 +13,65 @@ class ProposalsController {
     }
   }
 
+  async getMyProposals(req, res, next) {
+    try {
+      const bidderId = req.user.id;
+      const proposals = await proposalsService.getProposalsByBidder(bidderId);
+      res.status(200).json({
+        success: true,
+        data: proposals,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async createProposal(req, res, next) {
+    try {
+      const { propertyId } = req.params;
+      const { amount, details } = req.body;
+      const bidderId = req.user.id;
+
+      let fileUrl = null;
+      if (req.file) {
+        fileUrl = `/public/uploads/${req.file.filename}`;
+      }
+
+      const proposalAmount = amount ? parseFloat(amount) : null;
+      if (amount && isNaN(proposalAmount)) {
+        return res.status(400).json({ success: false, message: 'Invalid amount provided.' });
+      }
+
+      const finalDetails = details || 'Counter offer or proposal submitted.';
+
+      const newProposal = await proposalsService.createProposal(
+        propertyId,
+        bidderId,
+        proposalAmount,
+        finalDetails,
+        fileUrl
+      );
+
+      res.status(201).json({
+        success: true,
+        message: 'Your proposal has been submitted successfully.',
+        data: newProposal
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async updateProposalStatus(req, res, next) {
     try {
       const { status } = req.body;
+      const sellerId = req.user.id;
       
-      // Validate that the new status is allowed by the schema
       if (!['PENDING', 'ACCEPTED', 'REJECTED'].includes(status)) {
         return res.status(400).json({ success: false, message: 'Invalid status. Must be PENDING, ACCEPTED, or REJECTED.' });
       }
 
-      const proposal = await proposalsService.updateProposalStatus(req.params.id, status);
+      const proposal = await proposalsService.updateProposalStatus(req.params.id, status, sellerId);
       
       res.status(200).json({
         success: true,
