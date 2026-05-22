@@ -1,5 +1,5 @@
-const bidService = require('./bid.service');
-const prisma = require('../shared/db');
+import * as bidService from './bid.service.js';
+import prisma from '../shared/prisma.client.js';
 
 /**
  * Place a new bid on a property.
@@ -113,9 +113,4 @@ async function getPropertyBids(req, res, next) {
   }
 }
 
-module.exports = {
-  placeBid,
-  retractBid,
-  acceptBid,
-  getPropertyBids
-};
+export { getPropertyBids, placeBid, retractBid, acceptBid };
