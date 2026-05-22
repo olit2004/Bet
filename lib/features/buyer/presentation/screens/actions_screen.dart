@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/core/widgets/app_logo.dart';
-import 'package:bet/core/property/providers/property_provider.dart';
-import 'package:bet/core/property/models/property_model.dart';
-import 'package:bet/features/buyer/buyer_routes.dart';
+import 'package:bet/features/buyer/application/buyer_providers.dart';
 
-class ActionsScreen extends StatefulWidget {
+class ActionsScreen extends ConsumerStatefulWidget {
   const ActionsScreen({super.key});
 
   @override
-  State<ActionsScreen> createState() => _ActionsScreenState();
+  ConsumerState<ActionsScreen> createState() => _ActionsScreenState();
 }
 
-class _ActionsScreenState extends State<ActionsScreen> with SingleTickerProviderStateMixin {
+class _ActionsScreenState extends ConsumerState<ActionsScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -35,8 +34,36 @@ class _ActionsScreenState extends State<ActionsScreen> with SingleTickerProvider
     super.dispose();
   }
 
+  String _formatCurrency(num amount) {
+    final formatter = NumberFormat('#,##0', 'en_US');
+    return '${formatter.format(amount)} ETB';
+  }
+
+  String _formatDate(String dateStr) {
+    try {
+      final date = DateTime.parse(dateStr);
+      return DateFormat('MMMM d, yyyy').format(date).toUpperCase();
+    } catch (_) {
+      return dateStr;
+    }
+  }
+
+  String _timeLeft(String? endTimeStr) {
+    if (endTimeStr == null) return 'No deadline';
+    try {
+      final endTime = DateTime.parse(endTimeStr);
+      final diff = endTime.difference(DateTime.now());
+      if (diff.isNegative) return 'Ended';
+      return '${diff.inDays}d ${diff.inHours % 24}h ${diff.inMinutes % 60}m';
+    } catch (_) {
+      return 'N/A';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final dashboardAsync = ref.watch(buyerDashboardProvider);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -67,22 +94,42 @@ class _ActionsScreenState extends State<ActionsScreen> with SingleTickerProvider
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // 1. Stats Grid
+            // 1. Stats Grid — from dashboard provider
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-              child: GridView.count(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisCount: 2,
-                crossAxisSpacing: 20,
-                mainAxisSpacing: 20,
-                childAspectRatio: 1.4,
-                children: [
-                  _buildStatCard('12', 'ACTIVE BIDS', const Color(0xFF374CE2)),
-                  _buildStatCard('4', 'PROPOSALS', const Color(0xFF059669)),
-                  _buildStatCard('\$4.2M', 'ASSET VALUE', const Color(0xFF05345C)),
-                  _buildStatCard('7', 'HOUSES RENTED', const Color(0xFF9CA3AF)),
-                ],
+              child: dashboardAsync.when(
+                data: (dashboard) => GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 20,
+                  mainAxisSpacing: 20,
+                  childAspectRatio: 1.4,
+                  children: [
+                    _buildStatCard('${dashboard.activeBids}', 'ACTIVE BIDS', const Color(0xFF374CE2)),
+                    _buildStatCard('${dashboard.totalProposals}', 'PROPOSALS', const Color(0xFF059669)),
+                    _buildStatCard('${dashboard.totalBids}', 'TOTAL BIDS', const Color(0xFF05345C)),
+                    _buildStatCard('${dashboard.acceptedBids}', 'ACCEPTED BIDS', const Color(0xFF9CA3AF)),
+                  ],
+                ),
+                loading: () => const SizedBox(
+                  height: 160,
+                  child: Center(child: CircularProgressIndicator(color: Color(0xFF374CE2))),
+                ),
+                error: (e, _) => GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 20,
+                  mainAxisSpacing: 20,
+                  childAspectRatio: 1.4,
+                  children: [
+                    _buildStatCard('0', 'ACTIVE BIDS', const Color(0xFF374CE2)),
+                    _buildStatCard('0', 'PROPOSALS', const Color(0xFF059669)),
+                    _buildStatCard('0', 'TOTAL BIDS', const Color(0xFF05345C)),
+                    _buildStatCard('0', 'ACCEPTED BIDS', const Color(0xFF9CA3AF)),
+                  ],
+                ),
               ),
             ),
             
@@ -111,7 +158,7 @@ class _ActionsScreenState extends State<ActionsScreen> with SingleTickerProvider
                 ? _buildActiveBidsList() 
                 : _buildHistoryList(),
             
-            const SizedBox(height: 32), // Add bottom padding for better scroll experience
+            const SizedBox(height: 32),
           ],
         ),
       ),
@@ -182,84 +229,214 @@ class _ActionsScreenState extends State<ActionsScreen> with SingleTickerProvider
   }
 
   Widget _buildActiveBidsList() {
-    final properties = context.watch<PropertyProvider>().properties;
+    final bidsAsync = ref.watch(myBidsProvider);
     
-    if (properties.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    return bidsAsync.when(
+      data: (bids) {
+        final activeBids = bids.where((b) => b['status'] == 'ACTIVE').toList();
+        
+        if (activeBids.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+            child: Center(
+              child: Column(
+                children: [
+                  Icon(Icons.gavel_outlined, size: 48, color: AppColors.secondaryText.withValues(alpha: 0.3)),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No active bids yet',
+                    style: GoogleFonts.manrope(
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.secondaryText,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Place a bid on a property to see it here',
+                    style: GoogleFonts.inter(color: AppColors.secondaryText, fontSize: 13),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
 
-    final villa = properties.firstWhere((p) => p.id == '1', orElse: () => properties.first);
-    final apartments = properties.firstWhere((p) => p.id == '2', orElse: () => properties.first);
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          itemCount: activeBids.length,
+          itemBuilder: (context, index) {
+            final bid = activeBids[index];
+            final property = bid['property'] as Map<String, dynamic>?;
+            final title = property?['title'] ?? 'Unknown Property';
+            final location = '${property?['locale'] ?? ''} • ${property?['sqFootage']?.toString() ?? ''} SQM';
+            final endTime = property?['endTime'] as String?;
 
-    return ListView(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      children: [
-        _buildBidCard(
-          title: 'Exquisite Villa',
-          location: 'Garment • 500 SQM',
-          price: '13,100,000 ETB',
-          timeLeft: '2d 14h 22m',
-          status: 'WINNING BID',
-          statusColor: const Color(0xFFD1FAE5),
-          statusTextColor: const Color(0xFF059669),
-          onTap: () => context.push('${BuyerRoutes.detail}/${villa.id}', extra: villa),
+            return _buildBidCard(
+              title: title,
+              location: location,
+              price: _formatCurrency(bid['amount'] as num),
+              timeLeft: _timeLeft(endTime),
+              status: 'ACTIVE BID',
+              statusColor: const Color(0xFFD1FAE5),
+              statusTextColor: const Color(0xFF059669),
+              onTap: () {
+                if (property != null) {
+                  context.push('/property/${property['id']}');
+                }
+              },
+            );
+          },
+        );
+      },
+      loading: () => const Padding(
+        padding: EdgeInsets.symmetric(vertical: 40),
+        child: Center(child: CircularProgressIndicator(color: Color(0xFF374CE2))),
+      ),
+      error: (e, _) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: Center(
+          child: Column(
+            children: [
+              Icon(Icons.gavel_outlined, size: 48, color: AppColors.secondaryText.withValues(alpha: 0.3)),
+              const SizedBox(height: 16),
+              Text(
+                'No active bids yet',
+                style: GoogleFonts.manrope(
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.secondaryText,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Place a bid on a property to see it here',
+                style: GoogleFonts.inter(color: AppColors.secondaryText, fontSize: 13),
+              ),
+            ],
+          ),
         ),
-        _buildBidCard(
-          title: 'Elegant Apartments',
-          location: 'Tsehay Realstate • 3 Units',
-          price: '7,450,000 ETB',
-          status: 'OUTBID',
-          statusColor: const Color(0xFFFFEDD5),
-          statusTextColor: const Color(0xFFEA580C),
-          showRaiseButton: apartments.category == PropertyCategory.buy,
-          onTap: () => context.push('${BuyerRoutes.detail}/${apartments.id}', extra: apartments),
-        ),
-      ],
+      ),
     );
   }
 
   Widget _buildHistoryList() {
-    final properties = context.watch<PropertyProvider>().properties;
-    
-    if (properties.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    final bidsAsync = ref.watch(myBidsProvider);
 
-    final villa = properties.firstWhere((p) => p.id == '1', orElse: () => properties.first);
-    final apartments = properties.firstWhere((p) => p.id == '2', orElse: () => properties.first);
+    return bidsAsync.when(
+      data: (bids) {
+        // History = non-ACTIVE bids (RETRACTED, ACCEPTED, DECLINED)
+        final historyBids = bids.where((b) => b['status'] != 'ACTIVE').toList();
 
-    return ListView(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      children: [
-        _buildHistoryCard(
-          title: 'Elegant Apartments',
-          description: 'Look for the best apartments in Addis Ababa. We provide all the things you require including in house equipments.',
-          date: 'JULY 12, 2023',
-          badgeText: 'RENTED',
-          badgeColor: const Color(0xFFE0E7FF),
-          badgeTextColor: const Color(0xFF374CE2),
-          price: '30,000 ETB',
-          icon: Icons.description_outlined,
-          iconColor: const Color(0xFF374CE2),
-          onTap: () => context.push('${BuyerRoutes.detail}/${apartments.id}', extra: apartments),
+        if (historyBids.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+            child: Center(
+              child: Column(
+                children: [
+                  Icon(Icons.history, size: 48, color: AppColors.secondaryText.withValues(alpha: 0.3)),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No history yet',
+                    style: GoogleFonts.manrope(
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.secondaryText,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          itemCount: historyBids.length,
+          itemBuilder: (context, index) {
+            final bid = historyBids[index];
+            final property = bid['property'] as Map<String, dynamic>?;
+            final status = bid['status'] as String? ?? 'UNKNOWN';
+            final title = property?['title'] ?? 'Unknown Property';
+            final description = property?['description'] ?? '';
+
+            Color badgeColor;
+            Color badgeTextColor;
+            IconData icon;
+            Color iconColor;
+
+            switch (status) {
+              case 'ACCEPTED':
+                badgeColor = const Color(0xFFD1FAE5);
+                badgeTextColor = const Color(0xFF059669);
+                icon = Icons.check_circle_outline;
+                iconColor = const Color(0xFF059669);
+                break;
+              case 'DECLINED':
+                badgeColor = const Color(0xFFFFEDD5);
+                badgeTextColor = const Color(0xFFEA580C);
+                icon = Icons.cancel_outlined;
+                iconColor = const Color(0xFFEA580C);
+                break;
+              case 'RETRACTED':
+                badgeColor = const Color(0xFFE0E7FF);
+                badgeTextColor = const Color(0xFF374CE2);
+                icon = Icons.undo;
+                iconColor = const Color(0xFF374CE2);
+                break;
+              default:
+                badgeColor = const Color(0xFFE5E7EB);
+                badgeTextColor = const Color(0xFF6B7280);
+                icon = Icons.info_outline;
+                iconColor = const Color(0xFF6B7280);
+            }
+
+            return _buildHistoryCard(
+              title: title,
+              description: description.length > 100 ? '${description.substring(0, 100)}...' : description,
+              date: _formatDate(bid['createdAt'] ?? ''),
+              badgeText: status,
+              badgeColor: badgeColor,
+              badgeTextColor: badgeTextColor,
+              price: _formatCurrency(bid['amount'] as num),
+              icon: icon,
+              iconColor: iconColor,
+              onTap: () {
+                if (property != null) {
+                  context.push('/property/${property['id']}');
+                }
+              },
+            );
+          },
+        );
+      },
+      loading: () => const Padding(
+        padding: EdgeInsets.symmetric(vertical: 40),
+        child: Center(child: CircularProgressIndicator(color: Color(0xFF374CE2))),
+      ),
+      error: (e, _) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: Center(
+          child: Column(
+            children: [
+              Icon(Icons.history, size: 48, color: AppColors.secondaryText.withValues(alpha: 0.3)),
+              const SizedBox(height: 16),
+              Text(
+                'No history yet',
+                style: GoogleFonts.manrope(
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.secondaryText,
+                  fontSize: 16,
+                ),
+              ),
+            ],
+          ),
         ),
-        _buildHistoryCard(
-          title: 'Grand Villa',
-          description: 'Sky-scraping houses for your needs. We provide the best that exists in the whole country wide.',
-          date: 'JUNE 28, 2023',
-          badgeText: 'BOUGHT',
-          badgeColor: const Color(0xFFD1FAE5),
-          badgeTextColor: const Color(0xFF059669),
-          price: '10,420,000 ETB',
-          icon: Icons.check_circle_outline,
-          iconColor: const Color(0xFF059669),
-          onTap: () => context.push('${BuyerRoutes.detail}/${villa.id}', extra: villa),
-        ),
-      ],
+      ),
     );
   }
 

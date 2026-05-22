@@ -3,11 +3,17 @@ import 'package:bet/features/buyer/presentation/screens/property_details_screen.
 import 'package:bet/features/buyer/presentation/screens/place_bid_screen.dart';
 import 'package:bet/features/buyer/presentation/screens/counter_offer_screen.dart';
 import 'package:bet/core/property/models/property_model.dart';
+import 'package:bet/features/buyer/presentation/screens/profile_screen.dart';
+import 'package:bet/features/buyer/presentation/screens/dashboard_screen.dart';
+import 'package:bet/features/buyer/presentation/screens/fayda_upload_page.dart';
 
 class BuyerRoutes {
   static const String detail = '/property';
   static const String placeBid = '/place-bid';
   static const String counterOffer = '/counter-offer';
+  static const String profile = '/profile';
+  static const String dashboard = '/dashboard';
+  static const String faydaUpload = '/fayda-upload';
 
   static List<RouteBase> get routes => [
         // 1. Property Details
@@ -46,6 +52,24 @@ class BuyerRoutes {
             final property = state.extra as Property;
             return CounterOfferScreen(property: property);
           },
+        ),
+        
+        GoRoute(
+          name: 'buyer-profile',
+          path: profile,
+          builder: (context, state) => const ProfileScreen(),
+        ),
+
+        GoRoute(
+          name: 'buyer-dashboard',
+          path: dashboard,
+          builder: (context, state) => const DashboardScreen(),
+        ),
+
+        GoRoute(
+          name: 'buyer-fayda',
+          path: faydaUpload,
+          builder: (context, state) => const FaydaUploadPage(),
         ),
       ];
 }

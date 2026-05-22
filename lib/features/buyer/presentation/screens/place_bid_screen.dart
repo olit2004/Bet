@@ -1,6 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/core/widgets/custom_button.dart';
 import 'package:bet/core/widgets/custom_text_field.dart';
@@ -9,8 +12,9 @@ import 'package:bet/core/property/widgets/bid_info_card.dart';
 import 'package:bet/core/property/widgets/upload_container.dart';
 import 'package:bet/core/property/widgets/legal_notice_card.dart';
 import 'package:bet/core/widgets/app_logo.dart';
+import 'package:bet/features/buyer/application/buyer_providers.dart';
 
-class PlaceBidScreen extends StatefulWidget {
+class PlaceBidScreen extends ConsumerStatefulWidget {
   final Property property;
 
   const PlaceBidScreen({
@@ -19,22 +23,102 @@ class PlaceBidScreen extends StatefulWidget {
   });
 
   @override
-  State<PlaceBidScreen> createState() => _PlaceBidScreenState();
+  ConsumerState<PlaceBidScreen> createState() => _PlaceBidScreenState();
 }
 
-class _PlaceBidScreenState extends State<PlaceBidScreen> {
+class _PlaceBidScreenState extends ConsumerState<PlaceBidScreen> {
   final TextEditingController _bidController = TextEditingController();
+  
+  bool _isLoading = false;
+  
+  // File state
+  String? _filePath;
+  List<int>? _fileBytes;
+  String? _fileName;
 
   @override
   void initState() {
     super.initState();
-    _bidController.text = '4,860,000'; 
+    _bidController.text = widget.property.price.toStringAsFixed(0);
   }
 
   @override
   void dispose() {
     _bidController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickFile() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
+        withData: kIsWeb,
+      );
+
+      if (result != null) {
+        setState(() {
+          _fileName = result.files.single.name;
+          if (kIsWeb) {
+            _fileBytes = result.files.single.bytes;
+            _filePath = null;
+          } else {
+            _filePath = result.files.single.path;
+            _fileBytes = null;
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error picking file: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _submitBid() async {
+    final amountText = _bidController.text.replaceAll(',', '');
+    final amount = double.tryParse(amountText);
+    
+    if (amount == null || amount <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid bid amount')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final bidDataSource = ref.read(bidRemoteDataSourceProvider);
+      
+      await bidDataSource.placeBid(
+        propertyId: widget.property.id,
+        amount: amount,
+        bankStatementPath: _filePath,
+        bankStatementBytes: _fileBytes,
+        bankStatementFileName: _fileName,
+      );
+      
+      // Invalidate the bids and dashboard providers so they refresh on return
+      ref.invalidate(myBidsProvider);
+      ref.invalidate(buyerDashboardProvider);
+      
+      if (mounted) {
+        _showSuccessDialog();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to place bid: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
@@ -62,7 +146,7 @@ class _PlaceBidScreenState extends State<PlaceBidScreen> {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(24),
-                  child: Image.asset(
+                  child: Image.network(
                     widget.property.imageUrls.first,
                     height: 220,
                     width: double.infinity,
@@ -129,10 +213,10 @@ class _PlaceBidScreenState extends State<PlaceBidScreen> {
             const SizedBox(height: 32),
             Row(
               children: [
-                const Expanded(
+                Expanded(
                   child: BidInfoCard(
-                    label: 'Highest Bid',
-                    value: '4,850,000 ETB',
+                    label: 'Starting Price',
+                    value: '${widget.property.price.toStringAsFixed(0)} ETB',
                     isDark: true,
                   ),
                 ),
@@ -140,7 +224,7 @@ class _PlaceBidScreenState extends State<PlaceBidScreen> {
                 Expanded(
                   child: BidInfoCard(
                     label: 'Ends In',
-                    value: '02h 45m',
+                    value: 'N/A', // Could calculate from property.endTime if available
                     icon: Icons.timer_outlined,
                   ),
                 ),
@@ -177,15 +261,7 @@ class _PlaceBidScreenState extends State<PlaceBidScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Minimum increment: \$10,000',
-                  style: GoogleFonts.inter(
-                    color: AppColors.secondaryText,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Text(
-                  '12 active bidders',
+                  'Must be > Starting Price',
                   style: GoogleFonts.inter(
                     color: AppColors.secondaryText,
                     fontSize: 11,
@@ -205,34 +281,21 @@ class _PlaceBidScreenState extends State<PlaceBidScreen> {
             ),
             const SizedBox(height: 12),
             UploadContainer(
-              title: 'Select your Bank Statement to upload',
-              subtitle: 'Only PDF format is Allowed:\nCBE-Bank_Statement_Form_Validated.pdf',
-              onBrowse: () {},
-            ),
-            const SizedBox(height: 24),
-            Text(
-              '(Optional) Upload Your Proposal',
-              style: GoogleFonts.manrope(
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
-                color: AppColors.primaryText,
-              ),
-            ),
-            const SizedBox(height: 12),
-            UploadContainer(
-              title: 'Select a proposal to upload',
-              subtitle: 'Only PDF format is Allowed:\nCBE-Bank_Statement_Form_Validated.pdf',
-              onBrowse: () {},
+              title: _fileName ?? 'Select your Bank Statement to upload',
+              subtitle: 'PDF/Image formats are allowed',
+              onBrowse: _pickFile,
             ),
             const SizedBox(height: 32),
             const LegalNoticeCard(
               text: 'Bidding commits you to a legal purchase agreement. Funds must be verified within 24 hours of winning.',
             ),
             const SizedBox(height: 32),
-            CustomButton(
-              text: 'Submit',
-              onPressed: _showSuccessDialog,
-            ),
+            _isLoading 
+              ? const Center(child: CircularProgressIndicator(color: AppColors.primaryBlue))
+              : CustomButton(
+                  text: 'Submit Bid',
+                  onPressed: _submitBid,
+                ),
             const SizedBox(height: 40),
           ],
         ),
@@ -243,6 +306,7 @@ class _PlaceBidScreenState extends State<PlaceBidScreen> {
   void _showSuccessDialog() {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Padding(
@@ -269,7 +333,7 @@ class _PlaceBidScreenState extends State<PlaceBidScreen> {
               ),
               const SizedBox(height: 12),
               Text(
-                'Your proposal has been submitted successfully.',
+                'Your bid has been submitted successfully.',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   color: AppColors.secondaryText,
@@ -282,7 +346,7 @@ class _PlaceBidScreenState extends State<PlaceBidScreen> {
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.pop(context); // Close dialog
-                    context.pop(); // Go back to previous screen
+                    context.pop(); // Go back to property screen
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryBlue,

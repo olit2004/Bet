@@ -1,6 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/core/widgets/custom_button.dart';
 import 'package:bet/core/widgets/custom_text_field.dart';
@@ -9,8 +12,9 @@ import 'package:bet/core/property/widgets/bid_info_card.dart';
 import 'package:bet/core/property/widgets/upload_container.dart';
 import 'package:bet/core/property/widgets/legal_notice_card.dart';
 import 'package:bet/core/widgets/app_logo.dart';
+import 'package:bet/features/buyer/application/buyer_providers.dart';
 
-class CounterOfferScreen extends StatefulWidget {
+class CounterOfferScreen extends ConsumerStatefulWidget {
   final Property property;
 
   const CounterOfferScreen({
@@ -19,22 +23,107 @@ class CounterOfferScreen extends StatefulWidget {
   });
 
   @override
-  State<CounterOfferScreen> createState() => _CounterOfferScreenState();
+  ConsumerState<CounterOfferScreen> createState() => _CounterOfferScreenState();
 }
 
-class _CounterOfferScreenState extends State<CounterOfferScreen> {
+class _CounterOfferScreenState extends ConsumerState<CounterOfferScreen> {
   final TextEditingController _offerController = TextEditingController();
+  final TextEditingController _detailsController = TextEditingController();
+
+  bool _isLoading = false;
+  
+  // File state
+  String? _filePath;
+  List<int>? _fileBytes;
+  String? _fileName;
 
   @override
   void initState() {
     super.initState();
-    _offerController.text = '15,000'; // Default from Figma
+    _offerController.text = widget.property.price.toStringAsFixed(0);
+    _detailsController.text = "I'm offering to rent this property with a 6-month upfront payment.";
   }
 
   @override
   void dispose() {
     _offerController.dispose();
+    _detailsController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickFile() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
+        withData: kIsWeb,
+      );
+
+      if (result != null) {
+        setState(() {
+          _fileName = result.files.single.name;
+          if (kIsWeb) {
+            _fileBytes = result.files.single.bytes;
+            _filePath = null;
+          } else {
+            _filePath = result.files.single.path;
+            _fileBytes = null;
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error picking file: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _submitProposal() async {
+    final amountText = _offerController.text.replaceAll(',', '');
+    final amount = double.tryParse(amountText);
+    
+    final details = _detailsController.text.trim();
+    if (details.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter proposal details')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final proposalDataSource = ref.read(proposalRemoteDataSourceProvider);
+      
+      await proposalDataSource.createProposal(
+        propertyId: widget.property.id,
+        amount: amount,
+        details: details,
+        proposalFilePath: _filePath,
+        proposalFileBytes: _fileBytes,
+        proposalFileName: _fileName,
+      );
+      
+      // Invalidate the proposals and dashboard providers so they refresh
+      ref.invalidate(myProposalsProvider);
+      ref.invalidate(buyerDashboardProvider);
+      
+      if (mounted) {
+        _showSuccessDialog();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to submit proposal: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
@@ -61,7 +150,7 @@ class _CounterOfferScreenState extends State<CounterOfferScreen> {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(24),
-                  child: Image.asset(
+                  child: Image.network(
                     widget.property.imageUrls.first,
                     height: 220,
                     width: double.infinity,
@@ -127,17 +216,17 @@ class _CounterOfferScreenState extends State<CounterOfferScreen> {
             const SizedBox(height: 32),
             Row(
               children: [
-                const Expanded(
+                Expanded(
                   child: BidInfoCard(
-                    label: 'Monthly Cost',
-                    value: '15,000 ETB',
+                    label: 'Asking Price',
+                    value: '${widget.property.price.toStringAsFixed(0)} ETB',
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: BidInfoCard(
-                    label: 'Released At',
-                    value: 'January 7, 2026',
+                    label: 'Available',
+                    value: 'Now',
                     icon: Icons.timer_outlined,
                   ),
                 ),
@@ -145,7 +234,7 @@ class _CounterOfferScreenState extends State<CounterOfferScreen> {
             ),
             const SizedBox(height: 32),
             Text(
-              'Counter Offer',
+              'Counter Offer Amount',
               style: GoogleFonts.manrope(
                 fontSize: 16,
                 fontWeight: FontWeight.w800,
@@ -169,31 +258,33 @@ class _CounterOfferScreenState extends State<CounterOfferScreen> {
                 ),
               ),
             ),
+            const SizedBox(height: 24),
+            Text(
+              'Proposal Details',
+              style: GoogleFonts.manrope(
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+                color: AppColors.primaryText,
+              ),
+            ),
             const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Minimum increment: \$10,000',
-                  style: GoogleFonts.inter(
-                    color: AppColors.secondaryText,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                  ),
+            TextField(
+              controller: _detailsController,
+              maxLines: 4,
+              decoration: InputDecoration(
+                hintText: 'Describe your terms...',
+                filled: true,
+                fillColor: AppColors.inputFill,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
                 ),
-                Text(
-                  '1 Counter Offer',
-                  style: GoogleFonts.inter(
-                    color: AppColors.secondaryText,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
+                contentPadding: const EdgeInsets.all(16),
+              ),
             ),
             const SizedBox(height: 32),
             Text(
-              'Select a proposal to upload',
+              '(Optional) Upload Proposal Document',
               style: GoogleFonts.manrope(
                 fontSize: 14,
                 fontWeight: FontWeight.w800,
@@ -202,19 +293,21 @@ class _CounterOfferScreenState extends State<CounterOfferScreen> {
             ),
             const SizedBox(height: 12),
             UploadContainer(
-              title: 'Select a proposal to upload',
-              subtitle: 'Only PDF format is Allowed:\nCBE-Bank_Statement_Form_Validated.pdf',
-              onBrowse: () {},
+              title: _fileName ?? 'Select a proposal to upload',
+              subtitle: 'PDF/Image formats are allowed',
+              onBrowse: _pickFile,
             ),
             const SizedBox(height: 32),
             const LegalNoticeCard(
-              text: 'Counter offering commits you to a legal rent agreement.',
+              text: 'Counter offering commits you to a legal agreement if accepted by the seller.',
             ),
             const SizedBox(height: 32),
-            CustomButton(
-              text: 'Submit',
-              onPressed: _showSuccessDialog,
-            ),
+            _isLoading 
+              ? const Center(child: CircularProgressIndicator(color: AppColors.primaryBlue))
+              : CustomButton(
+                  text: 'Submit Proposal',
+                  onPressed: _submitProposal,
+                ),
             const SizedBox(height: 40),
           ],
         ),
@@ -225,6 +318,7 @@ class _CounterOfferScreenState extends State<CounterOfferScreen> {
   void _showSuccessDialog() {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Padding(
@@ -264,7 +358,7 @@ class _CounterOfferScreenState extends State<CounterOfferScreen> {
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.pop(context); // Close dialog
-                    context.pop(); // Go back to previous screen
+                    context.pop(); // Go back to property screen
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryBlue,
