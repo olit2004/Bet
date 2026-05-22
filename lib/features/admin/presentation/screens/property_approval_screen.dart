@@ -17,6 +17,7 @@ class _PropertiesScreenState extends State<PropertiesScreen> {
   List<dynamic> properties = [];
   bool isLoading = true;
   String errorMessage = "";
+  String currentFilter = "All";
 
   @override
   void initState() {
@@ -55,6 +56,16 @@ class _PropertiesScreenState extends State<PropertiesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    List<dynamic> filteredProperties = properties.where((p) {
+      if (currentFilter == 'All') return true;
+      final title = (p['title'] ?? '').toString().toLowerCase();
+      final desc = (p['description'] ?? '').toString().toLowerCase();
+      bool isCommercial = title.contains('office') || title.contains('shop') || title.contains('commercial') || desc.contains('office') || desc.contains('commercial');
+      if (currentFilter == 'Commercial') return isCommercial;
+      if (currentFilter == 'Residential') return !isCommercial;
+      return true;
+    }).toList();
+
     return Scaffold(
       backgroundColor: Color.fromRGBO(248, 249, 255, 1),
       appBar: _buildAppBar(context),
@@ -75,15 +86,15 @@ class _PropertiesScreenState extends State<PropertiesScreen> {
                       _filterButtons(),
                       SizedBox(height: 20),
                       
-                      if (properties.isEmpty)
+                      if (filteredProperties.isEmpty)
                         const Center(
                           child: Padding(
                             padding: EdgeInsets.all(40.0),
-                            child: Text("No properties pending review.", style: TextStyle(fontSize: 18)),
+                            child: Text("No properties found for this filter.", style: TextStyle(fontSize: 18)),
                           ),
                         ),
                         
-                      ...properties.map((property) {
+                      ...filteredProperties.map((property) {
                         return _houseCard(
                           context,
                           property,
@@ -158,28 +169,35 @@ class _PropertiesScreenState extends State<PropertiesScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _buildFilterButton('All', isActive: true),
+        _buildFilterButton('All', isActive: currentFilter == 'All'),
         const SizedBox(width: 10),
-        _buildFilterButton('Residential'),
+        _buildFilterButton('Residential', isActive: currentFilter == 'Residential'),
         const SizedBox(width: 10),
-        _buildFilterButton('Commercial'),
+        _buildFilterButton('Commercial', isActive: currentFilter == 'Commercial'),
       ],
     );
   }
 
   Widget _buildFilterButton(String text, {bool isActive = false}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      decoration: BoxDecoration(
-        color: isActive ? const Color(0xFF4C5DF4) : Colors.grey[200],
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: isActive ? Colors.white : Colors.black,
-          fontWeight: FontWeight.w600,
-          fontSize: 20,
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          currentFilter = text;
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        decoration: BoxDecoration(
+          color: isActive ? const Color(0xFF4C5DF4) : Colors.grey[200],
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            color: isActive ? Colors.white : Colors.black,
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
+          ),
         ),
       ),
     );
