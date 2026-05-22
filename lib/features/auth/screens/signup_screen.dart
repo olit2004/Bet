@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/core/widgets/custom_app_bar.dart';
 import 'package:bet/core/widgets/custom_button.dart';
 import 'package:bet/core/widgets/custom_text_field.dart';
+import '../application/providers/auth_provider.dart';
 
-class SignupScreen extends StatefulWidget {
+class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
 
   @override
-  State<SignupScreen> createState() => _SignupScreenState();
+  ConsumerState<SignupScreen> createState() => _SignupScreenState();
 }
 
-class _SignupScreenState extends State<SignupScreen> {
+class _SignupScreenState extends ConsumerState<SignupScreen> {
   final _buyerFormKey = GlobalKey<FormState>();
   final _sellerFormKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
@@ -38,6 +40,29 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Listen for auth state changes
+    ref.listen<AuthStateData>(authNotifierProvider, (previous, next) {
+      if (next.status == AuthState.error && next.errorMessage != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.errorMessage!),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } else if (next.status == AuthState.authenticated) {
+        // Handle role-based routing
+        if (next.user?.role == 'ADMIN') {
+          context.go('/admin-dashboard');
+        } else if (next.user?.role == 'SELLER') {
+          context.go('/seller-dashboard');
+        } else {
+          context.go('/home');
+        }
+      }
+    });
+
+    final authState = ref.watch(authNotifierProvider);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: const CustomAppBar(showBackButton: true),
@@ -204,19 +229,22 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                         const SizedBox(height: 32),
                         CustomButton(
-                          text: 'Create Account',
-                          onPressed: () {
-                            final activeFormKey = _isBuyer ? _buyerFormKey : _sellerFormKey;
-                            if (activeFormKey.currentState!.validate()) {
-                              if (_emailController.text == 'admin@beth.com') {
-                                context.go('/admin-dashboard');
-                              } else if (_isBuyer) {
-                                context.go('/home');
-                              } else {
-                                context.go('/seller-dashboard');
-                              }
-                            }
-                          },
+                          text: authState.status == AuthState.loading ? 'Creating Account...' : 'Create Account',
+                          onPressed: authState.status == AuthState.loading
+                              ? null
+                              : () {
+                                  final activeFormKey = _isBuyer ? _buyerFormKey : _sellerFormKey;
+                                  if (activeFormKey.currentState!.validate()) {
+                                    ref.read(authNotifierProvider.notifier).register(
+                                      email: _emailController.text,
+                                      password: _passwordController.text,
+                                      role: _isBuyer ? 'BUYER' : 'SELLER',
+                                      name: _nameController.text,
+                                      phone: _phoneController.text,
+                                      company: _isBuyer ? null : _companyController.text.isNotEmpty ? _companyController.text : null,
+                                    );
+                                  }
+                                },
                         ),
                         const SizedBox(height: 24),
                         _buildDivider(),
