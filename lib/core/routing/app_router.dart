@@ -13,25 +13,32 @@ import 'package:bet/features/seller/seller_routes.dart';
 import 'package:bet/features/profile/presentation/screens/settings_screen.dart';
 import 'package:bet/core/widgets/main_wrapper.dart';
 
-class GoRouterRefreshStream extends ChangeNotifier {
-  GoRouterRefreshStream(Stream<dynamic> stream) {
-    notifyListeners();
-    _subscription = stream.asBroadcastStream().listen(
-      (dynamic _) => notifyListeners(),
-    );
+class GoRouterRefreshNotifier extends ChangeNotifier {
+  GoRouterRefreshNotifier(Ref ref) {
+    _subscription = ref.listen<AuthStateData>(authNotifierProvider, (_, __) {
+      notifyListeners();
+    });
   }
-  late final StreamSubscription<dynamic> _subscription;
+
+  late final ProviderSubscription<AuthStateData> _subscription;
+
   @override
   void dispose() {
-    _subscription.cancel();
+    _subscription.close();
     super.dispose();
   }
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
+  final refreshNotifier = GoRouterRefreshNotifier(ref);
+  
+  ref.onDispose(() {
+    refreshNotifier.dispose();
+  });
+
   return GoRouter(
     initialLocation: '/',
-    refreshListenable: GoRouterRefreshStream(ref.watch(authNotifierProvider.notifier).stream),
+    refreshListenable: refreshNotifier,
     redirect: (context, state) {
       final authState = ref.read(authNotifierProvider);
       final isAuth = authState.status == AuthState.authenticated;
