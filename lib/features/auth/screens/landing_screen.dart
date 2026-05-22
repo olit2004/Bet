@@ -1,13 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/core/widgets/custom_app_bar.dart';
 import 'package:bet/core/widgets/custom_button.dart';
 import 'package:bet/core/widgets/favorite_button.dart';
+import 'package:bet/core/property/providers/property_provider.dart';
 
-class LandingScreen extends StatelessWidget {
+class LandingScreen extends StatefulWidget {
   const LandingScreen({super.key});
+
+  @override
+  State<LandingScreen> createState() => _LandingScreenState();
+}
+
+class _LandingScreenState extends State<LandingScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<PropertyProvider>().loadProperties();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,18 +45,33 @@ class LandingScreen extends StatelessWidget {
           const SizedBox(width: 8),
         ],
       ),
-      body: SingleChildScrollView(
-        primary: true,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeroSection(context),
-            _buildTrendingAuctions(),
-            _buildVerifiedListingsInfo(),
-            _buildExclusiveRentals(),
-            const SizedBox(height: 40),
-          ],
-        ),
+      body: Consumer<PropertyProvider>(
+        builder: (context, propertyProvider, child) {
+          if (propertyProvider.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final auctions = propertyProvider.properties
+              .where((p) => p.isFeatured || p.price > 40000000)
+              .toList();
+          final rentals = propertyProvider.properties
+              .where((p) => p.categoryName == 'Rent')
+              .toList();
+
+          return SingleChildScrollView(
+            primary: true,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeroSection(context),
+                _buildTrendingAuctions(auctions),
+                _buildVerifiedListingsInfo(),
+                _buildExclusiveRentals(rentals),
+                const SizedBox(height: 40),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -302,7 +332,9 @@ class LandingScreen extends StatelessWidget {
   }
 
   // Trending Auctions Section
-  Widget _buildTrendingAuctions() {
+  Widget _buildTrendingAuctions(List<Property> auctions) {
+    if (auctions.isEmpty) return const SizedBox.shrink();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -324,9 +356,9 @@ class LandingScreen extends StatelessWidget {
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            itemCount: 1,
+            itemCount: auctions.length,
             itemBuilder: (context, index) {
-              return _buildAuctionCard(context);
+              return _buildAuctionCard(context, auctions[index]);
             },
           ),
         ),
@@ -334,7 +366,17 @@ class LandingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAuctionCard(BuildContext context) {
+  Widget _buildAuctionCard(BuildContext context, Property property) {
+    // Format price
+    final numberFormat = NumberFormat('#,###');
+    final formattedPrice = numberFormat.format(property.price);
+    
+    // Find beds and baths
+    final beds = property.specs.firstWhere((s) => s.label.toLowerCase() == 'beds', orElse: () => const PropertySpec(label: 'Beds', value: '0')).value;
+    final baths = property.specs.firstWhere((s) => s.label.toLowerCase() == 'baths', orElse: () => const PropertySpec(label: 'Baths', value: '0')).value;
+    
+    final image = property.imageUrls.isNotEmpty ? property.imageUrls.first : 'assets/images/the glass Pavillion.png';
+
     return Container(
       width: MediaQuery.of(context).size.width - 32,
       margin: const EdgeInsets.only(right: 16, bottom: 8),
@@ -367,7 +409,7 @@ class LandingScreen extends StatelessWidget {
                     top: Radius.circular(20),
                   ),
                   child: Image.asset(
-                    'assets/images/the glass Pavillion.png',
+                    image,
                     fit: BoxFit.cover,
                     width: double.infinity,
                     errorBuilder: (_, _, _) => const Center(
@@ -442,7 +484,7 @@ class LandingScreen extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'ETB 44,250,000',
+                        'ETB $formattedPrice',
                         style: GoogleFonts.inter(
                           color: Colors.white,
                           fontSize: 16,
@@ -463,7 +505,7 @@ class LandingScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'The Glass Pavilion',
+                  property.title,
                   style: GoogleFonts.inter(
                     color: AppColors.primaryText,
                     fontSize: 24,
@@ -481,7 +523,7 @@ class LandingScreen extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      'Bole, Addis Ababa',
+                      property.address,
                       style: GoogleFonts.inter(
                         color: AppColors.secondaryText,
                         fontSize: 13,
@@ -496,7 +538,7 @@ class LandingScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '5',
+                          beds,
                           style: GoogleFonts.inter(
                             fontWeight: FontWeight.bold,
                             fontSize: 24,
@@ -525,7 +567,7 @@ class LandingScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '6',
+                          baths,
                           style: GoogleFonts.inter(
                             fontWeight: FontWeight.bold,
                             fontSize: 24,
@@ -653,7 +695,11 @@ class LandingScreen extends StatelessWidget {
   }
 
   // Exclusive Rentals Section
-  Widget _buildExclusiveRentals() {
+  Widget _buildExclusiveRentals(List<Property> rentals) {
+    if (rentals.isEmpty) return const SizedBox.shrink();
+
+    final numberFormat = NumberFormat('#,###');
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16.0, 48.0, 16.0, 24.0),
       child: Column(
@@ -670,26 +716,15 @@ class LandingScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          _buildRentalCard(
-            'Industrial Loft',
-            'Mebrat-hayl, Adama',
-            '28,200 ETB',
-            'assets/images/Industrial loft.png',
-          ),
-          const SizedBox(height: 20),
-          _buildRentalCard(
-            'Skyline Retreat',
-            'Bole Medanialem',
-            '32,500 ETB',
-            'assets/images/skyline retreat.png',
-          ),
-          const SizedBox(height: 20),
-          _buildRentalCard(
-            'Garden Estate',
-            'CMC, Addis Ababa',
-            '25,000 ETB',
-            'assets/images/garden state.png',
-          ),
+          ...rentals.map((r) => Padding(
+            padding: const EdgeInsets.only(bottom: 20.0),
+            child: _buildRentalCard(
+              r.title,
+              r.address,
+              '${numberFormat.format(r.price)} ETB',
+              r.imageUrls.isNotEmpty ? r.imageUrls.first : 'assets/images/Industrial loft.png',
+            ),
+          )),
         ],
       ),
     );
