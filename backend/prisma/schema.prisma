@@ -1,10 +1,10 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-}
-
-generator client {
-  provider = "prisma-client-js"
 }
 
 model User {
@@ -18,17 +18,17 @@ model User {
   faydaId       String?        @unique // Fayda ID stored locally
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
-  buyer         Buyer?
-  seller        Seller?
   admin         Admin?
-  notifications Notification[]
   auditLogs     AuditLog[]
+  buyer         Buyer?
+  notifications Notification[]
+  seller        Seller?
 }
 
 model Buyer {
   id        String     @id
-  user      User       @relation(fields: [id], references: [id], onDelete: Cascade)
   bids      Bid[]
+  user      User       @relation(fields: [id], references: [id], onDelete: Cascade)
   proposals Proposal[]
 }
 
@@ -66,11 +66,11 @@ model Property {
   endTime     DateTime?  // Auction end date/time
   endingAt    DateTime?
   ownerId     String
-  owner       Seller     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  bids        Bid[]
-  proposals   Proposal[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+  bids        Bid[]
+  owner       Seller     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  proposals   Proposal[]
 }
 
 model Bid {
@@ -103,18 +103,18 @@ model Proposal {
 model Notification {
   id        String   @id @default(uuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   message   String
-  type      String // OUTBID, AUCTION_ENDED, PROPOSAL_UPDATE, EVENT
+  type      String
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model AuditLog {
   id        String   @id @default(uuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   action    String
   details   String
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
