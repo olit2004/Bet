@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/core/widgets/custom_button.dart';
 import 'package:bet/core/widgets/custom_text_field.dart';
+import 'package:bet/features/auth/application/providers/auth_provider.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -283,11 +285,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 }
 
-class DeleteAccountDialog extends StatelessWidget {
+class DeleteAccountDialog extends ConsumerWidget {
   const DeleteAccountDialog({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Padding(
@@ -340,9 +342,8 @@ class DeleteAccountDialog extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      // Logic to delete account
+                      ref.read(authNotifierProvider.notifier).deleteAccount();
                       Navigator.pop(context);
-                      context.go('/login');
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
