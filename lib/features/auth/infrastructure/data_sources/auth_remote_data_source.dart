@@ -4,8 +4,8 @@ import '../../domain/failures/auth_failure.dart';
 import '../../domain/entities/user.dart';
 
 class AuthRemoteDataSource {
-  // Use 10.0.2.2 for Android Emulator, or localhost for iOS simulator / Desktop
-  static const String baseUrl = 'http://10.0.2.2:8080/api/auth';
+  // Using localhost for Windows Desktop testing (use 10.0.2.2 for Android Emulator)
+  static const String baseUrl = 'http://localhost:8080/api/auth';
 
   Future<Map<String, dynamic>> login(String email, String password) async {
     try {
