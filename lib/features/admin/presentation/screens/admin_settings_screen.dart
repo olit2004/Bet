@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
@@ -25,11 +27,97 @@ class _SettingsScreenState extends State<SettingsScreen> {
     super.dispose();
   }
 
+  Future<void> _updatePassword() async {
+    final oldPassword = _oldPasswordController.text;
+    final newPassword = _newPasswordController.text;
+    final confirmPassword = _confirmPasswordController.text;
+
+    if (oldPassword.isEmpty || newPassword.isEmpty || confirmPassword.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill out all fields.')),
+      );
+      return;
+    }
+
+    if (newPassword != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('New passwords do not match.')),
+      );
+      return;
+    }
+
+    try {
+      final response = await http.patch(
+        Uri.parse('http://localhost:8080/api/admin/settings/password'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'oldPassword': oldPassword,
+          'newPassword': newPassword,
+        }),
+      );
+
+      final responseData = json.decode(response.body);
+
+      if (response.statusCode == 200) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Password updated successfully!')),
+          );
+          _oldPasswordController.clear();
+          _newPasswordController.clear();
+          _confirmPasswordController.clear();
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(responseData['message'] ?? 'Failed to update password')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error communicating with server.')),
+        );
+      }
+    }
+  }
+
   void _showDeleteDialog() {
     showDialog(
       context: context,
-      builder: (context) => const DeleteAccountDialog(),
+      builder: (context) => DeleteAccountDialog(
+        onDelete: _deleteAccount,
+      ),
     );
+  }
+
+  Future<void> _deleteAccount() async {
+    try {
+      final response = await http.delete(
+        Uri.parse('http://localhost:8080/api/admin/settings/account'),
+      );
+
+      if (response.statusCode == 200) {
+        if (mounted) {
+          Navigator.pop(context); // Close dialog
+          context.go('/login'); // Redirect to login
+        }
+      } else {
+        final responseData = json.decode(response.body);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(responseData['message'] ?? 'Failed to delete account')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error communicating with server.')),
+        );
+      }
+    }
   }
 
   @override
@@ -92,9 +180,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 32),
             CustomButton(
               text: 'Update Password',
-              onPressed: () {
-
-              },
+              onPressed: _updatePassword,
             ),
             const SizedBox(height: 48),
             const Divider(),
@@ -135,7 +221,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 }
 
 class DeleteAccountDialog extends StatelessWidget {
-  const DeleteAccountDialog({super.key});
+  final VoidCallback onDelete;
+  const DeleteAccountDialog({super.key, required this.onDelete});
 
   @override
   Widget build(BuildContext context) {
@@ -194,11 +281,7 @@ class DeleteAccountDialog extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {
-
-                      Navigator.pop(context);
-                      context.go('/login');
-                    },
+                    onPressed: onDelete,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
                       foregroundColor: Colors.white,

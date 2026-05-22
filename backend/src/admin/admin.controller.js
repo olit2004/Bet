@@ -134,6 +134,37 @@ const reviewProperty = async (req, res, next) => {
   }
 };
 
+const updatePassword = async (req, res, next) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing 'oldPassword' or 'newPassword' in request body",
+      });
+    }
+    await adminService.updateAdminPassword(req.user.id, oldPassword, newPassword);
+    return res.status(200).json({
+      success: true,
+      message: 'Password updated successfully.',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteAccount = async (req, res, next) => {
+  try {
+    await adminService.deleteAdminAccount(req.user.id);
+    return res.status(200).json({
+      success: true,
+      message: 'Admin account deleted successfully.',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export default {
   getDashboard,
   getUsers,
@@ -143,4 +174,6 @@ export default {
   verifyIdentity,
   getPropertiesForReview,
   reviewProperty,
+  updatePassword,
+  deleteAccount,
 };

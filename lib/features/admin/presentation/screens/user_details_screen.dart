@@ -81,12 +81,6 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
           );
           _fetchUserDetails();
         }
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to suspend user: ${response.statusCode}')),
-          );
-        }
       }
     } catch (e) {
       if (mounted) {
@@ -162,6 +156,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
     final name = email.split('@')[0];
     final role = user?['role'] ?? 'GUEST';
     final isVerified = user?['isVerified'] ?? false;
+    final joinDate = _formatDate(user?['createdAt']);
 
     return Container(
       width: double.infinity,
@@ -173,7 +168,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
             children: [
               const CircleAvatar(
                 radius: 60,
-                backgroundImage: AssetImage("/images/profile.png"),
+                backgroundImage: AssetImage("assets/images/lemi.png"),
               ),
               Positioned(
                 bottom: 5,
@@ -186,7 +181,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                     border: Border.all(color: Colors.white, width: 2),
                   ),
                   child: Text(
-                    isVerified ? "VERIFIED" : "PENDING",
+                    isVerified ? "ACTIVE" : "PENDING",
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 12,
@@ -204,31 +199,29 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
           ),
           const SizedBox(height: 10),
           Text(
-            "$role • Joined ${_formatDate(user?['createdAt'])}",
+            "$role • Joined $joinDate",
             style: const TextStyle(color: Color(0xFF7C8BB1), fontSize: 16),
           ),
           const SizedBox(height: 40),
-          if (role != 'GUEST' || isVerified)
-            isSuspending
-                ? const CircularProgressIndicator()
-                : CustomButton(
-                    text: "Suspend User",
-                    color: const Color.fromARGB(255, 229, 238, 255),
-                    textColor: const Color.fromARGB(255, 9, 13, 255),
-                    width: 450,
-                    height: 60,
-                    onPressed: _suspendUser,
-                  ),
+          isSuspending
+              ? const CircularProgressIndicator()
+              : CustomButton(
+                  text: "Suspend",
+                  color: const Color.fromARGB(255, 229, 238, 255),
+                  textColor: const Color.fromARGB(255, 9, 13, 255),
+                  width: 450,
+                  height: 60,
+                  onPressed: _suspendUser,
+                ),
         ],
       ),
     );
   }
 
   Widget _stats() {
-    final role = user?['role'] ?? 'GUEST';
     final isVerified = user?['isVerified'] ?? false;
-    final faydaId = user?['faydaId'] ?? 'Not Provided';
-
+    final joinDate = _formatDate(user?['createdAt']);
+    
     return Container(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -238,7 +231,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Container(
-                width: 170,
+                width: 200,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -247,17 +240,17 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("Role"),
+                    const Text("Listings"),
                     const SizedBox(height: 5),
                     Text(
-                      role,
-                      style: _textStyle(20, FontWeight.bold, Colors.black),
+                      "14",
+                      style: _textStyle(30, FontWeight.bold, Colors.black),
                     ),
                   ],
                 ),
               ),
               Container(
-                width: 170,
+                width: 200,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -266,11 +259,11 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("Status"),
+                    const Text("Rating"),
                     const SizedBox(height: 5),
                     Text(
-                      isVerified ? "Verified" : "Unverified",
-                      style: _textStyle(20, FontWeight.bold, isVerified ? Colors.green : Colors.orange),
+                      "4.9",
+                      style: _textStyle(30, FontWeight.bold, Colors.black),
                     ),
                   ],
                 ),
@@ -279,20 +272,48 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
           ),
           const SizedBox(height: 20),
           Container(
+            padding: const EdgeInsets.all(20),
+            margin: const EdgeInsets.all(15),
+            decoration: BoxDecoration(
+              color: const Color.fromARGB(255, 62, 82, 227),
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Row(
+              children: [
+                Column(
+                  children: [
+                    Text(
+                      "Sales",
+                      style: _textStyle(12, FontWeight.bold, Colors.white),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      "\$12.4M",
+                      style: _textStyle(40, FontWeight.bold, Colors.white),
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                const Icon(Icons.trending_up, color: Colors.white),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          Container(
             decoration: BoxDecoration(
               color: isVerified ? const Color.fromARGB(255, 207, 250, 236) : const Color.fromARGB(255, 255, 243, 224),
               borderRadius: BorderRadius.circular(24),
             ),
             padding: const EdgeInsets.all(20),
-            margin: const EdgeInsets.symmetric(horizontal: 15),
+            margin: const EdgeInsets.all(15),
             child: Row(
               children: [
                 Icon(
                   isVerified ? Icons.safety_check : Icons.warning_amber_rounded,
                   color: isVerified ? Colors.green : Colors.orange,
-                  size: 50,
+                  size: 70,
                 ),
-                const SizedBox(width: 15),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -300,15 +321,26 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                       Text(
                         isVerified ? "Fayda Verified" : "Verification Pending",
                         style: _textStyle(
-                          20,
+                          25,
                           FontWeight.bold,
                           isVerified ? const Color.fromARGB(255, 11, 49, 2) : const Color.fromARGB(255, 94, 60, 0),
                         ),
                       ),
-                      const SizedBox(height: 4),
                       Text(
-                        "Fayda ID: $faydaId",
-                        style: const TextStyle(fontSize: 14),
+                        "Identity and assets verified on",
+                        style: _textStyle(
+                          15,
+                          FontWeight.bold,
+                          isVerified ? const Color.fromARGB(255, 11, 49, 2) : const Color.fromARGB(255, 94, 60, 0),
+                        ),
+                      ),
+                      Text(
+                        joinDate,
+                        style: _textStyle(
+                          15,
+                          FontWeight.bold,
+                          isVerified ? const Color.fromARGB(255, 11, 49, 2) : const Color.fromARGB(255, 94, 60, 0),
+                        ),
                       ),
                     ],
                   ),
@@ -331,7 +363,30 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
             "Profile Details",
             style: _textStyle(26, FontWeight.bold, Colors.black),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 40),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            width: double.infinity,
+            padding: const EdgeInsets.all(15),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Title(
+                  color: const Color.fromARGB(255, 81, 74, 74),
+                  child: const Text("BIOGRAPHY"),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  "Luxury real estate specialist focusing on brutalist \narchitecture and mid-century modern \nrestorations in the Pacific Northwest.",
+                  style: _textStyle(18, FontWeight.normal, Colors.black),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 4),
           Container(
             decoration: BoxDecoration(
               color: Colors.white,
@@ -356,7 +411,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           Container(
             decoration: BoxDecoration(
               color: Colors.white,
@@ -366,14 +421,14 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
             padding: const EdgeInsets.all(15),
             child: Row(
               children: [
-                const Icon(Icons.calendar_month, size: 40, color: Colors.deepPurple),
+                const Icon(Icons.phone, size: 40, color: Colors.deepPurple),
                 const SizedBox(width: 10),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("MEMBER SINCE"),
+                    const Text("PHONE NUMBER"),
                     Text(
-                      _formatDate(user?['createdAt']),
+                      "+1 (555) 092-4412",
                       style: _textStyle(16, FontWeight.bold, Colors.black),
                     ),
                   ],
@@ -387,7 +442,132 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
   }
 
   Widget _activeListing() {
-    return Container();
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 10),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Text(
+                "   Active Listings",
+                style: _textStyle(25, FontWeight.bold, Colors.black),
+              ),
+              const Spacer(),
+              Text(
+                "view all   ",
+                style: _textStyle(
+                  16,
+                  FontWeight.bold,
+                  const Color.fromARGB(255, 44, 38, 148),
+                ),
+              ),
+            ],
+          ),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              children: [
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    _houseCard(
+                      "assets/images/garden-state.png",
+                      "The Obsidian Pavilion ",
+                      4,
+                      2,
+                    ),
+                    const SizedBox(width: 15),
+                    _houseCard(
+                      "assets/images/Industrial-loft.png",
+                      "Azure Shores Villa",
+                      5,
+                      3,
+                    ),
+                    const SizedBox(width: 15),
+                    _houseCard(
+                      "assets/images/skyline-retreat.png",
+                      "Skyline Penthouse",
+                      3,
+                      2,
+                    ),
+                    const SizedBox(width: 15),
+                    _houseCard(
+                      "assets/images/the-glass-Pavillion.png",
+                      "Oak Ridge Manor",
+                      6,
+                      4,
+                    ),
+                    const SizedBox(width: 15),
+                    _houseCard(
+                      "assets/images/garden-state.png",
+                      "Emerald Valley Estate",
+                      4,
+                      3,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _houseCard(String imageUrl, String houseNme, int bed, int bathRoom) {
+    return Container(
+      width: 400,
+      margin: const EdgeInsets.only(bottom: 20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(30),
+              topRight: Radius.circular(30),
+            ),
+            child: SizedBox(
+              height: 280,
+              width: 400,
+              child: Image.asset(imageUrl, fit: BoxFit.cover),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(25),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  houseNme,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 28,
+                    color: Color.fromARGB(255, 25, 25, 65),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const Icon(Icons.bed),
+                    const SizedBox(width: 5),
+                    Text("$bed"),
+                    const SizedBox(width: 12),
+                    const Icon(Icons.bathroom),
+                    const SizedBox(width: 5),
+                    Text("$bathRoom"),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _activityLog() {
@@ -399,7 +579,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Security & Activity Log",
+            "Activity Log",
             style: _textStyle(25, FontWeight.bold, Colors.black),
           ),
           const SizedBox(height: 15),
@@ -411,7 +591,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                 padding: const EdgeInsets.only(bottom: 15.0),
                 child: Row(
                   children: [
-                    const Icon(Icons.info_outline, color: Colors.blue),
+                    const Icon(Icons.check_circle, color: Colors.green),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Column(
@@ -423,8 +603,8 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                           ),
                           Text(log['details'] ?? ''),
                           Text(
-                            _formatDate(log['createdAt']),
-                            style: const TextStyle(fontSize: 12, color: Colors.grey),
+                            _timeAgo(_formatDate(log['createdAt'])),
+                            style: const TextStyle(fontSize: 12),
                           ),
                         ],
                       ),
@@ -447,9 +627,13 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
     if (dateStr == null) return "N/A";
     try {
       final date = DateTime.parse(dateStr);
-      return "${date.day}/${date.month}/${date.year}";
+      return "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
     } catch (_) {
       return dateStr;
     }
+  }
+
+  String _timeAgo(String dateStr) {
+    return "$dateStr • Recently";
   }
 }

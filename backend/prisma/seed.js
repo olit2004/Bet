@@ -22,6 +22,8 @@ async function main() {
     data: {
       email: 'admin@bet.com',
       passwordHash: '$2a$12$HDEJTC/vvQI8.LdD6jLGP.OPgboNGvu5j/CkEm1LLRXKY0n0spVj2',
+      name: 'System Admin',
+      phone: '+251911000000',
       role: 'ADMIN',
       isVerified: true,
       faydaId: 'FAYDA-ETH-777',
@@ -34,6 +36,8 @@ async function main() {
     data: {
       email: 'lemi@buyer.com',
       passwordHash: '$2a$12$HDEJTC/vvQI8.LdD6jLGP.OPgboNGvu5j/CkEm1LLRXKY0n0spVj2',
+      name: 'Lemi Tadesse',
+      phone: '+251911111111',
       role: 'BUYER',
       isVerified: true,
       faydaId: 'FAYDA-ETH-101',
@@ -45,6 +49,8 @@ async function main() {
     data: {
       email: 'misganaw@buyer.com',
       passwordHash: '$2a$12$HDEJTC/vvQI8.LdD6jLGP.OPgboNGvu5j/CkEm1LLRXKY0n0spVj2',
+      name: 'Misganaw Alemu',
+      phone: '+251922222222',
       role: 'BUYER',
       isVerified: false,
       faydaId: 'FAYDA-ETH-102',
@@ -56,6 +62,8 @@ async function main() {
     data: {
       email: 'samuel@seller.com',
       passwordHash: '$2a$12$HDEJTC/vvQI8.LdD6jLGP.OPgboNGvu5j/CkEm1LLRXKY0n0spVj2',
+      name: 'Samuel Bekele',
+      phone: '+251933333333',
       role: 'SELLER',
       isVerified: true,
       faydaId: 'FAYDA-ETH-201',
@@ -67,6 +75,8 @@ async function main() {
     data: {
       email: 'reza@seller.com',
       passwordHash: '$2a$12$HDEJTC/vvQI8.LdD6jLGP.OPgboNGvu5j/CkEm1LLRXKY0n0spVj2',
+      name: 'Reza Ahmed',
+      phone: '+251944444444',
       role: 'SELLER',
       isVerified: false,
       faydaId: 'FAYDA-ETH-202',
@@ -99,6 +109,9 @@ async function main() {
       longitude: 38.79,
       type: 'SALE',
       status: 'ACTIVE',
+      beds: 4,
+      baths: 3,
+      sqFootage: 1800.0,
       ownerId: sellerUser1.id,
     },
   });
@@ -112,6 +125,9 @@ async function main() {
       longitude: 37.39,
       type: 'SALE',
       status: 'CLOSED',
+      beds: 6,
+      baths: 5,
+      sqFootage: 3500.0,
       ownerId: sellerUser2.id,
     },
   });

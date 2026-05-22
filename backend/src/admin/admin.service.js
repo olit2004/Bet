@@ -1,4 +1,5 @@
 import prisma from '../shared/db.js';
+import bcrypt from 'bcryptjs';
 
 const getDashboardStats = async () => {
   const activeAuctionsCount = await prisma.property.count({
@@ -76,12 +77,21 @@ const getDashboardStats = async () => {
     { day: 'Sat', volume: 100 },
     { day: 'Sun', volume: 110 }
   ];
+  const adminUser = await prisma.user.findFirst({
+    where: { role: 'ADMIN' },
+    select: { email: true, role: true, createdAt: true, name: true }
+  });
+
   return {
     revenue,
     activeAuctions,
     pendingVerifications,
     recentActivities,
     weeklyChartData,
+    adminName: adminUser?.name || 'Admin',
+    adminEmail: adminUser?.email || 'admin@bet.com',
+    adminRole: adminUser?.role || 'ADMIN',
+    memberSince: adminUser ? adminUser.createdAt.getFullYear().toString() : '2024',
   };
 };
 
@@ -229,6 +239,43 @@ const reviewProperty = async (propertyId, status, adminUserId) => {
   return updatedProperty;
 };
 
+const updateAdminPassword = async (userId, oldPassword, newPassword) => {
+  let user;
+  if (userId === 'dev-admin-uuid-1234') {
+    user = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
+  } else {
+    user = await prisma.user.findUnique({ where: { id: userId } });
+  }
+  
+  if (!user) throw new Error('User not found');
+
+  const isPasswordValid = await bcrypt.compare(oldPassword, user.passwordHash);
+  if (!isPasswordValid) {
+    const error = new Error('Invalid old password');
+    error.status = 401;
+    throw error;
+  }
+
+  const salt = await bcrypt.genSalt(12);
+  const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { passwordHash: hashedPassword },
+  });
+};
+
+const deleteAdminAccount = async (userId) => {
+  let targetId = userId;
+  if (userId === 'dev-admin-uuid-1234') {
+    const adminUser = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
+    if (adminUser) targetId = adminUser.id;
+  }
+  await prisma.user.delete({
+    where: { id: targetId },
+  });
+};
+
 export default {
   getDashboardStats,
   getAllUsers,
@@ -238,4 +285,6 @@ export default {
   verifyUserIdentity,
   getPropertiesForReview,
   reviewProperty,
+  updateAdminPassword,
+  deleteAdminAccount,
 };

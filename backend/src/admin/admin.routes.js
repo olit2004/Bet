@@ -13,5 +13,7 @@ router.get('/verifications/pending', adminController.getPendingIdentities);
 router.post('/users/:id/verify-identity', adminController.verifyIdentity);
 router.get('/properties/review', adminController.getPropertiesForReview);
 router.patch('/properties/:id/review', adminController.reviewProperty);
+router.patch('/settings/password', adminController.updatePassword);
+router.delete('/settings/account', adminController.deleteAccount);
 
 export default router;

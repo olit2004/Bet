@@ -336,15 +336,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          _bar(40),
-          _bar(70),
-          _bar(50),
-          _bar(90),
-          _bar(60),
-          _bar(100),
-          _bar(110),
-        ],
+        children: weeklyChartData.isNotEmpty
+            ? weeklyChartData.map<Widget>((item) {
+                double value = (item is Map && item['value'] != null)
+                    ? (item['value'] as num).toDouble()
+                    : (item is num ? item.toDouble() : 40);
+                return _bar(value.clamp(10, 150));
+              }).toList()
+            : [_bar(40), _bar(70), _bar(50), _bar(90), _bar(60), _bar(100), _bar(110)],
       ),
     );
   }
