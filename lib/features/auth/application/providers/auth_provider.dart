@@ -1,0 +1,124 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../domain/entities/user.dart';
+import '../../domain/repositories/auth_repository.dart';
+import '../../infrastructure/data_sources/auth_local_data_source.dart';
+import '../../infrastructure/data_sources/auth_remote_data_source.dart';
+import '../../infrastructure/repositories/auth_repository_impl.dart';
+
+// --- Dependency Injection Providers ---
+
+final authLocalDataSourceProvider = Provider<AuthLocalDataSource>((ref) {
+  return AuthLocalDataSource();
+});
+
+final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
+  return AuthRemoteDataSource();
+});
+
+final authRepositoryProvider = Provider<AuthRepository>((ref) {
+  return AuthRepositoryImpl(
+    localDataSource: ref.watch(authLocalDataSourceProvider),
+    remoteDataSource: ref.watch(authRemoteDataSourceProvider),
+  );
+});
+
+// --- State Management ---
+
+enum AuthState {
+  initial,
+  loading,
+  authenticated,
+  unauthenticated,
+  error,
+}
+
+class AuthStateData {
+  final AuthState status;
+  final User? user;
+  final String? errorMessage;
+
+  AuthStateData({
+    required this.status,
+    this.user,
+    this.errorMessage,
+  });
+
+  AuthStateData copyWith({
+    AuthState? status,
+    User? user,
+    String? errorMessage,
+  }) {
+    return AuthStateData(
+      status: status ?? this.status,
+      user: user ?? this.user,
+      errorMessage: errorMessage ?? this.errorMessage,
+    );
+  }
+}
+
+class AuthNotifier extends StateNotifier<AuthStateData> {
+  final AuthRepository _repository;
+
+  AuthNotifier(this._repository)
+      : super(AuthStateData(status: AuthState.initial)) {
+    checkAuthStatus();
+  }
+
+  Future<void> checkAuthStatus() async {
+    state = state.copyWith(status: AuthState.loading);
+    try {
+      final user = await _repository.checkAuthStatus();
+      if (user != null) {
+        state = state.copyWith(status: AuthState.authenticated, user: user);
+      } else {
+        state = state.copyWith(status: AuthState.unauthenticated);
+      }
+    } catch (e) {
+      state = state.copyWith(status: AuthState.unauthenticated);
+    }
+  }
+
+  Future<void> login(String email, String password) async {
+    state = state.copyWith(status: AuthState.loading, errorMessage: null);
+    try {
+      final user = await _repository.login(email, password);
+      state = state.copyWith(status: AuthState.authenticated, user: user);
+    } catch (e) {
+      state = state.copyWith(status: AuthState.error, errorMessage: e.toString());
+    }
+  }
+
+  Future<void> register({
+    required String email,
+    required String password,
+    required String role,
+    required String name,
+    required String phone,
+    String? company,
+  }) async {
+    state = state.copyWith(status: AuthState.loading, errorMessage: null);
+    try {
+      final user = await _repository.register(
+        email: email,
+        password: password,
+        role: role,
+        name: name,
+        phone: phone,
+        company: company,
+      );
+      state = state.copyWith(status: AuthState.authenticated, user: user);
+    } catch (e) {
+      state = state.copyWith(status: AuthState.error, errorMessage: e.toString());
+    }
+  }
+
+  Future<void> logout() async {
+    state = state.copyWith(status: AuthState.loading);
+    await _repository.logout();
+    state = state.copyWith(status: AuthState.unauthenticated, user: null);
+  }
+}
+
+final authNotifierProvider = StateNotifierProvider<AuthNotifier, AuthStateData>((ref) {
+  return AuthNotifier(ref.watch(authRepositoryProvider));
+});
