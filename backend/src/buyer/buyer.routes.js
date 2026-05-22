@@ -1,9 +1,9 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const buyerController = require('./buyer.controller');
-const { verifyToken, authorizeRoles } = require('../user/user.middleware');
+import { register } from './buyer.controller.js';
+import { verifyToken, authorizeRoles } from '../user/user.middleware.js';
 
 // POST /api/buyer/register — Upgrade GUEST → BUYER
-router.post('/register', verifyToken, buyerController.register);
+router.post('/register', verifyToken, register);
 
-module.exports = router;
+export default router;

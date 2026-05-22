@@ -1,10 +1,8 @@
-const bidService = require('./bid.service');
-const prisma = require('../shared/db');
+import bidService from './bid.service.js';
+import prisma from '../shared/db.js';
 
-/**
- * Place a new bid on a property.
- * Expects: propertyId in params, amount in body, optional file in req.file.
- */
+
+
 async function placeBid(req, res, next) {
   try {
     const { propertyId } = req.params;
@@ -19,7 +17,7 @@ async function placeBid(req, res, next) {
 
     let bankStatementUrl = null;
     if (req.file) {
-      // Store the relative path so the frontend can retrieve it statically
+
       bankStatementUrl = `/public/uploads/${req.file.filename}`;
     }
 
@@ -40,10 +38,7 @@ async function placeBid(req, res, next) {
   }
 }
 
-/**
- * Retract an existing bid.
- * Expects: bidId in params.
- */
+
 async function retractBid(req, res, next) {
   try {
     const { id } = req.params;
@@ -113,7 +108,7 @@ async function getPropertyBids(req, res, next) {
   }
 }
 
-module.exports = {
+export default {
   placeBid,
   retractBid,
   acceptBid,
