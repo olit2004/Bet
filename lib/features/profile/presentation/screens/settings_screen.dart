@@ -1,6 +1,9 @@
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/core/widgets/custom_button.dart';
 import 'package:bet/core/widgets/custom_text_field.dart';
@@ -22,6 +25,42 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final _bioController = TextEditingController(
     text: 'Curating architectural masterpieces in the Pacific Northwest. Focused on brutalist and mid-century modern restorations.',
   );
+
+  String? _profileImagePath;
+  List<int>? _profileImageBytes;
+
+  Future<void> _pickProfileImage() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.image,
+        withData: kIsWeb,
+      );
+
+      if (result != null) {
+        setState(() {
+          if (kIsWeb) {
+            _profileImageBytes = result.files.single.bytes;
+            _profileImagePath = null;
+          } else {
+            _profileImagePath = result.files.single.path;
+            _profileImageBytes = null;
+          }
+        });
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Profile image selected successfully')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error picking image: $e')),
+        );
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -64,6 +103,87 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Center(
+              child: Stack(
+                children: [
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundColor: AppColors.inputFill,
+                    backgroundImage: _profileImageBytes != null 
+                        ? MemoryImage(Uint8List.fromList(_profileImageBytes!)) as ImageProvider
+                        : const AssetImage('assets/images/avater.png'),
+                    child: (_profileImageBytes == null && _profileImagePath == null)
+                        ? null // The default avatar is the background
+                        : null,
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: GestureDetector(
+                      onTap: _pickProfileImage,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: const BoxDecoration(
+                          color: AppColors.primaryBlue,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.camera_alt, color: Colors.white, size: 20),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Center(
+              child: TextButton.icon(
+                onPressed: _pickProfileImage,
+                icon: const Icon(Icons.upload_file),
+                label: const Text('Browse for Profile Picture'),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.primaryBlue,
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
+            const Divider(),
+            const SizedBox(height: 32),
+            Text(
+              'Fayda Verification',
+              style: GoogleFonts.manrope(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primaryText,
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  context.push('/fayda-upload');
+                },
+                icon: const Icon(Icons.fingerprint, color: Colors.white),
+                label: Text(
+                  'Verify with Fayda ID',
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryBlue,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
+                ),
+              ),
+            ),
+            const SizedBox(height: 48),
+            const Divider(),
+            const SizedBox(height: 32),
             Text(
               'Update Profile',
               style: GoogleFonts.manrope(
