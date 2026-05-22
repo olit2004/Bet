@@ -113,4 +113,22 @@ async function getPropertyBids(req, res, next) {
   }
 }
 
-export { getPropertyBids, placeBid, retractBid, acceptBid };
+/**
+ * Get all bids for the currently logged-in buyer
+ */
+async function getMyBids(req, res, next) {
+  try {
+    const bidderId = req.user.id;
+    const bids = await bidService.getMyBids(bidderId);
+    
+    res.status(200).json({
+      status: 'success',
+      results: bids.length,
+      data: bids
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export { getPropertyBids, placeBid, retractBid, acceptBid, getMyBids };

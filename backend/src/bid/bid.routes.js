@@ -9,8 +9,12 @@ import upload from '../shared/upload.middleware.js';
 // We will mount this router carefully in app.js.
 
 // ----------------------------------------------------
+// ----------------------------------------------------
 // Property-specific Bid Routes (e.g. POST /api/properties/:propertyId/bids)
 // ----------------------------------------------------
+
+// Get my bids (Buyer) - Must be placed before /properties/:propertyId to avoid param collision
+router.get('/my-bids', verifyToken, authorizeRoles('BUYER'), bidController.getMyBids);
 
 // Retrieve all bids for a specific property (Accessible to any authenticated user)
 router.get('/properties/:propertyId/bids', verifyToken, bidController.getPropertyBids);

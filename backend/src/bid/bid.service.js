@@ -181,4 +181,17 @@ async function acceptBid(bidId, sellerId) {
     });
 }
 
-export { placeBid, retractBid, acceptBid };
+/**
+ * Get all bids for a specific buyer
+ */
+async function getMyBids(bidderId) {
+    return prisma.bid.findMany({
+        where: { bidderId },
+        include: {
+            property: true,
+        },
+        orderBy: { createdAt: 'desc' }
+    });
+}
+
+export { placeBid, retractBid, acceptBid, getMyBids };
