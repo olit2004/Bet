@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import 'package:bet/features/auction/application/providers/bid_provider.dart';
 import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/core/widgets/custom_button.dart';
 import 'package:bet/core/widgets/custom_text_field.dart';
@@ -10,7 +12,7 @@ import 'package:bet/core/property/widgets/upload_container.dart';
 import 'package:bet/core/property/widgets/legal_notice_card.dart';
 import 'package:bet/core/widgets/app_logo.dart';
 
-class PlaceBidScreen extends StatefulWidget {
+class PlaceBidScreen extends ConsumerStatefulWidget {
   final Property property;
 
   const PlaceBidScreen({
@@ -19,10 +21,10 @@ class PlaceBidScreen extends StatefulWidget {
   });
 
   @override
-  State<PlaceBidScreen> createState() => _PlaceBidScreenState();
+  ConsumerState<PlaceBidScreen> createState() => _PlaceBidScreenState();
 }
 
-class _PlaceBidScreenState extends State<PlaceBidScreen> {
+class _PlaceBidScreenState extends ConsumerState<PlaceBidScreen> {
   final TextEditingController _bidController = TextEditingController();
 
   @override
@@ -39,6 +41,8 @@ class _PlaceBidScreenState extends State<PlaceBidScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bidState = ref.watch(bidNotifierProvider);
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -230,8 +234,25 @@ class _PlaceBidScreenState extends State<PlaceBidScreen> {
             ),
             const SizedBox(height: 32),
             CustomButton(
-              text: 'Submit',
-              onPressed: _showSuccessDialog,
+              text: bidState.status == BidStatus.loading ? 'Submitting...' : 'Submit',
+              onPressed: bidState.status == BidStatus.loading ? () {} : () async {
+                final amount = double.tryParse(_bidController.text.replaceAll(',', '')) ?? 0.0;
+                await ref.read(bidNotifierProvider.notifier).placeBid(
+                  widget.property.id,
+                  amount,
+                );
+                
+                if (mounted) {
+                  final finalState = ref.read(bidNotifierProvider);
+                  if (finalState.status == BidStatus.success) {
+                    _showSuccessDialog();
+                  } else if (finalState.status == BidStatus.error) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(finalState.errorMessage ?? 'Error submitting bid')),
+                    );
+                  }
+                }
+              },
             ),
             const SizedBox(height: 40),
           ],

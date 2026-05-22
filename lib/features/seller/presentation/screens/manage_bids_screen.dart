@@ -1,13 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/features/seller/presentation/widgets/bid_success_overlay.dart';
+import 'package:bet/features/auction/application/providers/bid_provider.dart';
 
-class ManageBidsScreen extends StatelessWidget {
+class ManageBidsScreen extends ConsumerStatefulWidget {
   final String propertyId;
 
   const ManageBidsScreen({super.key, required this.propertyId});
+
+  @override
+  ConsumerState<ManageBidsScreen> createState() => _ManageBidsScreenState();
+}
+
+class _ManageBidsScreenState extends ConsumerState<ManageBidsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref.read(bidNotifierProvider.notifier).fetchPropertyBids(widget.propertyId);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,14 +106,17 @@ class ManageBidsScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        Text(
-                          '14',
-                          style: GoogleFonts.manrope(
-                            color: AppColors.primaryLightBlue,
-                            fontSize: 32,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
+                        Consumer(builder: (context, ref, _) {
+                          final bidState = ref.watch(bidNotifierProvider);
+                          return Text(
+                            '\${bidState.bids.length}',
+                            style: GoogleFonts.manrope(
+                              color: AppColors.primaryLightBlue,
+                              fontSize: 32,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          );
+                        }),
                       ],
                     ),
                   ),
@@ -194,32 +212,34 @@ class ManageBidsScreen extends StatelessWidget {
             const SizedBox(height: 32),
 
             // Bids List
-            _BidCard(
-              name: 'Abebe Tesfaye',
-              price: '4,850,000 Birr',
-              timeAgo: '2 MINS AGO',
-              imageUrl: 'assets/images/bidder_1.png',
-              isHighest: true,
-              isAcceptable: true,
-            ),
-            const SizedBox(height: 16),
-            _BidCard(
-              name: 'Selam Kebede',
-              price: '4,825,000 Birr',
-              timeAgo: '15 MINS AGO',
-              imageUrl: 'assets/images/bidder_2.png',
-              isHighest: false,
-              isAcceptable: false,
-            ),
-            const SizedBox(height: 16),
-            _BidCard(
-              name: 'Tola Bedhesa',
-              price: '4,790,000 Birr',
-              timeAgo: '1 HOUR AGO',
-              imageUrl: 'assets/images/tola_gobena.avif',
-              isHighest: false,
-              isAcceptable: false,
-            ),
+            Consumer(builder: (context, ref, _) {
+              final bidState = ref.watch(bidNotifierProvider);
+
+              if (bidState.status == BidStatus.loading && bidState.bids.isEmpty) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (bidState.bids.isEmpty) {
+                return const Center(child: Text('No bids received yet.'));
+              }
+
+              return Column(
+                children: bidState.bids.map((bid) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: _BidCard(
+                      bidId: bid.id,
+                      name: 'Buyer \${bid.buyerId.substring(0, 5)}', // Mock name since we don't fetch user data here
+                      price: '\${bid.amount} Birr',
+                      timeAgo: 'Just now',
+                      imageUrl: 'assets/images/bidder_1.png',
+                      isHighest: false, // Could calculate this based on amounts
+                      isAcceptable: bid.status != 'ACCEPTED',
+                    ),
+                  );
+                }).toList(),
+              );
+            }),
             const SizedBox(height: 32),
 
             // Previous Bids
@@ -280,7 +300,8 @@ class ManageBidsScreen extends StatelessWidget {
   }
 }
 
-class _BidCard extends StatelessWidget {
+class _BidCard extends ConsumerWidget {
+  final String bidId;
   final String name;
   final String price;
   final String timeAgo;
@@ -289,6 +310,7 @@ class _BidCard extends StatelessWidget {
   final bool isAcceptable;
 
   const _BidCard({
+    required this.bidId,
     required this.name,
     required this.price,
     required this.timeAgo,
@@ -298,7 +320,7 @@ class _BidCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFEAECEF),
@@ -464,12 +486,15 @@ class _BidCard extends StatelessWidget {
                       child: SizedBox(
                         height: 48,
                         child: ElevatedButton(
-                          onPressed: () {
+                          onPressed: () async {
                             if (isAcceptable) {
-                              showDialog(
-                                context: context,
-                                builder: (context) => const BidSuccessOverlay(),
-                              );
+                              await ref.read(bidNotifierProvider.notifier).acceptBid(bidId);
+                              if (context.mounted) {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => const BidSuccessOverlay(),
+                                );
+                              }
                             } else {
                               context.push('/review-bid/skyline-123');
                             }

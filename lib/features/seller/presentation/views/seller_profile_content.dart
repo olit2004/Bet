@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/features/seller/presentation/widgets/seller_button.dart';
 import 'package:bet/features/seller/presentation/widgets/performance_card.dart';
 import 'package:bet/features/seller/presentation/widgets/profile_stat.dart';
+import '../../../auth/application/providers/auth_provider.dart';
+import '../providers/seller_profile_provider.dart';
 
-class SellerProfileContent extends StatelessWidget {
+class SellerProfileContent extends ConsumerWidget {
   final String userId;
 
   final bool showHeader;
@@ -21,7 +24,11 @@ class SellerProfileContent extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authNotifierProvider);
+    final user = authState.user;
+    final statsAsync = ref.watch(sellerProfileStatsProvider(userId));
+
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
       child: Column(
@@ -44,7 +51,7 @@ class SellerProfileContent extends StatelessWidget {
           // ── Name ──
           Center(
             child: Text(
-              'Fayera Gadisa',
+              user?.name ?? 'Seller',
               style: Theme.of(context).textTheme.displayLarge?.copyWith(
                 color: AppColors.primaryText,
                 fontSize: 28,
@@ -53,10 +60,10 @@ class SellerProfileContent extends StatelessWidget {
           ),
           const SizedBox(height: 12),
 
-          // ── Bio ──
+          // ── Bio/Email ──
           Center(
             child: Text(
-              'Architect & Principal Curator focusing on modernist residential heritage and sustainable luxury estates.',
+              user?.email ?? '',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: AppColors.secondaryText,
@@ -66,60 +73,81 @@ class SellerProfileContent extends StatelessWidget {
           ),
           const SizedBox(height: 32),
 
-          // ── Inline Stats Row ──
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ProfileStat(
-                value: '8',
-                label: 'LISTINGS',
-                valueColor: AppColors.primaryText,
+          // ── Dynamic Stats ──
+          statsAsync.when(
+            loading: () => const Center(
+              child: Padding(
+                padding: EdgeInsets.all(32.0),
+                child: CircularProgressIndicator(color: AppColors.primaryBlue),
               ),
-              SizedBox(width: 40),
-              ProfileStat(
-                value: '42',
-                label: 'TOTAL BIDS',
-                valueColor: AppColors.primaryText,
-              ),
-            ],
-          ),
-          const SizedBox(height: 28),
-
-          // ── Divider ──
-          Divider(
-            color: AppColors.secondaryText.withValues(alpha: 0.15),
-            thickness: 1,
-          ),
-          const SizedBox(height: 24),
-
-          // ── Section Title ──
-          Text(
-            'SELLER PERFORMANCE',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: AppColors.secondaryText,
-              letterSpacing: 2.0,
-              fontWeight: FontWeight.w700,
-              fontSize: 12,
             ),
-          ),
-          const SizedBox(height: 20),
+            error: (error, stack) => Center(
+              child: Text(
+                'Failed to load stats: $error',
+                style: const TextStyle(color: AppColors.error),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            data: (stats) => Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // ── Inline Stats Row ──
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ProfileStat(
+                      value: stats.activeProperties.toString(),
+                      label: 'LISTINGS',
+                      valueColor: AppColors.primaryText,
+                    ),
+                    const SizedBox(width: 40),
+                    ProfileStat(
+                      value: stats.totalBids.toString(),
+                      label: 'TOTAL BIDS',
+                      valueColor: AppColors.primaryText,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 28),
 
-          // ── Performance Cards ──
-          const PerformanceCard(
-            label: 'AVG. BID INCREASE',
-            value: '+12.4%',
-            subtitle: 'Above initial listing price',
-            icon: Icons.trending_up_rounded,
-            valueColor: Color(0xFF00684A),
-          ),
-          const SizedBox(height: 16),
+                // ── Divider ──
+                Divider(
+                  color: AppColors.secondaryText.withValues(alpha: 0.15),
+                  thickness: 1,
+                ),
+                const SizedBox(height: 24),
 
-          const PerformanceCard(
-            label: 'TIME TO SALE',
-            value: '18 Days',
-            subtitle: '40% faster than market avg',
-            icon: Icons.access_time_rounded,
-            valueColor: AppColors.primaryText,
+                // ── Section Title ──
+                Text(
+                  'SELLER PERFORMANCE',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppColors.secondaryText,
+                    letterSpacing: 2.0,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // ── Performance Cards ──
+                PerformanceCard(
+                  label: 'TOTAL VIEWS',
+                  value: stats.totalViews.toString(),
+                  subtitle: 'Across all properties',
+                  icon: Icons.visibility_rounded,
+                  valueColor: const Color(0xFF00684A),
+                ),
+                const SizedBox(height: 16),
+
+                PerformanceCard(
+                  label: 'CONVERSION RATE',
+                  value: stats.conversionRate,
+                  subtitle: 'Bids per view',
+                  icon: Icons.trending_up_rounded,
+                  valueColor: AppColors.primaryText,
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 24),
 
