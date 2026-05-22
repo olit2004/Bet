@@ -1,4 +1,4 @@
-import prisma from '../shared/prisma.client.js';
+import prisma from '../shared/db.js';
 
 class PropertyService {
   async createProperty(data) {

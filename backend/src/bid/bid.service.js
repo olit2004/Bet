@@ -1,4 +1,4 @@
-import prisma from '../shared/db.js';
+import prisma from '../shared/prisma.client.js';
 
 
 async function placeBid(propertyId, bidderId, amount, bankStatementUrl = null) {
@@ -181,8 +181,4 @@ async function acceptBid(bidId, sellerId) {
     });
 }
 
-export default {
-    placeBid,
-    retractBid,
-    acceptBid
-};
+export { placeBid, retractBid, acceptBid };

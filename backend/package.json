@@ -2,6 +2,7 @@
   "name": "bet-backend",
   "version": "1.0.0",
   "description": "Backend REST API for Bet - Local Property Auction Platform",
+  "type": "module",
   "main": "src/server.js",
   "type": "module",
   "scripts": {
