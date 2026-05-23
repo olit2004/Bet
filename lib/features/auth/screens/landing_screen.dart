@@ -410,14 +410,23 @@ class _LandingScreenState extends State<LandingScreen> {
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(20),
                   ),
-                  child: Image.asset(
-                    image,
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    errorBuilder: (_, _, _) => const Center(
-                      child: Icon(Icons.home, color: Colors.white),
-                    ),
-                  ),
+                  child: image.startsWith('assets/')
+                      ? Image.asset(
+                          image,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          errorBuilder: (_, _, _) => const Center(
+                            child: Icon(Icons.home, color: Colors.white),
+                          ),
+                        )
+                      : Image.network(
+                          image.startsWith('/') ? 'http://localhost:8080$image' : image,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          errorBuilder: (_, _, _) => const Center(
+                            child: Icon(Icons.home, color: Colors.white),
+                          ),
+                        ),
                 ),
               ),
               Positioned(
@@ -765,14 +774,23 @@ class _LandingScreenState extends State<LandingScreen> {
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(20),
                   ),
-                  child: Image.asset(
-                    imagePath,
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    errorBuilder: (_, _, _) => const Center(
-                      child: Icon(Icons.home_work, color: Colors.white),
-                    ),
-                  ),
+                  child: imagePath.startsWith('assets/')
+                      ? Image.asset(
+                          imagePath,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          errorBuilder: (_, _, _) => const Center(
+                            child: Icon(Icons.home_work, color: Colors.white),
+                          ),
+                        )
+                      : Image.network(
+                          imagePath.startsWith('/') ? 'http://localhost:8080$imagePath' : imagePath,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          errorBuilder: (_, _, _) => const Center(
+                            child: Icon(Icons.home_work, color: Colors.white),
+                          ),
+                        ),
                 ),
               ),
               Positioned(

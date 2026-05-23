@@ -25,9 +25,10 @@ class PropertyRemoteDataSource {
   }
 
   /// Fetches a single property by ID from the backend.
+  /// Increments the view count (buyer is viewing).
   Future<Property?> getPropertyById(String id) async {
     final response = await http.get(
-      Uri.parse('$_baseUrl/properties/$id'),
+      Uri.parse('$_baseUrl/properties/$id?incrementView=true'),
       headers: {'Content-Type': 'application/json'},
     );
 

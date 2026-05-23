@@ -27,7 +27,13 @@ class Property {
   final DateTime? createdAt;
   final DateTime? endTime;
   final String? sellerName;
+  final String? sellerAvatarUrl;
+  final String? sellerPhone;
+  final String? sellerBio;
   final String? locale;
+  final String status;
+  final bool isSellerVerified;
+  final String? sellerFaydaStatus;
 
   const Property({
     required this.id,
@@ -44,7 +50,13 @@ class Property {
     this.createdAt,
     this.endTime,
     this.sellerName,
+    this.sellerAvatarUrl,
+    this.sellerPhone,
+    this.sellerBio,
     this.locale,
+    this.status = 'ACTIVE',
+    this.isSellerVerified = false,
+    this.sellerFaydaStatus,
   });
 
   /// Helper to get a string representation of the category
@@ -115,7 +127,14 @@ class Property {
           : (json['endingAt'] != null)
               ? DateTime.tryParse(json['endingAt'] as String)
               : null,
+      sellerName: json['owner']?['user']?['name'] as String?,
+      sellerAvatarUrl: json['owner']?['user']?['avatarUrl'] as String?,
+      sellerPhone: json['owner']?['user']?['phone'] as String?,
+      sellerBio: json['owner']?['user']?['bio'] as String?,
+      isSellerVerified: json['owner']?['user']?['isVerified'] as bool? ?? false,
+      sellerFaydaStatus: json['owner']?['user']?['faydaStatus'] as String?,
       locale: json['locale'] as String?,
+      status: json['status'] as String? ?? 'ACTIVE',
     );
   }
 }

@@ -117,7 +117,10 @@ class AuthNotifier extends Notifier<AuthStateData> {
   Future<void> logout() async {
     state = state.copyWith(status: AuthState.loading);
     await _repository.logout();
-    state = state.copyWith(status: AuthState.unauthenticated, user: null);
+    // Use a fresh AuthStateData instead of copyWith so the user field is
+    // genuinely null – copyWith(user: null) silently keeps the old value
+    // because of the null ?? this.user fallback.
+    state = AuthStateData(status: AuthState.unauthenticated);
   }
 
   Future<void> uploadProfileImage(dynamic imageFile) async {
@@ -154,7 +157,8 @@ class AuthNotifier extends Notifier<AuthStateData> {
     state = state.copyWith(status: AuthState.loading);
     try {
       await _repository.deleteAccount();
-      state = state.copyWith(status: AuthState.unauthenticated, user: null);
+      // Use a fresh AuthStateData so the user field is genuinely null.
+      state = AuthStateData(status: AuthState.unauthenticated);
     } catch (e) {
       state = state.copyWith(status: AuthState.error, errorMessage: e.toString());
     }

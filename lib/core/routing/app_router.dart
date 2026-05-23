@@ -11,6 +11,7 @@ import 'package:bet/features/admin/presentation/widgets/admin_routing.dart';
 import 'package:bet/features/buyer/buyer_routes.dart';
 import 'package:bet/features/seller/seller_routes.dart';
 import 'package:bet/features/profile/presentation/screens/settings_screen.dart';
+import 'package:bet/features/profile/presentation/screens/verify_id_screen.dart';
 import 'package:bet/features/notification/presentation/screens/notifications_screen.dart';
 import 'package:bet/core/widgets/main_wrapper.dart';
 
@@ -82,6 +83,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/settings',
         builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: '/verify-id',
+        builder: (context, state) => const VerifyIdScreen(),
       ),
       GoRoute(
         path: '/notifications',
