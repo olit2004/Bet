@@ -95,10 +95,15 @@ class _PropertiesScreenState extends State<PropertiesScreen> {
                         ),
                         
                       ...filteredProperties.map((property) {
+                        final imageUrls = property['imageUrls'] as List<dynamic>? ?? [];
+                        String imagePath = imageUrls.isNotEmpty ? imageUrls[0] : "assets/images/skyline-retreat.png";
+                        if (imagePath.startsWith('/')) {
+                          imagePath = 'http://localhost:8080$imagePath';
+                        }
                         return _houseCard(
                           context,
                           property,
-                          "assets/images/skyline-retreat.png",
+                          imagePath,
                           property['title'] ?? 'Untitled Property',
                           property['startingPrice']?.toString() ?? '0',
                           property['seller'] != null ? property['seller']['email'].split('@')[0] : 'Unknown Seller',
@@ -228,7 +233,13 @@ class _PropertiesScreenState extends State<PropertiesScreen> {
             child: SizedBox(
               height: 280,
               width: double.infinity,
-              child: Image.asset(houseImage, fit: BoxFit.cover),
+              child: houseImage.startsWith('assets/')
+                  ? Image.asset(houseImage, fit: BoxFit.cover)
+                  : Image.network(
+                      houseImage, 
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Image.asset("assets/images/skyline-retreat.png", fit: BoxFit.cover),
+                    ),
             ),
           ),
 

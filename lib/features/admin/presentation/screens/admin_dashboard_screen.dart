@@ -122,7 +122,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         return _buildActivityTile(
                           activity['title'] ?? 'Activity',
                           activity['subtitle'] ?? '',
-                          activity['avatar'] ?? '/images/verify.png',
                           Icons.notifications_active,
                           Colors.blue,
                         );
@@ -154,10 +153,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               MaterialPageRoute(builder: (context) => const ProfileScreen()),
             );
           },
-          child: const CircleAvatar(
-            radius: 18,
-            backgroundImage: AssetImage("/images/avater.png"),
-          ),
+          child: CircleAvatar(
+          radius: 25,
+          backgroundColor: Colors.grey.shade200,
+          child: const Icon(Icons.person, color: Colors.grey),
+        ),
         ),
         const SizedBox(width: 15),
       ],
@@ -372,7 +372,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Widget _buildActivityTile(
     String title,
     String subtitle,
-    String iconUrl,
     IconData icon,
     Color color,
   ) {
@@ -389,9 +388,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             color: Colors.black87,
             width: 45,
             height: 45,
-            child: CircleAvatar(
-              backgroundImage: AssetImage(iconUrl),
-              backgroundColor: color,
+            child: Center(
+              child: Icon(icon, color: Colors.white),
             ),
           ),
         ),

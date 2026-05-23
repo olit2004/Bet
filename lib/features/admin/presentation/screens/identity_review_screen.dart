@@ -58,7 +58,7 @@ class _IdentityReviewScreenState extends State<IdentityReviewScreen> {
         body: json.encode({'status': status}),
       );
       if (response.statusCode == 200) {
-        _fetchPendingVerifications(); // Refresh list
+        _fetchPendingVerifications();
       }
     } catch (e) {}
   }
@@ -186,7 +186,11 @@ Widget _idCard(Map<String, dynamic> user) {
           ],
         ),
         SizedBox(height: 10),
-        Expanded(child: Image.asset("assets/images/Fayda_National_ID_Card_-_Front.jpg")),
+        Expanded(
+          child: user['faydaImageUrl'] != null 
+              ? Image.network('http://localhost:8080${user['faydaImageUrl']}', fit: BoxFit.cover, errorBuilder: (context, error, stackTrace) => Image.asset("assets/images/Fayda_National_ID_Card_-_Front.jpg"))
+              : Image.asset("assets/images/Fayda_National_ID_Card_-_Front.jpg"),
+        ),
       ],
     ),
   );

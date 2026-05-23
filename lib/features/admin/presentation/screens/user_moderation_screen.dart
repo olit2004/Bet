@@ -93,7 +93,7 @@ class _UsersScreenState extends State<UsersScreen> {
                           user['isVerified']
                               ? "Verified"
                               : "Pending Verification",
-                          "/images/profile.png",
+                          user['avatarUrl'],
                           user['role'] == 'SELLER',
                           user['id'] ?? '',
                           type: user['isVerified'] ? 1 : 3,
@@ -127,10 +127,7 @@ class _UsersScreenState extends State<UsersScreen> {
               MaterialPageRoute(builder: (context) => const ProfileScreen()),
             );
           },
-          child: const CircleAvatar(
-            radius: 18,
-            backgroundImage: AssetImage("/images/avater.png"),
-          ),
+          child: const Icon(Icons.person, color: Colors.grey),
         ),
         const SizedBox(width: 15),
       ],
@@ -267,7 +264,7 @@ class _UsersScreenState extends State<UsersScreen> {
     String name,
     String role,
     String statusDiscription,
-    String imageUrl,
+    String? imageUrl,
     bool isSeller,
     String userId, {
     Color roleColor = const Color.fromARGB(255, 147, 198, 239),
@@ -306,7 +303,11 @@ class _UsersScreenState extends State<UsersScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 clipBehavior: Clip.antiAlias,
-                child: Image.asset(imageUrl, fit: BoxFit.cover),
+                child: imageUrl != null
+                    ? (imageUrl.startsWith('http')
+                        ? Image.network(imageUrl, fit: BoxFit.cover, errorBuilder: (context, error, stackTrace) => const Icon(Icons.person, size: 50, color: Colors.grey))
+                        : Image.network('http://localhost:8080$imageUrl', fit: BoxFit.cover, errorBuilder: (context, error, stackTrace) => const Icon(Icons.person, size: 50, color: Colors.grey)))
+                    : const Icon(Icons.person, size: 50, color: Colors.grey),
               ),
 
               SizedBox(width: 10),

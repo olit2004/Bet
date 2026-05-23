@@ -104,6 +104,14 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
     }
   }
 
+  String _getImageUrl(String path) {
+    if (path.isEmpty) return 'assets/images/garden-state.png';
+    if (path.startsWith('http')) return path;
+    if (path.startsWith('assets/')) return path; 
+    if (!path.startsWith('/')) path = '/$path';
+    return 'http://localhost:8080$path';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -173,9 +181,12 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
         children: [
           Stack(
             children: [
-              const CircleAvatar(
+              CircleAvatar(
                 radius: 60,
-                backgroundImage: AssetImage("assets/images/lemi.png"),
+                backgroundImage: user?['avatarUrl'] != null 
+                    ? NetworkImage(_getImageUrl(user!['avatarUrl'])) as ImageProvider
+                    : const AssetImage("assets/images/avater.png"),
+                onBackgroundImageError: (exception, stackTrace) {},
               ),
               Positioned(
                 bottom: 5,
@@ -234,77 +245,27 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Container(
-                width: 200,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text("Listings"),
-                    const SizedBox(height: 5),
-                    Text(
-                      "14",
-                      style: _textStyle(30, FontWeight.bold, Colors.black),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                width: 200,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text("Rating"),
-                    const SizedBox(height: 5),
-                    Text(
-                      "4.9",
-                      style: _textStyle(30, FontWeight.bold, Colors.black),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
           Container(
             padding: const EdgeInsets.all(20),
-            margin: const EdgeInsets.all(15),
+            margin: const EdgeInsets.symmetric(horizontal: 15),
+            width: double.infinity,
             decoration: BoxDecoration(
-              color: const Color.fromARGB(255, 62, 82, 227),
-              borderRadius: BorderRadius.circular(24),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
             ),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  children: [
-                    Text(
-                      "Sales",
-                      style: _textStyle(12, FontWeight.bold, Colors.white),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      "\$12.4M",
-                      style: _textStyle(40, FontWeight.bold, Colors.white),
-                    ),
-                  ],
+                const Text("Listings"),
+                const SizedBox(height: 5),
+                Text(
+                  ((user?['seller']?['properties'] as List<dynamic>?)?.length ?? 0).toString(),
+                  style: _textStyle(30, FontWeight.bold, Colors.black),
                 ),
-                const Spacer(),
-                const Icon(Icons.trending_up, color: Colors.white),
               ],
             ),
           ),
+
           const SizedBox(height: 20),
           Container(
             decoration: BoxDecoration(
@@ -370,30 +331,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
             "Profile Details",
             style: _textStyle(26, FontWeight.bold, Colors.black),
           ),
-          const SizedBox(height: 40),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            width: double.infinity,
-            padding: const EdgeInsets.all(15),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Title(
-                  color: const Color.fromARGB(255, 81, 74, 74),
-                  child: const Text("BIOGRAPHY"),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  "Luxury real estate specialist focusing on brutalist \narchitecture and mid-century modern \nrestorations in the Pacific Northwest.",
-                  style: _textStyle(18, FontWeight.normal, Colors.black),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 20),
           Container(
             decoration: BoxDecoration(
               color: Colors.white,
@@ -435,7 +373,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                   children: [
                     const Text("PHONE NUMBER"),
                     Text(
-                      "+1 (555) 092-4412",
+                      user?['phone'] ?? "Not provided",
                       style: _textStyle(16, FontWeight.bold, Colors.black),
                     ),
                   ],
@@ -482,11 +420,12 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
             child: Row(
               children: properties.map<Widget>((prop) {
                 final imageUrls = prop['imageUrls'] as List<dynamic>? ?? [];
-                final imagePath = imageUrls.isNotEmpty ? imageUrls[0] : "assets/images/garden-state.png";
+                String imagePath = imageUrls.isNotEmpty ? imageUrls[0] : "";
+                
                 return Padding(
                   padding: const EdgeInsets.only(right: 15.0),
                   child: _houseCard(
-                    imagePath,
+                    _getImageUrl(imagePath),
                     prop['title'] ?? 'Untitled Property',
                     prop['beds'] ?? 0,
                     prop['baths'] ?? 0,
@@ -519,9 +458,23 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
             child: SizedBox(
               height: 280,
               width: 400,
-              child: imageUrl.startsWith('http') 
-                  ? Image.network(imageUrl, fit: BoxFit.cover) 
-                  : Image.asset(imageUrl, fit: BoxFit.cover),
+              child: imageUrl.startsWith('http')
+                  ? Image.network(
+                      imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Image.asset(
+                        "assets/images/garden-state.png",
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : Image.asset(
+                      imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Image.asset(
+                        "assets/images/garden-state.png",
+                        fit: BoxFit.cover,
+                      ),
+                    ),
             ),
           ),
           Padding(
@@ -532,9 +485,9 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                 Text(
                   houseNme,
                   style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 28,
-                    color: Color.fromARGB(255, 25, 25, 65),
+                    fontSize: 16,
+                    height: 1.5,
+                    color: Color.fromARGB(255, 74, 72, 66),
                   ),
                 ),
                 const SizedBox(height: 8),

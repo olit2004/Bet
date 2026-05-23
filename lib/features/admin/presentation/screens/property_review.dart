@@ -58,6 +58,12 @@ PreferredSizeWidget _profileAppBar(BuildContext context) {
 }
 
 Widget _profileInfo(Map<String, dynamic> property) {
+  final imageUrls = property['imageUrls'] as List<dynamic>? ?? [];
+  String imagePath = imageUrls.isNotEmpty ? imageUrls[0] : "assets/images/skyline-retreat.png";
+  if (imagePath.startsWith('/')) {
+    imagePath = 'http://localhost:8080$imagePath';
+  }
+
   return Container(
     width: double.infinity,
     margin: const EdgeInsets.all(10),
@@ -70,12 +76,15 @@ Widget _profileInfo(Map<String, dynamic> property) {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(20),
-              child: Image.asset(
-                "images/skyline-retreat.png",
-                width: double.infinity,
-                height: 260,
-                fit: BoxFit.cover,
-              ),
+              child: imagePath.startsWith('assets/')
+                  ? Image.asset(imagePath, width: double.infinity, height: 260, fit: BoxFit.cover)
+                  : Image.network(
+                      imagePath, 
+                      width: double.infinity, 
+                      height: 260, 
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Image.asset("assets/images/skyline-retreat.png", width: double.infinity, height: 260, fit: BoxFit.cover),
+                    ),
             ),
 
             Positioned(
