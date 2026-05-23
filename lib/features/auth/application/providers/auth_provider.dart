@@ -120,6 +120,23 @@ class AuthNotifier extends Notifier<AuthStateData> {
     state = state.copyWith(status: AuthState.unauthenticated, user: null);
   }
 
+  Future<void> uploadProfileImage(dynamic imageFile) async {
+    try {
+      final updatedUser = await _repository.uploadProfileImage(imageFile);
+      state = state.copyWith(user: updatedUser);
+    } catch (e) {
+      state = state.copyWith(errorMessage: e.toString());
+      rethrow;
+    }
+  }
+
+  Future<void> submitVerification(String faydaId, dynamic imageFile) async {
+    try {
+      final updatedUser = await _repository.submitVerification(faydaId, imageFile);
+      state = state.copyWith(user: updatedUser);
+    } catch (e) {
+      state = state.copyWith(errorMessage: e.toString());
+      rethrow;
   Future<void> deleteAccount() async {
     state = state.copyWith(status: AuthState.loading);
     try {

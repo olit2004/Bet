@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/features/seller/presentation/widgets/seller_button.dart';
 import 'package:bet/features/seller/presentation/widgets/performance_card.dart';
@@ -9,11 +10,9 @@ import 'package:bet/features/seller/presentation/widgets/profile_stat.dart';
 import '../../../auth/application/providers/auth_provider.dart';
 import '../providers/seller_profile_provider.dart';
 
-class SellerProfileContent extends ConsumerWidget {
+class SellerProfileContent extends ConsumerStatefulWidget {
   final String userId;
-
   final bool showHeader;
-
   final VoidCallback? onBack;
 
   const SellerProfileContent({
@@ -24,26 +23,91 @@ class SellerProfileContent extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SellerProfileContent> createState() => _SellerProfileContentState();
+}
+
+class _SellerProfileContentState extends ConsumerState<SellerProfileContent> {
+  bool _isUploadingImage = false;
+
+  Future<void> _pickAndUploadImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() => _isUploadingImage = true);
+      try {
+        await ref.read(authNotifierProvider.notifier).uploadProfileImage(pickedFile);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Profile image updated successfully!')),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to update image: $e')),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isUploadingImage = false);
+        }
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
     final user = authState.user;
-    final statsAsync = ref.watch(sellerProfileStatsProvider(userId));
+    final statsAsync = ref.watch(sellerProfileStatsProvider(widget.userId));
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (showHeader) ...[
+          if (widget.showHeader) ...[
             _buildHeader(context),
             const SizedBox(height: 28),
           ],
 
           // ── Profile Avatar ──
           Center(
-            child: const CircleAvatar(
-              radius: 50,
-              backgroundImage: AssetImage('assets/images/seller_profile.png'),
+            child: GestureDetector(
+              onTap: _pickAndUploadImage,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundColor: Colors.grey.shade200,
+                    backgroundImage: user?.avatarUrl != null
+                        ? NetworkImage('http://localhost:8080${user!.avatarUrl}')
+                        : const AssetImage('assets/images/seller_profile.png') as ImageProvider,
+                  ),
+                  if (_isUploadingImage)
+                    const CircularProgressIndicator(
+                      color: AppColors.primaryBlue,
+                    ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: const BoxDecoration(
+                        color: AppColors.primaryBlue,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.camera_alt,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 24),
@@ -154,7 +218,12 @@ class SellerProfileContent extends ConsumerWidget {
           // ── Logout Button ──
           SellerButton(
             text: 'LOGOUT',
-            onPressed: () => context.go('/login'),
+            onPressed: () async {
+              await ref.read(authNotifierProvider.notifier).logout();
+              if (context.mounted) {
+                context.go('/login');
+              }
+            },
             icon: Icons.logout_rounded,
             color: Colors.white,
             textColor: Colors.redAccent,
@@ -173,7 +242,7 @@ class SellerProfileContent extends ConsumerWidget {
         Row(
           children: [
             GestureDetector(
-              onTap: onBack,
+              onTap: widget.onBack,
               child: const Icon(
                 Icons.arrow_back,
                 color: AppColors.primaryText,

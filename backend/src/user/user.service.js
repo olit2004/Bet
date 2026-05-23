@@ -55,9 +55,20 @@ const deleteUserById = async (id) => {
   });
 };
 
+/**
+ * Update a user by their ID.
+ */
+const updateUser = async (id, data) => {
+  return prisma.user.update({
+    where: { id },
+    data,
+  });
+};
+
 export default {
   createUser,
   findUserByEmail,
   findUserById,
   deleteUserById,
+  updateUser,
 };

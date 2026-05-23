@@ -24,4 +24,10 @@ abstract class AuthRepository {
   
   /// Checks if the user is already authenticated (e.g. from secure storage)
   Future<User?> checkAuthStatus();
+
+  /// Uploads a profile image for the authenticated user.
+  Future<User> uploadProfileImage(dynamic imageFile);
+
+  /// Submits Fayda ID verification for the authenticated user.
+  Future<User> submitVerification(String faydaId, dynamic imageFile);
 }

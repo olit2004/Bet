@@ -16,4 +16,19 @@ class SellerPropertyRepositoryImpl implements SellerPropertyRepository {
     final json = await _remoteDataSource.createProperty(propertyData);
     return SellerPropertyModel.fromJson(json);
   }
+
+  @override
+  Future<List<SellerProperty>> getSellerProperties(String sellerId) async {
+    return await _remoteDataSource.getSellerProperties(sellerId);
+  }
+
+  @override
+  Future<SellerProperty> getPropertyById(String propertyId) async {
+    return await _remoteDataSource.getPropertyById(propertyId);
+  }
+
+  @override
+  Future<void> acceptOffer(String offerId, bool isAuction) async {
+    return await _remoteDataSource.acceptOffer(offerId, isAuction);
+  }
 }

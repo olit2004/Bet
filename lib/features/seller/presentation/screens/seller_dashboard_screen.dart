@@ -5,15 +5,17 @@ import '../views/seller_profile_content.dart';
 import '../views/create_property_content.dart';
 import '../views/my_listings_content.dart';
 import '../views/active_auctions_content.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../auth/application/providers/auth_provider.dart';
 
-class SellerDashboardScreen extends StatefulWidget {
+class SellerDashboardScreen extends ConsumerStatefulWidget {
   const SellerDashboardScreen({super.key});
 
   @override
-  State<SellerDashboardScreen> createState() => _SellerDashboardScreenState();
+  ConsumerState<SellerDashboardScreen> createState() => _SellerDashboardScreenState();
 }
 
-class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
+class _SellerDashboardScreenState extends ConsumerState<SellerDashboardScreen> {
   int _currentIndex = 0;
 
   /// Tab titles used in the AppBar for non-home tabs.
@@ -21,8 +23,11 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authNotifierProvider);
+    final user = authState.user;
+
     return Scaffold(
-      // ── AppBar with back arrow for non-home tabs ──
+      //AppBar with back arrow for non-home tabs
       appBar: _currentIndex != 0
           ? AppBar(
               leading: IconButton(
@@ -58,9 +63,10 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
                       )
                     : CircleAvatar(
                         radius: 18,
-                        backgroundImage: const AssetImage(
-                          'assets/images/seller_profile.png',
-                        ),
+                        backgroundColor: Colors.grey.shade200,
+                        backgroundImage: user?.avatarUrl != null
+                            ? NetworkImage('http://localhost:8080${user!.avatarUrl}')
+                            : const AssetImage('assets/images/seller_profile.png') as ImageProvider,
                       ),
                 const SizedBox(width: 16),
               ],
@@ -87,7 +93,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
           ],
         ),
       ),
-      // ── Flutter built-in BottomNavigationBar ──
+      // Flutter built-in BottomNavigationBar
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {

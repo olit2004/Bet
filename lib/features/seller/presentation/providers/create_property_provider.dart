@@ -5,30 +5,26 @@ import '../../data/data_sources/seller_property_remote_data_source.dart';
 import '../../data/repositories/seller_property_repository_impl.dart';
 import '../../../auth/application/providers/auth_provider.dart';
 
-// --- Dependency Injection Providers ---
+// Dependency Injection Providers ---
 
 final sellerPropertyRemoteDataSourceProvider =
     Provider<SellerPropertyRemoteDataSource>((ref) {
-  return SellerPropertyRemoteDataSource(
-    authLocalDataSource: ref.watch(authLocalDataSourceProvider),
-  );
-});
+      return SellerPropertyRemoteDataSource(
+        authLocalDataSource: ref.watch(authLocalDataSourceProvider),
+      );
+    });
 
-final sellerPropertyRepositoryProvider =
-    Provider<SellerPropertyRepository>((ref) {
+final sellerPropertyRepositoryProvider = Provider<SellerPropertyRepository>((
+  ref,
+) {
   return SellerPropertyRepositoryImpl(
     remoteDataSource: ref.watch(sellerPropertyRemoteDataSourceProvider),
   );
 });
 
-// --- State Management ---
+// State Management
 
-enum CreatePropertyStatus {
-  initial,
-  loading,
-  success,
-  error,
-}
+enum CreatePropertyStatus { initial, loading, success, error }
 
 class CreatePropertyState {
   final CreatePropertyStatus status;
@@ -42,9 +38,9 @@ class CreatePropertyState {
   });
 
   const CreatePropertyState.initial()
-      : status = CreatePropertyStatus.initial,
-        createdProperty = null,
-        errorMessage = null;
+    : status = CreatePropertyStatus.initial,
+      createdProperty = null,
+      errorMessage = null;
 
   CreatePropertyState copyWith({
     CreatePropertyStatus? status,
@@ -73,7 +69,7 @@ class CreatePropertyNotifier extends Notifier<CreatePropertyState> {
     state = const CreatePropertyState.initial();
   }
 
-  /// Submits a new property listing to the backend.
+  //Submits a new property listing to the backend.
   Future<bool> createProperty(Map<String, dynamic> propertyData) async {
     state = state.copyWith(
       status: CreatePropertyStatus.loading,
@@ -103,5 +99,5 @@ class CreatePropertyNotifier extends Notifier<CreatePropertyState> {
 
 final createPropertyNotifierProvider =
     NotifierProvider<CreatePropertyNotifier, CreatePropertyState>(() {
-  return CreatePropertyNotifier();
-});
+      return CreatePropertyNotifier();
+    });
