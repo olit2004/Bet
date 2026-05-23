@@ -20,7 +20,7 @@ export const registerAsBuyer = async (userId) => {
     return tx.user.update({
       where: { id: userId },
       data: { role: 'BUYER' },
-      select: { id: true, email: true, role: true, isVerified: true, faydaId: true, createdAt: true, updatedAt: true },
+      select: { id: true, email: true, role: true, isVerified: true, faydaId: true, createdAt: true, updatedAt: true, bio: true },
     });
   });
 
@@ -38,6 +38,7 @@ export const getBuyerProfile = async (userId) => {
       faydaId: true,
       createdAt: true,
       updatedAt: true,
+      bio: true,
     }
   });
 
@@ -72,7 +73,8 @@ export const updateBuyerProfile = async (userId, data) => {
   const updatedUser = await prisma.user.update({
     where: { id: userId },
     data: {
-      ...(data.email && { email: data.email })
+      ...(data.email && { email: data.email }),
+      ...(data.bio !== undefined && { bio: data.bio }),
     },
     select: {
       id: true,
@@ -82,6 +84,7 @@ export const updateBuyerProfile = async (userId, data) => {
       faydaId: true,
       createdAt: true,
       updatedAt: true,
+      bio: true,
     }
   });
 
@@ -130,6 +133,7 @@ export const verifyFayda = async (userId, faydaId) => {
       faydaId: true,
       createdAt: true,
       updatedAt: true,
+      bio: true,
     }
   });
 
@@ -143,18 +147,30 @@ export const getBuyerDashboard = async (userId) => {
     where: { id: userId },
     include: {
       bids: {
-        select: { id: true, amount: true, status: true, property: { select: { title: true, status: true } } }
+        select: { id: true, amount: true, status: true, createdAt: true, property: { select: { id: true, title: true, status: true, location: true, endTime: true, imageUrls: true, description: true } } },
+        orderBy: { createdAt: 'desc' }
       },
       proposals: {
-        select: { id: true, amount: true, status: true, property: { select: { title: true, status: true } } }
+        select: { id: true, amount: true, status: true, createdAt: true, property: { select: { id: true, title: true, status: true, location: true, endTime: true, imageUrls: true, description: true } } },
+        orderBy: { createdAt: 'desc' }
       }
     }
   });
 
+  // If buyer profile doesn't exist yet (new user), return an empty dashboard
   if (!buyer) {
-    const error = new Error('Buyer profile not found.');
-    error.statusCode = 404;
-    throw error;
+    return {
+      statistics: {
+        totalBids: 0,
+        activeBids: 0,
+        acceptedBids: 0,
+        totalProposals: 0,
+        pendingProposals: 0,
+        acceptedProposals: 0
+      },
+      recentBids: [],
+      recentProposals: []
+    };
   }
 
   // Calculate statistics
@@ -175,7 +191,7 @@ export const getBuyerDashboard = async (userId) => {
       pendingProposals,
       acceptedProposals
     },
-    recentBids: buyer.bids.slice(0, 5), // Return the 5 most recent bids
-    recentProposals: buyer.proposals.slice(0, 5) // Return the 5 most recent proposals
+    recentBids: buyer.bids.slice(0, 5),
+    recentProposals: buyer.proposals.slice(0, 5)
   };
 };
