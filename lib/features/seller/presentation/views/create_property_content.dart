@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -9,6 +10,8 @@ import 'package:bet/features/seller/presentation/widgets/seller_button.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:bet/features/seller/presentation/widgets/listing_success_overlay.dart';
 import 'package:bet/features/seller/presentation/providers/create_property_provider.dart';
+import 'package:bet/features/seller/presentation/providers/seller_properties_provider.dart';
+import 'package:bet/features/auth/application/providers/auth_provider.dart';
 
 class CreatePropertyContent extends ConsumerStatefulWidget {
   const CreatePropertyContent({super.key});
@@ -181,7 +184,31 @@ class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
                       const SizedBox(height: 10),
                       _buildTextField(
                         controller: _endDateController,
-                        hint: 'e.g. Apr 20, 18:00',
+                        hint: 'Select Date',
+                        readOnly: true,
+                        onTap: () async {
+                          final date = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now().add(const Duration(days: 1)),
+                            firstDate: DateTime.now(),
+                            lastDate: DateTime.now().add(const Duration(days: 365)),
+                            builder: (context, child) {
+                              return Theme(
+                                data: Theme.of(context).copyWith(
+                                  colorScheme: const ColorScheme.light(
+                                    primary: AppColors.primaryLightBlue,
+                                    onPrimary: Colors.white,
+                                    onSurface: AppColors.primaryText,
+                                  ),
+                                ),
+                                child: child!,
+                              );
+                            },
+                          );
+                          if (date != null) {
+                            _endDateController.text = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T23:59:59Z";
+                          }
+                        },
                       ),
                     ],
                   ),
@@ -320,12 +347,19 @@ class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(16),
-          child: Image.file(
-            File(file.path),
-            width: 120,
-            height: 120,
-            fit: BoxFit.cover,
-          ),
+          child: kIsWeb
+              ? Image.network(
+                  file.path,
+                  width: 120,
+                  height: 120,
+                  fit: BoxFit.cover,
+                )
+              : Image.file(
+                  File(file.path),
+                  width: 120,
+                  height: 120,
+                  fit: BoxFit.cover,
+                ),
         ),
         Positioned(
           top: 6,
@@ -722,6 +756,13 @@ class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
     if (success) {
       // Reset provider state for next creation
       ref.read(createPropertyNotifierProvider.notifier).reset();
+      
+      // Invalidate the properties list so it fetches the new item
+      final userId = ref.read(authNotifierProvider).user?.id;
+      if (userId != null) {
+        ref.invalidate(sellerPropertiesProvider(userId));
+      }
+
       showListingSuccessOverlay(
         context,
         onReturnToDashboard: () {
@@ -763,39 +804,49 @@ class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
     required TextEditingController controller,
     required String hint,
     int maxLines = 1,
-    TextInputType keyboardType = TextInputType.text,
+    TextInputType? keyboardType,
+    bool readOnly = false,
+    VoidCallback? onTap,
   }) {
-    return TextField(
-      controller: controller,
-      maxLines: maxLines,
-      keyboardType: keyboardType,
-      style: GoogleFonts.inter(color: AppColors.primaryText, fontSize: 15),
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: GoogleFonts.inter(
-          color: AppColors.secondaryText.withValues(alpha: 0.5),
-          fontSize: 15,
-        ),
-        fillColor: AppColors.inputFill,
-        filled: true,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(
-            color: AppColors.primaryBlue.withValues(alpha: 0.3),
-            width: 1.5,
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F3F6), // subtle inner shadow/gray
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: TextField(
+        controller: controller,
+        maxLines: maxLines,
+        keyboardType: keyboardType,
+        readOnly: readOnly,
+        onTap: onTap,
+        style: GoogleFonts.inter(color: AppColors.primaryText, fontSize: 15),
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: GoogleFonts.inter(
+            color: AppColors.secondaryText.withValues(alpha: 0.5),
+            fontSize: 15,
           ),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 16,
+          fillColor: AppColors.inputFill,
+          filled: true,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(
+              color: AppColors.primaryBlue.withValues(alpha: 0.3),
+              width: 1.5,
+            ),
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 16,
+          ),
         ),
       ),
     );

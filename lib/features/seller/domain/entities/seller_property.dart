@@ -1,5 +1,7 @@
-/// Represents a property listing created by a seller.
-/// Aligned with the backend Prisma `Property` model.
+// Aligned with the backend Prisma `Property` model.
+import 'bid.dart';
+import 'proposal.dart';
+
 class SellerProperty {
   final String id;
   final String title;
@@ -14,6 +16,9 @@ class SellerProperty {
   final String status; // ACTIVE, ENDED, CLOSED
   final double? sqFootage;
   final int views;
+  final int? bidCount;
+  final List<Bid>? bids;
+  final List<Proposal>? proposals;
   final List<String> imageUrls;
   final DateTime? endTime;
   final String ownerId;
@@ -34,6 +39,9 @@ class SellerProperty {
     this.status = 'ACTIVE',
     this.sqFootage,
     this.views = 0,
+    this.bidCount,
+    this.bids,
+    this.proposals,
     required this.imageUrls,
     this.endTime,
     required this.ownerId,

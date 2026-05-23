@@ -1,30 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:bet/features/seller/seller_routes.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/core/widgets/app_logo.dart';
 import 'package:bet/features/seller/presentation/widgets/seller_button.dart';
-import 'package:bet/core/property/models/property_model.dart';
-import 'package:bet/features/seller/seller_routes.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:bet/features/seller/presentation/providers/property_detail_provider.dart';
 
-class PropertyDetailsScreen extends StatelessWidget {
+class PropertyDetailsScreen extends ConsumerWidget {
   final String propertyId;
-  final String imageUrl;
-  final String title;
-  final String location;
-  final Property? property;
 
   const PropertyDetailsScreen({
     super.key,
     required this.propertyId,
-    required this.imageUrl,
-    required this.title,
-    required this.location,
-    this.property,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final propertyAsync = ref.watch(propertyDetailProvider(propertyId));
     const bgColor = Color(0xFFEAECEF);
 
     return Scaffold(
@@ -39,25 +33,67 @@ class PropertyDetailsScreen extends StatelessWidget {
         ),
         title: const AppLogo(size: 28),
       ),
-      body: Stack(
-        children: [
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: MediaQuery.of(context).size.height * 0.45,
-            child: imageUrl.startsWith('assets/')
-                ? Image.asset(imageUrl, fit: BoxFit.cover)
-                : Image.network(
-                    imageUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      color: AppColors.inputFill,
-                      child: const Icon(Icons.image_outlined, size: 48),
-                    ),
-                  ),
+      body: propertyAsync.when(
+        loading: () => const Center(
+          child: CircularProgressIndicator(color: AppColors.primaryBlue),
+        ),
+        error: (err, stack) => Center(
+          child: Text(
+            'Failed to load property details: $err',
+            style: const TextStyle(color: AppColors.error),
           ),
-          Positioned.fill(
+        ),
+        data: (property) {
+          final imageUrl = property.imageUrls.isNotEmpty 
+              ? 'http://localhost:8080${property.imageUrls.first}' 
+              : 'assets/images/properties/apartment.png';
+          
+          final title = property.title;
+          final location = property.location;
+          
+          // Calculate Highest Bid
+          double highestBid = 0;
+          if (property.bids != null && property.bids!.isNotEmpty) {
+            highestBid = property.bids!.map((b) => b.amount).reduce((a, b) => a > b ? a : b);
+          }
+
+          // Calculate Ends In
+          String endsIn = 'N/A';
+          if (property.endTime != null) {
+            final diff = property.endTime!.difference(DateTime.now());
+            if (diff.isNegative) {
+              endsIn = 'Ended';
+            } else {
+              final days = diff.inDays;
+              final hours = diff.inHours % 24;
+              final minutes = diff.inMinutes % 60;
+              if (days > 0) {
+                endsIn = '${days}d ${hours}h';
+              } else {
+                endsIn = '${hours}h ${minutes}m';
+              }
+            }
+          }
+
+          return Stack(
+            children: [
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                height: MediaQuery.of(context).size.height * 0.45,
+                child: imageUrl.startsWith('assets/')
+                    ? Image.asset(imageUrl, fit: BoxFit.cover)
+                    : Image.network(
+                        imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          color: AppColors.inputFill,
+                          child: const Icon(Icons.image_outlined, size: 48),
+                        ),
+                      ),
+              ),
+              Positioned.fill(
             child: SingleChildScrollView(
               physics: const ClampingScrollPhysics(),
               child: Column(
@@ -158,7 +194,7 @@ class PropertyDetailsScreen extends StatelessWidget {
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
-                                      '18,450,000',
+                                      highestBid > 0 ? highestBid.toStringAsFixed(0) : '--',
                                       style: GoogleFonts.manrope(
                                         color: const Color(0xFF00684A),
                                         fontSize: 22,
@@ -189,7 +225,7 @@ class PropertyDetailsScreen extends StatelessWidget {
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
-                                      '04h 12m',
+                                      endsIn,
                                       style: GoogleFonts.manrope(
                                         color: AppColors.primaryText,
                                         fontSize: 22,
@@ -208,7 +244,7 @@ class PropertyDetailsScreen extends StatelessWidget {
                             _buildFeatureBox(
                               context,
                               Icons.architecture_rounded,
-                              '4,200',
+                              property.sqFootage?.toStringAsFixed(0) ?? '--',
                               'SQ FT',
                             ),
                           ],
@@ -225,7 +261,7 @@ class PropertyDetailsScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Perched atop the city\'s most iconic tower, the Skyline Penthouse offers an unparalleled urban sanctuary. Defined by its seamless floor-to-ceiling glass and 360-degree metropolitan views, this residence features private elevator access, 24/7 personalized concierge services, and a master suite that floats above the lights of the city.',
+                          property.description,
                           style: GoogleFonts.inter(
                             color: AppColors.primaryText.withValues(alpha: 0.8),
                             fontSize: 14,
@@ -241,7 +277,9 @@ class PropertyDetailsScreen extends StatelessWidget {
             ),
           ),
         ],
-      ),
+      );
+    },
+  ),
       bottomNavigationBar: Container(
         color: bgColor,
         padding: EdgeInsets.only(
