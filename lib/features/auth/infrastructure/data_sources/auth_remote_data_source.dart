@@ -199,4 +199,31 @@ class AuthRemoteDataSource {
       throw const NetworkFailure();
     }
   }
+
+  Future<User> updateProfile(String token, {String? email, String? bio}) async {
+    try {
+      final response = await http.put(
+        Uri.parse('$baseUrl/profile'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          if (email != null) 'email': email,
+          if (bio != null) 'bio': bio,
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && data['status'] == 'success') {
+        return User.fromJson(data['data']);
+      } else {
+        throw AuthFailure(data['message'] ?? 'Failed to update profile');
+      }
+    } catch (e) {
+      if (e is AuthFailure) rethrow;
+      throw const NetworkFailure();
+    }
+  }
 }

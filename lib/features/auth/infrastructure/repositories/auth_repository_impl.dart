@@ -97,4 +97,14 @@ class AuthRepositoryImpl implements AuthRepository {
     await _localDataSource.cacheUser(updatedUser);
     return updatedUser;
   }
+
+  @override
+  Future<User> updateProfile({String? email, String? bio}) async {
+    final token = await _localDataSource.getToken();
+    if (token == null) throw Exception('No token found');
+    
+    final updatedUser = await _remoteDataSource.updateProfile(token, email: email, bio: bio);
+    await _localDataSource.cacheUser(updatedUser);
+    return updatedUser;
+  }
 }

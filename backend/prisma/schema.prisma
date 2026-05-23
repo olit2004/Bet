@@ -20,6 +20,7 @@ model User {
   phone         String?
   faydaImageUrl String?
   avatarUrl     String?
+  bio           String?
   faydaStatus   String?        @default("PENDING")
   admin         Admin?
   auditLogs     AuditLog[]

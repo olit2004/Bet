@@ -24,14 +24,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   final _oldPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  final _bioController = TextEditingController(
-    text: 'Curating architectural masterpieces in the Pacific Northwest. Focused on brutalist and mid-century modern restorations.',
-  );
+  final _bioController = TextEditingController();
 
   final _faydaFormKey = GlobalKey<FormState>();
   final _faydaIdController = TextEditingController();
   XFile? _faydaImage;
   bool _isSubmittingVerification = false;
+  bool _isUploadingProfileImage = false;
 
   @override
   void dispose() {
@@ -50,6 +49,43 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       setState(() {
         _faydaImage = pickedFile;
       });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      final user = ref.read(authNotifierProvider).user;
+      if (user?.bio != null) {
+        _bioController.text = user!.bio!;
+      }
+    });
+  }
+
+  Future<void> _pickAndUploadProfileImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() => _isUploadingProfileImage = true);
+      try {
+        await ref.read(authNotifierProvider.notifier).uploadProfileImage(pickedFile);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Profile photo updated successfully!')),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to update photo: $e')),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isUploadingProfileImage = false);
+        }
+      }
     }
   }
 
@@ -215,6 +251,47 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
             ),
             const SizedBox(height: 24),
+            
+            Center(
+              child: GestureDetector(
+                onTap: _pickAndUploadProfileImage,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    CircleAvatar(
+                      radius: 50,
+                      backgroundColor: Colors.grey.shade200,
+                      backgroundImage: (user?.avatarUrl != null && user!.avatarUrl!.isNotEmpty)
+                          ? NetworkImage('http://localhost:8080${user.avatarUrl}') as ImageProvider
+                          : null,
+                      child: (user?.avatarUrl == null || user!.avatarUrl!.isEmpty)
+                          ? const Icon(Icons.person, size: 50, color: Colors.grey)
+                          : null,
+                    ),
+                    if (_isUploadingProfileImage)
+                      const CircularProgressIndicator(color: AppColors.primaryBlue),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: const BoxDecoration(
+                          color: AppColors.primaryBlue,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.camera_alt,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            
             Form(
               key: _bioFormKey,
               child: Column(
@@ -235,11 +312,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   const SizedBox(height: 16),
                   CustomButton(
                     text: 'Update Bio',
-                    onPressed: () {
+                    onPressed: () async {
                       if (_bioFormKey.currentState!.validate()) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Bio updated successfully')),
-                        );
+                        try {
+                          await ref.read(authNotifierProvider.notifier).updateProfile(bio: _bioController.text);
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Bio updated successfully')),
+                            );
+                          }
+                        } catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Failed to update bio: $e')),
+                            );
+                          }
+                        }
                       }
                     },
                   ),

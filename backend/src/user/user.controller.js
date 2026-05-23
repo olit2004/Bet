@@ -106,6 +106,7 @@ const login = async (req, res, next) => {
         id: user.id,
         email: user.email,
         role: user.role,
+        bio: user.bio,
       },
     });
   } catch (error) {
@@ -161,6 +162,7 @@ const uploadProfileImage = async (req, res, next) => {
         role: updatedUser.role,
         name: updatedUser.name,
         avatarUrl: updatedUser.avatarUrl,
+        bio: updatedUser.bio,
       },
     });
   } catch (error) {
@@ -209,6 +211,7 @@ const submitVerification = async (req, res, next) => {
         faydaImageUrl: updatedUser.faydaImageUrl,
         faydaStatus: updatedUser.faydaStatus,
         isVerified: updatedUser.isVerified,
+        bio: updatedUser.bio,
       },
     });
   } catch (error) {
@@ -245,6 +248,7 @@ const getMe = async (req, res, next) => {
         faydaImageUrl: user.faydaImageUrl,
         faydaStatus: user.faydaStatus,
         isVerified: user.isVerified,
+        bio: user.bio,
       },
     });
   } catch (error) {
@@ -252,4 +256,41 @@ const getMe = async (req, res, next) => {
   }
 };
 
-export { register, login, deleteAccount, uploadProfileImage, submitVerification, getMe };
+const updateProfile = async (req, res, next) => {
+  try {
+    const { email, bio } = req.body;
+    
+    // Check email uniqueness if it's being updated
+    if (email) {
+      const existingEmail = await userService.findUserByEmail(email);
+      if (existingEmail && existingEmail.id !== req.user.id) {
+        return res.status(400).json({ status: 'fail', message: 'Email is already taken.' });
+      }
+    }
+
+    const updatedUser = await userService.updateUser(req.user.id, { 
+      ...(email && { email }),
+      ...(bio !== undefined && { bio }),
+    });
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        id: updatedUser.id,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        name: updatedUser.name,
+        avatarUrl: updatedUser.avatarUrl,
+        faydaId: updatedUser.faydaId,
+        faydaImageUrl: updatedUser.faydaImageUrl,
+        faydaStatus: updatedUser.faydaStatus,
+        isVerified: updatedUser.isVerified,
+        bio: updatedUser.bio,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export { register, login, deleteAccount, uploadProfileImage, submitVerification, getMe, updateProfile };

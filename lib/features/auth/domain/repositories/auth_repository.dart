@@ -30,4 +30,7 @@ abstract class AuthRepository {
 
   /// Submits Fayda ID verification for the authenticated user.
   Future<User> submitVerification(String faydaId, dynamic imageFile);
+
+  /// Updates the user's profile information.
+  Future<User> updateProfile({String? email, String? bio});
 }

@@ -5,13 +5,18 @@ import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/core/widgets/app_logo.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:bet/features/auth/application/providers/auth_provider.dart';
+import 'package:bet/features/buyer/application/providers/buyer_provider.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authNotifierProvider);
+    final user = authState.user;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -62,9 +67,12 @@ class ProfileScreen extends ConsumerWidget {
                 child: CircleAvatar(
                   radius: 70,
                   backgroundColor: AppColors.inputFill,
-                  backgroundImage: const AssetImage(
-                    'assets/images/lemi.png',
-                  ),
+                  backgroundImage: (user?.avatarUrl != null && user!.avatarUrl!.isNotEmpty)
+                      ? NetworkImage('http://localhost:8080${user.avatarUrl}') as ImageProvider
+                      : null,
+                  child: (user?.avatarUrl == null || user!.avatarUrl!.isEmpty)
+                      ? const Icon(Icons.person, size: 70, color: Colors.grey)
+                      : null,
                 ),
               ),
             ),
@@ -73,7 +81,7 @@ class ProfileScreen extends ConsumerWidget {
             
             // 2. Name
             Text(
-              'Lemi Fita',
+              user?.name ?? 'Unknown User',
               style: GoogleFonts.manrope(
                 fontSize: 28,
                 fontWeight: FontWeight.w900,
@@ -85,29 +93,30 @@ class ProfileScreen extends ConsumerWidget {
             const SizedBox(height: 12),
             
             // 3. Client Badge
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF3F7FF),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                'Client since 2021',
-                style: GoogleFonts.inter(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF374CE2),
+            if (user?.createdAt != null)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF3F7FF),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  'Client since ${DateFormat('yyyy').format(user!.createdAt!)}',
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF374CE2),
+                  ),
                 ),
               ),
-            ),
             
             const SizedBox(height: 20),
             
-            // 4. Bio
+            // 4. Bio (Email)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32.0),
               child: Text(
-                'Curating architectural masterpieces in the Pacific Northwest. Focused on brutalist and mid-century modern restorations.',
+                user?.email ?? '',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   fontSize: 15,
@@ -121,21 +130,25 @@ class ProfileScreen extends ConsumerWidget {
             const SizedBox(height: 32),
             
             // 5. Stats Grid (2x2)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: GridView.count(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisCount: 2,
-                crossAxisSpacing: 20,
-                mainAxisSpacing: 20,
-                childAspectRatio: 1.4,
-                children: [
-                  _buildStatCard('12', 'ACTIVE BIDS', const Color(0xFF374CE2)),
-                  _buildStatCard('4', 'PROPOSALS', const Color(0xFF059669)),
-                  _buildStatCard('\$4.2M', 'ASSET VALUE', const Color(0xFF05345C)),
-                  _buildStatCard('100%', 'ESCROW SUCCESS', const Color(0xFF05345C)),
-                ],
+            ref.watch(buyerDashboardProvider).when(
+              loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primaryBlue)),
+              error: (err, stack) => Center(child: Text('Failed to load stats: $err')),
+              data: (dashboard) => Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 20,
+                  mainAxisSpacing: 20,
+                  childAspectRatio: 1.4,
+                  children: [
+                    _buildStatCard('${dashboard.statistics.activeBids}', 'ACTIVE BIDS', const Color(0xFF374CE2)),
+                    _buildStatCard('${dashboard.statistics.totalProposals}', 'PROPOSALS', const Color(0xFF059669)),
+                    _buildStatCard('${dashboard.statistics.acceptedBids + dashboard.statistics.acceptedProposals}', 'ACCEPTED OFFERS', const Color(0xFF05345C)),
+                    _buildStatCard('${dashboard.statistics.totalBids}', 'TOTAL BIDS', const Color(0xFF05345C)),
+                  ],
+                ),
               ),
             ),
             

@@ -140,6 +140,16 @@ class AuthNotifier extends Notifier<AuthStateData> {
     }
   }
 
+  Future<void> updateProfile({String? email, String? bio}) async {
+    try {
+      final updatedUser = await _repository.updateProfile(email: email, bio: bio);
+      state = state.copyWith(user: updatedUser);
+    } catch (e) {
+      state = state.copyWith(errorMessage: e.toString());
+      rethrow;
+    }
+  }
+
   Future<void> deleteAccount() async {
     state = state.copyWith(status: AuthState.loading);
     try {
