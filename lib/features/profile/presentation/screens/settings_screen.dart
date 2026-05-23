@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/core/widgets/custom_button.dart';
 import 'package:bet/core/widgets/custom_text_field.dart';
+import 'package:bet/features/auth/application/providers/auth_provider.dart';
 
-class SettingsScreen extends StatefulWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   final _bioFormKey = GlobalKey<FormState>();
   final _passwordFormKey = GlobalKey<FormState>();
 
@@ -23,13 +26,60 @@ class _SettingsScreenState extends State<SettingsScreen> {
     text: 'Curating architectural masterpieces in the Pacific Northwest. Focused on brutalist and mid-century modern restorations.',
   );
 
+  final _faydaFormKey = GlobalKey<FormState>();
+  final _faydaIdController = TextEditingController();
+  XFile? _faydaImage;
+  bool _isSubmittingVerification = false;
+
   @override
   void dispose() {
     _oldPasswordController.dispose();
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
     _bioController.dispose();
+    _faydaIdController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickFaydaImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _faydaImage = pickedFile;
+      });
+    }
+  }
+
+  Future<void> _submitVerification() async {
+    if (_faydaFormKey.currentState!.validate() && _faydaImage != null) {
+      setState(() => _isSubmittingVerification = true);
+      try {
+        await ref.read(authNotifierProvider.notifier).submitVerification(
+          _faydaIdController.text,
+          _faydaImage!,
+        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Verification submitted successfully!')),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(e.toString())),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isSubmittingVerification = false);
+        }
+      }
+    } else if (_faydaImage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select an image of your Fayda ID')),
+      );
+    }
   }
 
   void _showDeleteDialog() {
@@ -41,6 +91,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authNotifierProvider);
+    final user = authState.user;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -64,6 +117,93 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // --- Verification Section ---
+            Text(
+              'Identity Verification',
+              style: GoogleFonts.manrope(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primaryText,
+              ),
+            ),
+            const SizedBox(height: 8),
+            _buildVerificationStatus(user?.isVerified, user?.faydaStatus),
+            const SizedBox(height: 16),
+            if (user?.faydaStatus == null || user?.faydaStatus == 'REJECTED') ...[
+              Form(
+                key: _faydaFormKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CustomTextField(
+                      label: 'Fayda ID Number',
+                      hintText: 'Enter your 12-digit Fayda ID',
+                      controller: _faydaIdController,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Fayda ID is required';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Fayda ID Image',
+                      style: GoogleFonts.inter(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primaryText,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    GestureDetector(
+                      onTap: _pickFaydaImage,
+                      child: Container(
+                        height: 120,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: _faydaImage != null
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.network(
+                                  _faydaImage!.path,
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            : Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(Icons.upload_file, color: AppColors.primaryBlue, size: 32),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Tap to upload ID image',
+                                    style: GoogleFonts.inter(
+                                      color: AppColors.secondaryText,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _isSubmittingVerification
+                        ? const Center(child: CircularProgressIndicator(color: AppColors.primaryBlue))
+                        : CustomButton(
+                            text: 'Submit Verification',
+                            onPressed: _submitVerification,
+                          ),
+                  ],
+                ),
+              ),
+            ],
+            const SizedBox(height: 32),
+            const Divider(),
+            const SizedBox(height: 32),
+            
             Text(
               'Update Profile',
               style: GoogleFonts.manrope(
@@ -278,6 +418,57 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildVerificationStatus(bool? isVerified, String? status) {
+    Color bgColor;
+    Color textColor;
+    String text;
+
+    if (isVerified == true) {
+      bgColor = const Color(0xFFD1FAE5);
+      textColor = const Color(0xFF059669);
+      text = 'Verified Account';
+    } else if (status == 'PENDING') {
+      bgColor = const Color(0xFFFEF3C7);
+      textColor = const Color(0xFFD97706);
+      text = 'Verification Pending';
+    } else if (status == 'REJECTED') {
+      bgColor = const Color(0xFFFEE2E2);
+      textColor = const Color(0xFFDC2626);
+      text = 'Verification Rejected. Please try again.';
+    } else {
+      bgColor = Colors.grey.shade200;
+      textColor = Colors.grey.shade700;
+      text = 'Unverified Account';
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isVerified == true ? Icons.verified : Icons.info_outline,
+            color: textColor,
+            size: 16,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            text,
+            style: GoogleFonts.inter(
+              color: textColor,
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+            ),
+          ),
+        ],
       ),
     );
   }

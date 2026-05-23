@@ -67,4 +67,24 @@ class AuthRepositoryImpl implements AuthRepository {
     
     return await _localDataSource.getUser();
   }
+
+  @override
+  Future<User> uploadProfileImage(dynamic imageFile) async {
+    final token = await _localDataSource.getToken();
+    if (token == null) throw Exception('No token found');
+    
+    final updatedUser = await _remoteDataSource.uploadProfileImage(imageFile, token);
+    await _localDataSource.cacheUser(updatedUser);
+    return updatedUser;
+  }
+
+  @override
+  Future<User> submitVerification(String faydaId, dynamic imageFile) async {
+    final token = await _localDataSource.getToken();
+    if (token == null) throw Exception('No token found');
+    
+    final updatedUser = await _remoteDataSource.submitVerification(faydaId, imageFile, token);
+    await _localDataSource.cacheUser(updatedUser);
+    return updatedUser;
+  }
 }

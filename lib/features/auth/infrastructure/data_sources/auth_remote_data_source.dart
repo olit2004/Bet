@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
+import 'package:http_parser/http_parser.dart';
 import '../../domain/failures/auth_failure.dart';
 import '../../domain/entities/user.dart';
 
@@ -67,6 +69,84 @@ class AuthRemoteDataSource {
         throw const UserAlreadyExistsFailure();
       } else {
         throw AuthFailure(data['message'] ?? 'Registration failed');
+      }
+    } catch (e) {
+      if (e is AuthFailure) rethrow;
+      throw const NetworkFailure();
+    }
+  }
+
+  Future<User> uploadProfileImage(XFile image, String token) async {
+    try {
+      var request = http.MultipartRequest('PATCH', Uri.parse('$baseUrl/profile-image'));
+      
+      request.headers.addAll({
+        'Authorization': 'Bearer $token',
+      });
+
+      final bytes = await image.readAsBytes();
+      final mimeType = image.mimeType ?? 'image/jpeg';
+      final typeSplit = mimeType.split('/');
+      
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'image',
+          bytes,
+          filename: image.name,
+          contentType: MediaType(typeSplit[0], typeSplit.length > 1 ? typeSplit[1] : 'jpeg'),
+        ),
+      );
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && data['status'] == 'success') {
+        return User.fromJson(data['data']);
+      } else {
+        throw AuthFailure(data['message'] ?? 'Failed to upload image');
+      }
+    } catch (e, stack) {
+      print('Upload error: $e');
+      print('Upload stack: $stack');
+      if (e is AuthFailure) rethrow;
+      throw const NetworkFailure();
+    }
+  }
+
+  Future<User> submitVerification(String faydaId, XFile image, String token) async {
+    try {
+      var request = http.MultipartRequest('PATCH', Uri.parse('$baseUrl/verification'));
+      
+      request.headers.addAll({
+        'Authorization': 'Bearer $token',
+      });
+
+      request.fields['faydaId'] = faydaId;
+
+      final bytes = await image.readAsBytes();
+      final mimeType = image.mimeType ?? 'image/jpeg';
+      final typeSplit = mimeType.split('/');
+      
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'faydaImage',
+          bytes,
+          filename: image.name,
+          contentType: MediaType(typeSplit[0], typeSplit.length > 1 ? typeSplit[1] : 'jpeg'),
+        ),
+      );
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && data['status'] == 'success') {
+        return User.fromJson(data['data']);
+      } else if (response.statusCode == 409) {
+        throw const AuthFailure('This Fayda ID is already registered.');
+      } else {
+        throw AuthFailure(data['message'] ?? 'Failed to submit verification');
       }
     } catch (e) {
       if (e is AuthFailure) rethrow;
