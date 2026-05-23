@@ -17,7 +17,8 @@ class CreatePropertyContent extends ConsumerStatefulWidget {
   const CreatePropertyContent({super.key});
 
   @override
-  ConsumerState<CreatePropertyContent> createState() => _CreatePropertyContentState();
+  ConsumerState<CreatePropertyContent> createState() =>
+      _CreatePropertyContentState();
 }
 
 class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
@@ -54,7 +55,8 @@ class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
   @override
   Widget build(BuildContext context) {
     final createState = ref.watch(createPropertyNotifierProvider);
-    final isLoading = createState.status == CreatePropertyStatus.loading || _isSubmitting;
+    final isLoading =
+        createState.status == CreatePropertyStatus.loading || _isSubmitting;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
@@ -99,7 +101,7 @@ class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
           ),
           const SizedBox(height: 24),
 
-          // ── Value Point & SQ Footage ──
+          // Value Point & SQ Footage
           Row(
             children: [
               Expanded(
@@ -189,9 +191,13 @@ class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
                         onTap: () async {
                           final date = await showDatePicker(
                             context: context,
-                            initialDate: DateTime.now().add(const Duration(days: 1)),
+                            initialDate: DateTime.now().add(
+                              const Duration(days: 1),
+                            ),
                             firstDate: DateTime.now(),
-                            lastDate: DateTime.now().add(const Duration(days: 365)),
+                            lastDate: DateTime.now().add(
+                              const Duration(days: 365),
+                            ),
                             builder: (context, child) {
                               return Theme(
                                 data: Theme.of(context).copyWith(
@@ -206,7 +212,8 @@ class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
                             },
                           );
                           if (date != null) {
-                            _endDateController.text = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T23:59:59Z";
+                            _endDateController.text =
+                                "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T23:59:59Z";
                           }
                         },
                       ),
@@ -226,7 +233,6 @@ class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
       ),
     );
   }
-
 
   // Image Upload Area
 
@@ -326,7 +332,11 @@ class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.add_photo_alternate, color: AppColors.primaryBlue, size: 32),
+            Icon(
+              Icons.add_photo_alternate,
+              color: AppColors.primaryBlue,
+              size: 32,
+            ),
             const SizedBox(height: 8),
             Text(
               'Add More',
@@ -386,16 +396,13 @@ class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
 
   Future<void> _pickImages() async {
     final ImagePicker picker = ImagePicker();
-    final List<XFile> images = await picker.pickMultiImage(
-      imageQuality: 80,
-    );
+    final List<XFile> images = await picker.pickMultiImage(imageQuality: 80);
     if (images.isNotEmpty) {
       setState(() {
         _selectedImages.addAll(images);
       });
     }
   }
-
 
   // Geographic Anchor (Interactive Map)
   Widget _buildGeographicAnchor(BuildContext context) {
@@ -682,7 +689,8 @@ class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
 
   Future<void> _submitProperty() async {
     // Validation
-    if (_titleController.text.trim().isEmpty || _priceController.text.trim().isEmpty) {
+    if (_titleController.text.trim().isEmpty ||
+        _priceController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -737,7 +745,10 @@ class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
       payload['value'] = _valueController.text.trim().replaceAll(',', '');
     }
     if (_sqFootageController.text.trim().isNotEmpty) {
-      payload['sqFootage'] = _sqFootageController.text.trim().replaceAll(',', '');
+      payload['sqFootage'] = _sqFootageController.text.trim().replaceAll(
+        ',',
+        '',
+      );
     }
     if (_listingType == 1 && _endDateController.text.trim().isNotEmpty) {
       payload['endingAt'] = _endDateController.text.trim();
@@ -756,7 +767,7 @@ class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
     if (success) {
       // Reset provider state for next creation
       ref.read(createPropertyNotifierProvider.notifier).reset();
-      
+
       // Invalidate the properties list so it fetches the new item
       final userId = ref.read(authNotifierProvider).user?.id;
       if (userId != null) {
@@ -772,7 +783,7 @@ class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
     } else {
       final errorMsg =
           ref.read(createPropertyNotifierProvider).errorMessage ??
-              'Failed to create listing.';
+          'Failed to create listing.';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(errorMsg, style: GoogleFonts.inter()),

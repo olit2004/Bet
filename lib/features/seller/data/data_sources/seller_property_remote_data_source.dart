@@ -9,7 +9,6 @@ import '../models/seller_property_model.dart';
 class SellerPropertyRemoteDataSource {
   final AuthLocalDataSource _authLocalDataSource;
 
-  // Using localhost for Desktop testing (use 10.0.2.2 for Android Emulator)
   static const String baseUrl = 'http://localhost:8080/api/properties';
 
   SellerPropertyRemoteDataSource({
@@ -22,15 +21,14 @@ class SellerPropertyRemoteDataSource {
     if (token == null) {
       throw Exception('Not authenticated. Please log in again.');
     }
-    return {
-      'Authorization': 'Bearer $token',
-    };
+    return {'Authorization': 'Bearer $token'};
   }
 
   /// Creates a new property listing on the backend.
   /// The backend extracts the ownerId from the JWT, so we don't send it.
   Future<Map<String, dynamic>> createProperty(
-      Map<String, dynamic> propertyData) async {
+    Map<String, dynamic> propertyData,
+  ) async {
     try {
       final headers = await _getAuthHeaders();
       final request = http.MultipartRequest('POST', Uri.parse(baseUrl));
@@ -48,7 +46,7 @@ class SellerPropertyRemoteDataSource {
         final List<XFile> images = propertyData['images'] as List<XFile>;
         for (final image in images) {
           final bytes = await image.readAsBytes();
-          
+
           final ext = image.name.split('.').last.toLowerCase();
           MediaType contentType = MediaType('image', 'jpeg');
           if (ext == 'png') {
@@ -81,7 +79,8 @@ class SellerPropertyRemoteDataSource {
         throw Exception('Only sellers can create property listings.');
       } else {
         throw Exception(
-            data['message'] as String? ?? 'Failed to create property.');
+          data['message'] as String? ?? 'Failed to create property.',
+        );
       }
     } catch (e) {
       if (e is Exception) rethrow;
@@ -103,14 +102,17 @@ class SellerPropertyRemoteDataSource {
       if (response.statusCode == 200 && data['success'] == true) {
         final List<dynamic> propertiesJson = data['data'] as List<dynamic>;
         return propertiesJson
-            .map((json) =>
-                SellerPropertyModel.fromJson(json as Map<String, dynamic>))
+            .map(
+              (json) =>
+                  SellerPropertyModel.fromJson(json as Map<String, dynamic>),
+            )
             .toList();
       } else if (response.statusCode == 401) {
         throw Exception('Session expired. Please log in again.');
       } else {
         throw Exception(
-            data['message'] as String? ?? 'Failed to fetch properties.');
+          data['message'] as String? ?? 'Failed to fetch properties.',
+        );
       }
     } catch (e) {
       if (e is Exception) rethrow;
@@ -131,14 +133,16 @@ class SellerPropertyRemoteDataSource {
 
       if (response.statusCode == 200 && data['success'] == true) {
         return SellerPropertyModel.fromJson(
-            data['data'] as Map<String, dynamic>);
+          data['data'] as Map<String, dynamic>,
+        );
       } else if (response.statusCode == 404) {
         throw Exception('Property not found.');
       } else if (response.statusCode == 401) {
         throw Exception('Session expired. Please log in again.');
       } else {
         throw Exception(
-            data['message'] as String? ?? 'Failed to fetch property details.');
+          data['message'] as String? ?? 'Failed to fetch property details.',
+        );
       }
     } catch (e) {
       if (e is Exception) rethrow;
@@ -168,7 +172,8 @@ class SellerPropertyRemoteDataSource {
 
       if (response.statusCode != 200 || data['success'] != true) {
         throw Exception(
-            data['message'] as String? ?? 'Failed to accept offer.');
+          data['message'] as String? ?? 'Failed to accept offer.',
+        );
       }
     } catch (e) {
       if (e is Exception) rethrow;

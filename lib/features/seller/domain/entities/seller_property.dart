@@ -1,4 +1,3 @@
-// Aligned with the backend Prisma `Property` model.
 import 'bid.dart';
 import 'proposal.dart';
 
@@ -48,5 +47,4 @@ class SellerProperty {
     this.createdAt,
     this.updatedAt,
   });
-
 }
