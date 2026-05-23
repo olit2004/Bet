@@ -7,6 +7,10 @@ async function placeBid(req, res, next) {
     const { amount } = req.body;
     const bidderId = req.user.id;
 
+    console.log(`[BID REQUEST] Placing bid for property: ${propertyId}`);
+    console.log(`[BID REQUEST] Bidder: ${bidderId}, Amount: ${amount}`);
+    console.log(`[BID REQUEST] File uploaded: ${req.file ? req.file.filename : 'No file'}`);
+
     if (!amount || isNaN(parseFloat(amount))) {
       const error = new Error('A valid bid amount is required');
       error.statusCode = 400;

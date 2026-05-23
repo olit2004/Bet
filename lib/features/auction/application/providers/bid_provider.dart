@@ -37,25 +37,30 @@ final bidRepositoryProvider = Provider<BidRepository>((ref) {
 // --- State Management ---
 
 enum BidStatus { initial, loading, success, error }
+enum BidAction { none, fetch, place, accept, retract }
 
 class BidStateData {
   final BidStatus status;
+  final BidAction lastAction;
   final List<BidEntity> bids;
   final String? errorMessage;
 
   BidStateData({
     required this.status,
+    this.lastAction = BidAction.none,
     this.bids = const [],
     this.errorMessage,
   });
 
   BidStateData copyWith({
     BidStatus? status,
+    BidAction? lastAction,
     List<BidEntity>? bids,
     String? errorMessage,
   }) {
     return BidStateData(
       status: status ?? this.status,
+      lastAction: lastAction ?? this.lastAction,
       bids: bids ?? this.bids,
       errorMessage: errorMessage ?? this.errorMessage,
     );
@@ -71,47 +76,48 @@ class BidNotifier extends Notifier<BidStateData> {
   }
 
   Future<void> fetchPropertyBids(String propertyId) async {
-    state = state.copyWith(status: BidStatus.loading, errorMessage: null);
+    state = state.copyWith(status: BidStatus.loading, lastAction: BidAction.fetch, errorMessage: null);
     try {
       final bids = await _repository.getPropertyBids(propertyId);
-      state = state.copyWith(status: BidStatus.success, bids: bids);
+      state = state.copyWith(status: BidStatus.success, lastAction: BidAction.fetch, bids: bids);
     } catch (e) {
-      state = state.copyWith(status: BidStatus.error, errorMessage: e.toString());
+      state = state.copyWith(status: BidStatus.error, lastAction: BidAction.fetch, errorMessage: e.toString());
     }
   }
 
-  Future<void> placeBid(String propertyId, double amount, {String? bankStatementPath}) async {
-    state = state.copyWith(status: BidStatus.loading, errorMessage: null);
+  Future<void> placeBid(String propertyId, double amount, {List<int>? bankStatementBytes, String? bankStatementFileName}) async {
+    state = state.copyWith(status: BidStatus.loading, lastAction: BidAction.place, errorMessage: null);
     try {
-      final newBid = await _repository.placeBid(propertyId, amount, bankStatementPath: bankStatementPath);
+      final newBid = await _repository.placeBid(propertyId, amount, bankStatementBytes: bankStatementBytes, bankStatementFileName: bankStatementFileName);
       state = state.copyWith(
         status: BidStatus.success,
+        lastAction: BidAction.place,
         bids: [...state.bids, newBid],
       );
     } catch (e) {
-      state = state.copyWith(status: BidStatus.error, errorMessage: e.toString());
+      state = state.copyWith(status: BidStatus.error, lastAction: BidAction.place, errorMessage: e.toString());
     }
   }
 
   Future<void> acceptBid(String bidId) async {
-    state = state.copyWith(status: BidStatus.loading, errorMessage: null);
+    state = state.copyWith(status: BidStatus.loading, lastAction: BidAction.accept, errorMessage: null);
     try {
       final updatedBid = await _repository.acceptBid(bidId);
       final updatedBids = state.bids.map((b) => b.id == bidId ? updatedBid : b).toList();
-      state = state.copyWith(status: BidStatus.success, bids: updatedBids);
+      state = state.copyWith(status: BidStatus.success, lastAction: BidAction.accept, bids: updatedBids);
     } catch (e) {
-      state = state.copyWith(status: BidStatus.error, errorMessage: e.toString());
+      state = state.copyWith(status: BidStatus.error, lastAction: BidAction.accept, errorMessage: e.toString());
     }
   }
 
   Future<void> retractBid(String bidId) async {
-    state = state.copyWith(status: BidStatus.loading, errorMessage: null);
+    state = state.copyWith(status: BidStatus.loading, lastAction: BidAction.retract, errorMessage: null);
     try {
       final updatedBid = await _repository.retractBid(bidId);
       final updatedBids = state.bids.map((b) => b.id == bidId ? updatedBid : b).toList();
-      state = state.copyWith(status: BidStatus.success, bids: updatedBids);
+      state = state.copyWith(status: BidStatus.success, lastAction: BidAction.retract, bids: updatedBids);
     } catch (e) {
-      state = state.copyWith(status: BidStatus.error, errorMessage: e.toString());
+      state = state.copyWith(status: BidStatus.error, lastAction: BidAction.retract, errorMessage: e.toString());
     }
   }
 }
