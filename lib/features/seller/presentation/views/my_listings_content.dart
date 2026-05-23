@@ -69,11 +69,12 @@ class _MyListingsContentState extends ConsumerState<MyListingsContent> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const AppLogo(size: 32),
-              const CircleAvatar(
+              CircleAvatar(
                 radius: 22,
-                backgroundImage: AssetImage(
-                  'assets/images/seller_profile.png',
-                ),
+                backgroundColor: Colors.grey.shade200,
+                backgroundImage: authState.user?.avatarUrl != null
+                    ? NetworkImage('http://localhost:8080${authState.user!.avatarUrl}')
+                    : const AssetImage('assets/images/seller_profile.png') as ImageProvider,
               ),
             ],
           ),

@@ -105,7 +105,7 @@ class ActiveAuctionsContent extends ConsumerWidget {
                     padding: const EdgeInsets.only(bottom: 24.0),
                     child: ActiveAuctionCard(
                       imageUrl: imageUrl,
-                      isVerified: true,
+                      isVerified: authState.user?.isVerified ?? false,
                       timeRemaining: timeRemaining,
                       title: property.title,
                       location: property.location,

@@ -6,6 +6,7 @@ import 'package:bet/features/seller/presentation/widgets/bid_success_overlay.dar
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bet/features/seller/presentation/providers/property_detail_provider.dart';
+import '../../../auth/application/providers/auth_provider.dart';
 
 class ManageBidsScreen extends ConsumerWidget {
   final String propertyId;
@@ -15,6 +16,8 @@ class ManageBidsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final propertyAsync = ref.watch(propertyDetailProvider(propertyId));
+    final authState = ref.watch(authNotifierProvider);
+    final user = authState.user;
     const bgColor = Color(0xFFEAECEF);
 
     return Scaffold(
@@ -38,9 +41,10 @@ class ManageBidsScreen extends ConsumerWidget {
         actions: [
           CircleAvatar(
             radius: 18,
-            backgroundImage: const AssetImage(
-              'assets/images/seller_profile.png',
-            ),
+            backgroundColor: Colors.grey.shade200,
+            backgroundImage: user?.avatarUrl != null
+                ? NetworkImage('http://localhost:8080${user!.avatarUrl}')
+                : const AssetImage('assets/images/seller_profile.png') as ImageProvider,
           ),
           const SizedBox(width: 16),
         ],
@@ -57,17 +61,19 @@ class ManageBidsScreen extends ConsumerWidget {
         ),
         data: (property) {
           final isAuction = property.listingType == 'AUCTION';
-          
+
           // Get the list of offers (either bids or proposals)
           final List<dynamic> offers = isAuction
               ? (property.bids ?? [])
               : (property.proposals ?? []);
-          
+
           final totalOffers = offers.length;
-          
+
           double highestOffer = 0;
           if (offers.isNotEmpty) {
-            highestOffer = offers.map((o) => (o.amount as num?)?.toDouble() ?? 0.0).reduce((a, b) => a > b ? a : b);
+            highestOffer = offers
+                .map((o) => (o.amount as num?)?.toDouble() ?? 0.0)
+                .reduce((a, b) => a > b ? a : b);
           }
 
           // Calculate time remaining
@@ -176,7 +182,9 @@ class ManageBidsScreen extends ConsumerWidget {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              highestOffer > 0 ? '${highestOffer.toStringAsFixed(0)} Birr' : '--',
+                              highestOffer > 0
+                                  ? '${highestOffer.toStringAsFixed(0)} Birr'
+                                  : '--',
                               style: GoogleFonts.manrope(
                                 color: Colors.white,
                                 fontSize: 22,
@@ -195,9 +203,14 @@ class ManageBidsScreen extends ConsumerWidget {
                 // Time Remaining Box
                 if (isAuction) ...[
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 20,
+                    ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFDCDFE5), // Slightly darker gray/blue
+                      color: const Color(
+                        0xFFDCDFE5,
+                      ), // Slightly darker gray/blue
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Column(
@@ -252,8 +265,8 @@ class ManageBidsScreen extends ConsumerWidget {
                   ...offers.asMap().entries.map((entry) {
                     final index = entry.key;
                     final offer = entry.value;
-                    
-                    // Simple logic to display time ago (you can use a package like timeago in real app)
+
+                    // Simple logic to display time ago
                     String timeAgo = '';
                     if (offer.createdAt != null) {
                       final diff = DateTime.now().difference(offer.createdAt!);
@@ -268,19 +281,23 @@ class ManageBidsScreen extends ConsumerWidget {
 
                     // For now we set the first one as highest for visual effect assuming they are sorted by backend
                     final isHighestOffer = index == 0 && highestOffer > 0;
-                    
+
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 16.0),
                       child: _BidCard(
                         bidId: offer.id,
                         propertyId: property.id,
                         name: offer.bidderName ?? 'Anonymous',
-                        price: '${offer.amount?.toStringAsFixed(0) ?? '--'} Birr',
+                        price:
+                            '${offer.amount?.toStringAsFixed(0) ?? '--'} Birr',
                         timeAgo: timeAgo,
                         imageUrl: 'assets/images/bidder_${(index % 2) + 1}.png',
                         isHighest: isHighestOffer,
-                        isAcceptable: offer.status == 'PENDING' || offer.status == 'ACTIVE',
+                        isAcceptable:
+                            offer.status == 'PENDING' ||
+                            offer.status == 'ACTIVE',
                         isAuction: isAuction,
+                        isVerified: offer.isVerified,
                       ),
                     );
                   }),
@@ -305,6 +322,7 @@ class _BidCard extends StatelessWidget {
   final bool isHighest;
   final bool isAcceptable;
   final bool isAuction;
+  final bool isVerified;
 
   const _BidCard({
     required this.propertyId,
@@ -316,6 +334,7 @@ class _BidCard extends StatelessWidget {
     required this.isHighest,
     required this.isAcceptable,
     required this.isAuction,
+    required this.isVerified,
   });
 
   @override
@@ -403,14 +422,25 @@ class _BidCard extends StatelessWidget {
                               fontWeight: FontWeight.w700,
                             ),
                           ),
-                          Text(
-                            'Verified Buyer',
-                            style: GoogleFonts.inter(
-                              color: AppColors.primaryBlue,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w500,
+                          if (isVerified)
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.verified,
+                                  color: AppColors.primaryBlue,
+                                  size: 12,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Verified Buyer',
+                                  style: GoogleFonts.inter(
+                                    color: AppColors.primaryBlue,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
                         ],
                       ),
                     ),

@@ -203,21 +203,22 @@ class _ReviewBidScreenState extends ConsumerState<ReviewBidScreen> {
                                   ),
                                 ),
                                 const SizedBox(height: 8),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF67E2A9),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    'VERIFIED',
-                                    style: GoogleFonts.inter(
-                                      color: const Color(0xFF00684A),
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w800,
+                                if (offer.isVerified)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF67E2A9),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      'VERIFIED',
+                                      style: GoogleFonts.inter(
+                                        color: const Color(0xFF00684A),
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w800,
+                                      ),
                                     ),
                                   ),
-                                ),
                               ],
                             ),
                           ),
@@ -247,14 +248,15 @@ class _ReviewBidScreenState extends ConsumerState<ReviewBidScreen> {
                         ],
                       ),
                       const SizedBox(height: 24),
-                      Text(
-                        'Verified Buyer',
-                        style: GoogleFonts.inter(
-                          color: AppColors.primaryBlue.withValues(alpha: 0.8),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
+                      if (offer.isVerified)
+                        Text(
+                          'Verified Buyer',
+                          style: GoogleFonts.inter(
+                            color: AppColors.primaryBlue.withValues(alpha: 0.8),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
                       if (offer.details != null && offer.details!.isNotEmpty) ...[
                         const SizedBox(height: 12),
                         Container(
