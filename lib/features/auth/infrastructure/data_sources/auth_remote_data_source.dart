@@ -172,6 +172,13 @@ class AuthRemoteDataSource {
         throw const AuthFailure('This Fayda ID is already registered.');
       } else {
         throw AuthFailure(data['message'] ?? 'Failed to submit verification');
+      }
+    } catch (e) {
+      if (e is AuthFailure) rethrow;
+      throw const NetworkFailure();
+    }
+  }
+
   Future<void> deleteAccount(String token) async {
     try {
       final response = await http.delete(

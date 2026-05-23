@@ -137,6 +137,9 @@ class AuthNotifier extends Notifier<AuthStateData> {
     } catch (e) {
       state = state.copyWith(errorMessage: e.toString());
       rethrow;
+    }
+  }
+
   Future<void> deleteAccount() async {
     state = state.copyWith(status: AuthState.loading);
     try {
