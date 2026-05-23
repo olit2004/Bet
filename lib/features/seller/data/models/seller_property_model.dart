@@ -89,6 +89,13 @@ class SellerPropertyModel extends SellerProperty {
       if (sqFootage != null) 'sqFootage': sqFootage,
       'imageUrls': imageUrls,
       if (endTime != null) 'endTime': endTime?.toIso8601String(),
+      'ownerId': ownerId,
+      'views': views,
+      if (bidCount != null) '_count': {'bids': bidCount},
+      if (bids != null) 'bids': bids!.map((e) => (e as BidModel).toJson()).toList(),
+      if (proposals != null) 'proposals': proposals!.map((e) => (e as ProposalModel).toJson()).toList(),
+      if (createdAt != null) 'createdAt': createdAt?.toIso8601String(),
+      if (updatedAt != null) 'updatedAt': updatedAt?.toIso8601String(),
     };
   }
 }

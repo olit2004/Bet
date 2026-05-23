@@ -2,8 +2,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/seller_property.dart';
 import '../../domain/repositories/seller_property_repository.dart';
 import '../../data/data_sources/seller_property_remote_data_source.dart';
+import '../../data/data_sources/seller_property_local_data_source.dart';
 import '../../data/repositories/seller_property_repository_impl.dart';
+import '../../../../core/database/database_helper.dart';
 import '../../../auth/application/providers/auth_provider.dart';
+import 'seller_properties_provider.dart';
+import 'seller_profile_provider.dart';
 
 // Dependency Injection Providers ---
 
@@ -14,11 +18,19 @@ final sellerPropertyRemoteDataSourceProvider =
       );
     });
 
+final sellerPropertyLocalDataSourceProvider =
+    Provider<SellerPropertyLocalDataSource>((ref) {
+      return SellerPropertyLocalDataSource(
+        databaseHelper: DatabaseHelper(),
+      );
+    });
+
 final sellerPropertyRepositoryProvider = Provider<SellerPropertyRepository>((
   ref,
 ) {
   return SellerPropertyRepositoryImpl(
     remoteDataSource: ref.watch(sellerPropertyRemoteDataSourceProvider),
+    localDataSource: ref.watch(sellerPropertyLocalDataSourceProvider),
   );
 });
 
@@ -82,6 +94,12 @@ class CreatePropertyNotifier extends Notifier<CreatePropertyState> {
         status: CreatePropertyStatus.success,
         createdProperty: property,
       );
+
+      // Invalidate the seller's properties list to force a refresh
+      ref.invalidate(sellerPropertiesProvider);
+      // Invalidate the seller's profile stats to update the counts in the profile tab
+      ref.invalidate(sellerProfileStatsProvider);
+
       return true;
     } catch (e) {
       String message = 'Something went wrong. Please try again.';

@@ -89,7 +89,7 @@ class _SellerDashboardScreenState extends ConsumerState<SellerDashboardScreen> {
             // Tab 2: Create Listing
             const CreatePropertyContent(),
             // Tab 3: Profile
-            const SellerProfileContent(userId: 'current-user'),
+            SellerProfileContent(userId: user?.id ?? ''),
           ],
         ),
       ),
