@@ -6,6 +6,7 @@ class Bid {
   final String? bidderName;
   final String? bidderEmail;
   final String propertyId;
+  final bool isVerified;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -17,6 +18,7 @@ class Bid {
     this.bidderName,
     this.bidderEmail,
     required this.propertyId,
+    this.isVerified = false,
     this.createdAt,
     this.updatedAt,
   });

@@ -9,6 +9,7 @@ class BidModel extends Bid {
     super.bidderName,
     super.bidderEmail,
     required super.propertyId,
+    super.isVerified,
     super.createdAt,
     super.updatedAt,
   });
@@ -21,6 +22,7 @@ class BidModel extends Bid {
       bidderId: json['bidderId'] as String,
       bidderName: json['bidder']?['user']?['name'] as String?,
       bidderEmail: json['bidder']?['user']?['email'] as String?,
+      isVerified: json['bidder']?['user']?['isVerified'] as bool? ?? false,
       propertyId: json['propertyId'] as String,
       createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt'] as String) : null,
       updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt'] as String) : null,

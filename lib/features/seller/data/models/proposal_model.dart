@@ -11,6 +11,7 @@ class ProposalModel extends Proposal {
     required super.details,
     super.fileUrl,
     required super.status,
+    super.isVerified,
     super.createdAt,
     super.updatedAt,
   });
@@ -22,6 +23,7 @@ class ProposalModel extends Proposal {
       bidderId: json['bidderId'] as String,
       bidderName: json['bidder']?['user']?['name'] as String?,
       bidderEmail: json['bidder']?['user']?['email'] as String?,
+      isVerified: json['bidder']?['user']?['isVerified'] as bool? ?? false,
       amount: json['amount'] != null ? (json['amount'] as num).toDouble() : null,
       details: json['details'] as String,
       fileUrl: json['fileUrl'] as String?,

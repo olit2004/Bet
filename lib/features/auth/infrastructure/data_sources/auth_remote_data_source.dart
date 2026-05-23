@@ -9,6 +9,31 @@ class AuthRemoteDataSource {
   // Using localhost for Windows Desktop testing (use 10.0.2.2 for Android Emulator)
   static const String baseUrl = 'http://localhost:8080/api/auth';
 
+  Future<User> getMe(String token) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/me'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && data['status'] == 'success') {
+        return User.fromJson(data['data']);
+      } else if (response.statusCode == 401) {
+        throw const InvalidCredentialsFailure();
+      } else {
+        throw AuthFailure(data['message'] ?? 'Failed to fetch user');
+      }
+    } catch (e) {
+      if (e is AuthFailure) rethrow;
+      throw const NetworkFailure();
+    }
+  }
+
   Future<Map<String, dynamic>> login(String email, String password) async {
     try {
       final response = await http.post(

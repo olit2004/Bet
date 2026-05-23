@@ -65,7 +65,15 @@ class AuthRepositoryImpl implements AuthRepository {
     final token = await _localDataSource.getToken();
     if (token == null) return null;
     
-    return await _localDataSource.getUser();
+    try {
+      final user = await _remoteDataSource.getMe(token);
+      await _localDataSource.cacheUser(user);
+      return user;
+    } catch (e) {
+      // Fallback to local cache if offline or token is valid but network fails
+      // Note: In a real app, we might handle 401 specifically to logout
+      return await _localDataSource.getUser();
+    }
   }
 
   @override
