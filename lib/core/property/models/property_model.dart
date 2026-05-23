@@ -56,4 +56,55 @@ class Property {
         return 'Commercial';
     }
   }
+
+  /// Maps a JSON object from the backend API to a [Property] model.
+  factory Property.fromJson(Map<String, dynamic> json) {
+    // Determine category from the 'type' field returned by backend
+    final type = (json['type'] as String? ?? 'SALE').toUpperCase();
+    PropertyCategory category;
+    if (type == 'RENT') {
+      category = PropertyCategory.rent;
+    } else if (type == 'COMMERCIAL') {
+      category = PropertyCategory.commercial;
+    } else {
+      category = PropertyCategory.buy;
+    }
+
+    // Build specs list from available fields
+    final specs = <PropertySpec>[];
+    if (json['beds'] != null) {
+      specs.add(PropertySpec(label: 'Beds', value: '${json['beds']}', icon: 'bed'));
+    }
+    if (json['baths'] != null) {
+      specs.add(PropertySpec(label: 'Baths', value: '${json['baths']}', icon: 'bathtub'));
+    }
+    if (json['sqFootage'] != null) {
+      specs.add(PropertySpec(label: 'SQM', value: '${json['sqFootage']}', icon: 'square_foot'));
+    }
+
+    // Parse image URLs list
+    final rawImages = json['imageUrls'];
+    final imageUrls = rawImages is List
+        ? List<String>.from(rawImages)
+        : <String>[];
+
+    return Property(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      description: json['description'] as String,
+      price: (json['price'] as num).toDouble(),
+      currency: 'ETB',
+      address: json['address'] as String? ?? '',
+      imageUrls: imageUrls,
+      category: category,
+      specs: specs,
+      isVerified: false,
+      isFeatured: json['listingType'] == 'AUCTION',
+      createdAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'] as String)
+          : null,
+      locale: json['locale'] as String?,
+    );
+  }
 }
+

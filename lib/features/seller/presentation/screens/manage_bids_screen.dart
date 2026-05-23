@@ -1,23 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+
 import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/features/seller/presentation/widgets/bid_success_overlay.dart';
-
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:bet/features/auction/application/providers/bid_provider.dart';
 import 'package:bet/features/seller/presentation/providers/property_detail_provider.dart';
 import '../../../auth/application/providers/auth_provider.dart';
 
 class ManageBidsScreen extends ConsumerWidget {
   final String propertyId;
 
-  const ManageBidsScreen({super.key, required this.propertyId});
+  const ManageBidsScreen({
+    super.key,
+    required this.propertyId,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final propertyAsync = ref.watch(propertyDetailProvider(propertyId));
     final authState = ref.watch(authNotifierProvider);
     final user = authState.user;
+
     const bgColor = Color(0xFFEAECEF);
 
     return Scaffold(
@@ -27,7 +32,10 @@ class ManageBidsScreen extends ConsumerWidget {
         elevation: 0,
         centerTitle: false,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.primaryLightBlue),
+          icon: const Icon(
+            Icons.arrow_back,
+            color: AppColors.primaryLightBlue,
+          ),
           onPressed: () => context.pop(),
         ),
         title: Text(
@@ -43,26 +51,33 @@ class ManageBidsScreen extends ConsumerWidget {
             radius: 18,
             backgroundColor: Colors.grey.shade200,
             backgroundImage: user?.avatarUrl != null
-                ? NetworkImage('http://localhost:8080${user!.avatarUrl}')
-                : const AssetImage('assets/images/seller_profile.png') as ImageProvider,
+                ? NetworkImage(
+                    'http://localhost:8080${user!.avatarUrl}',
+                  )
+                : const AssetImage(
+                    'assets/images/seller_profile.png',
+                  ) as ImageProvider,
           ),
           const SizedBox(width: 16),
         ],
       ),
       body: propertyAsync.when(
         loading: () => const Center(
-          child: CircularProgressIndicator(color: AppColors.primaryBlue),
+          child: CircularProgressIndicator(
+            color: AppColors.primaryBlue,
+          ),
         ),
         error: (err, stack) => Center(
           child: Text(
             'Failed to load bids: $err',
-            style: const TextStyle(color: AppColors.error),
+            style: const TextStyle(
+              color: AppColors.error,
+            ),
           ),
         ),
         data: (property) {
           final isAuction = property.listingType == 'AUCTION';
 
-          // Get the list of offers (either bids or proposals)
           final List<dynamic> offers = isAuction
               ? (property.bids ?? [])
               : (property.proposals ?? []);
@@ -70,31 +85,38 @@ class ManageBidsScreen extends ConsumerWidget {
           final totalOffers = offers.length;
 
           double highestOffer = 0;
+
           if (offers.isNotEmpty) {
             highestOffer = offers
-                .map((o) => (o.amount as num?)?.toDouble() ?? 0.0)
+                .map(
+                  (o) => (o.amount as num?)?.toDouble() ?? 0.0,
+                )
                 .reduce((a, b) => a > b ? a : b);
           }
 
-          // Calculate time remaining
           String timeRemaining = 'N/A';
+
           if (property.endTime != null) {
             final diff = property.endTime!.difference(DateTime.now());
+
             if (diff.isNegative) {
               timeRemaining = 'Ended';
             } else {
               final hours = diff.inHours;
               final minutes = diff.inMinutes % 60;
+
               timeRemaining = '${hours}h ${minutes}m';
             }
           }
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 24,
+              vertical: 16,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Title
                 Text(
                   'PROPERTY LISTING',
                   style: GoogleFonts.inter(
@@ -107,30 +129,31 @@ class ManageBidsScreen extends ConsumerWidget {
                 const SizedBox(height: 8),
                 Text(
                   property.title,
-                  style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                    color: const Color(0xFF0C2442), // Deep blue/black
-                    fontWeight: FontWeight.w900,
-                  ),
+                  style:
+                      Theme.of(context).textTheme.displayLarge?.copyWith(
+                            color: const Color(0xFF0C2442),
+                            fontWeight: FontWeight.w900,
+                          ),
                 ),
                 const SizedBox(height: 24),
 
-                // Top Stats (Total Bids / Highest Bid)
                 Row(
                   children: [
                     Expanded(
                       child: Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: const Color(
-                            0xFFF1F3F6,
-                          ), // Slightly lighter gray than bg
+                          color: const Color(0xFFF1F3F6),
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment:
+                              CrossAxisAlignment.start,
                           children: [
                             Text(
-                              isAuction ? 'TOTAL BIDS' : 'PROPOSALS',
+                              isAuction
+                                  ? 'TOTAL BIDS'
+                                  : 'PROPOSALS',
                               style: GoogleFonts.inter(
                                 color: AppColors.primaryBlue,
                                 fontSize: 10,
@@ -142,7 +165,8 @@ class ManageBidsScreen extends ConsumerWidget {
                             Text(
                               totalOffers.toString(),
                               style: GoogleFonts.manrope(
-                                color: AppColors.primaryLightBlue,
+                                color:
+                                    AppColors.primaryLightBlue,
                                 fontSize: 32,
                                 fontWeight: FontWeight.w900,
                               ),
@@ -156,25 +180,31 @@ class ManageBidsScreen extends ConsumerWidget {
                       child: Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryLightBlue,
-                          borderRadius: BorderRadius.circular(16),
+                          color:
+                              AppColors.primaryLightBlue,
+                          borderRadius:
+                              BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.primaryLightBlue.withValues(
-                                alpha: 0.2,
-                              ),
+                              color: AppColors
+                                  .primaryLightBlue
+                                  .withValues(alpha: 0.2),
                               blurRadius: 12,
                               offset: const Offset(0, 4),
                             ),
                           ],
                         ),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment:
+                              CrossAxisAlignment.start,
                           children: [
                             Text(
-                              isAuction ? 'HIGHEST BID' : 'HIGHEST OFFER',
+                              isAuction
+                                  ? 'HIGHEST BID'
+                                  : 'HIGHEST OFFER',
                               style: GoogleFonts.inter(
-                                color: Colors.white.withValues(alpha: 0.8),
+                                color: Colors.white
+                                    .withValues(alpha: 0.8),
                                 fontSize: 10,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 1.0,
@@ -198,9 +228,9 @@ class ManageBidsScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
+
                 const SizedBox(height: 16),
 
-                // Time Remaining Box
                 if (isAuction) ...[
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -208,13 +238,12 @@ class ManageBidsScreen extends ConsumerWidget {
                       vertical: 20,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(
-                        0xFFDCDFE5,
-                      ), // Slightly darker gray/blue
+                      color: const Color(0xFFDCDFE5),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment:
+                          CrossAxisAlignment.start,
                       children: [
                         Text(
                           'TIME REMAINING',
@@ -237,7 +266,8 @@ class ManageBidsScreen extends ConsumerWidget {
                             Text(
                               timeRemaining,
                               style: GoogleFonts.manrope(
-                                color: const Color(0xFF917325),
+                                color:
+                                    const Color(0xFF917325),
                                 fontSize: 24,
                                 fontWeight: FontWeight.w800,
                               ),
@@ -256,52 +286,63 @@ class ManageBidsScreen extends ConsumerWidget {
                     child: Center(
                       child: Text(
                         'No offers yet.',
-                        style: TextStyle(color: AppColors.secondaryText),
+                        style: TextStyle(
+                          color: AppColors.secondaryText,
+                        ),
                       ),
                     ),
                   )
                 else ...[
-                  // List all offers dynamically
                   ...offers.asMap().entries.map((entry) {
                     final index = entry.key;
                     final offer = entry.value;
 
-                    // Simple logic to display time ago
                     String timeAgo = '';
+
                     if (offer.createdAt != null) {
-                      final diff = DateTime.now().difference(offer.createdAt!);
+                      final diff = DateTime.now()
+                          .difference(offer.createdAt!);
+
                       if (diff.inMinutes < 60) {
-                        timeAgo = '${diff.inMinutes} MINS AGO';
+                        timeAgo =
+                            '${diff.inMinutes} MINS AGO';
                       } else if (diff.inHours < 24) {
-                        timeAgo = '${diff.inHours} HOURS AGO';
+                        timeAgo =
+                            '${diff.inHours} HOURS AGO';
                       } else {
-                        timeAgo = '${diff.inDays} DAYS AGO';
+                        timeAgo =
+                            '${diff.inDays} DAYS AGO';
                       }
                     }
 
-                    // For now we set the first one as highest for visual effect assuming they are sorted by backend
-                    final isHighestOffer = index == 0 && highestOffer > 0;
+                    final isHighestOffer =
+                        index == 0 && highestOffer > 0;
 
                     return Padding(
-                      padding: const EdgeInsets.only(bottom: 16.0),
+                      padding:
+                          const EdgeInsets.only(bottom: 16),
                       child: _BidCard(
                         bidId: offer.id,
                         propertyId: property.id,
-                        name: offer.bidderName ?? 'Anonymous',
+                        name:
+                            offer.bidderName ?? 'Anonymous',
                         price:
                             '${offer.amount?.toStringAsFixed(0) ?? '--'} Birr',
                         timeAgo: timeAgo,
-                        imageUrl: 'assets/images/bidder_${(index % 2) + 1}.png',
+                        imageUrl:
+                            'assets/images/bidder_${(index % 2) + 1}.png',
                         isHighest: isHighestOffer,
                         isAcceptable:
                             offer.status == 'PENDING' ||
-                            offer.status == 'ACTIVE',
+                                offer.status == 'ACTIVE',
                         isAuction: isAuction,
-                        isVerified: offer.isVerified,
+                        isVerified:
+                            offer.isVerified ?? false,
                       ),
                     );
                   }),
                 ],
+
                 const SizedBox(height: 32),
               ],
             ),
@@ -312,7 +353,7 @@ class ManageBidsScreen extends ConsumerWidget {
   }
 }
 
-class _BidCard extends StatelessWidget {
+class _BidCard extends ConsumerWidget {
   final String propertyId;
   final String bidId;
   final String name;
@@ -338,7 +379,7 @@ class _BidCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFEAECEF),
@@ -346,7 +387,9 @@ class _BidCard extends StatelessWidget {
         boxShadow: isHighest
             ? [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
+                  color: Colors.black.withValues(
+                    alpha: 0.04,
+                  ),
                   blurRadius: 20,
                   offset: const Offset(-8, 4),
                 ),
@@ -355,7 +398,6 @@ class _BidCard extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          // Left dark border line for the highest bid
           if (isHighest)
             Positioned(
               left: 0,
@@ -365,7 +407,8 @@ class _BidCard extends StatelessWidget {
                 width: 3,
                 decoration: BoxDecoration(
                   color: const Color(0xFF132D46),
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius:
+                      BorderRadius.circular(2),
                 ),
               ),
             ),
@@ -373,25 +416,28 @@ class _BidCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
               children: [
-                // Highest bid badge
                 if (isHighest) ...[
                   Align(
                     alignment: Alignment.topRight,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
+                      padding:
+                          const EdgeInsets.symmetric(
                         horizontal: 10,
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
                         color: const Color(0xFF67E2A9),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius:
+                            BorderRadius.circular(12),
                       ),
                       child: Text(
                         'HIGHEST BID',
                         style: GoogleFonts.inter(
-                          color: const Color(0xFF00684A),
+                          color:
+                              const Color(0xFF00684A),
                           fontSize: 9,
                           fontWeight: FontWeight.w800,
                         ),
@@ -401,42 +447,54 @@ class _BidCard extends StatelessWidget {
                   const SizedBox(height: 8),
                 ],
 
-                // User info and bid row
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                  crossAxisAlignment:
+                      CrossAxisAlignment.center,
                   children: [
                     CircleAvatar(
                       radius: 20,
-                      backgroundImage: AssetImage(imageUrl),
+                      backgroundImage:
+                          AssetImage(imageUrl),
                     ),
                     const SizedBox(width: 12),
+
                     Expanded(
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment:
+                            CrossAxisAlignment.start,
                         children: [
                           Text(
                             name,
                             style: GoogleFonts.inter(
-                              color: const Color(0xFF0C2442),
+                              color:
+                                  const Color(0xFF0C2442),
                               fontSize: 15,
-                              fontWeight: FontWeight.w700,
+                              fontWeight:
+                                  FontWeight.w700,
                             ),
                           ),
+
                           if (isVerified)
                             Row(
                               children: [
                                 const Icon(
                                   Icons.verified,
-                                  color: AppColors.primaryBlue,
+                                  color: AppColors
+                                      .primaryBlue,
                                   size: 12,
                                 ),
-                                const SizedBox(width: 4),
+                                const SizedBox(
+                                    width: 4),
                                 Text(
                                   'Verified Buyer',
-                                  style: GoogleFonts.inter(
-                                    color: AppColors.primaryBlue,
+                                  style:
+                                      GoogleFonts.inter(
+                                    color: AppColors
+                                        .primaryBlue,
                                     fontSize: 11,
-                                    fontWeight: FontWeight.w500,
+                                    fontWeight:
+                                        FontWeight
+                                            .w500,
                                   ),
                                 ),
                               ],
@@ -444,26 +502,33 @@ class _BidCard extends StatelessWidget {
                         ],
                       ),
                     ),
+
                     Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                      crossAxisAlignment:
+                          CrossAxisAlignment.end,
                       children: [
                         Text(
                           price,
                           style: GoogleFonts.manrope(
                             color: isHighest
-                                ? const Color(0xFF00684A)
-                                : const Color(0xFF0C2442),
+                                ? const Color(
+                                    0xFF00684A)
+                                : const Color(
+                                    0xFF0C2442),
                             fontSize: 18,
-                            fontWeight: FontWeight.w800,
+                            fontWeight:
+                                FontWeight.w800,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           timeAgo,
                           style: GoogleFonts.inter(
-                            color: AppColors.primaryBlue,
+                            color:
+                                AppColors.primaryBlue,
                             fontSize: 10,
-                            fontWeight: FontWeight.w700,
+                            fontWeight:
+                                FontWeight.w700,
                             letterSpacing: 1.0,
                           ),
                         ),
@@ -471,9 +536,9 @@ class _BidCard extends StatelessWidget {
                     ),
                   ],
                 ),
+
                 const SizedBox(height: 20),
 
-                // Actions row
                 Row(
                   children: [
                     if (isAcceptable) ...[
@@ -483,26 +548,37 @@ class _BidCard extends StatelessWidget {
                           height: 48,
                           child: OutlinedButton(
                             onPressed: () {
-                              context.push('/review-bid/$propertyId/$bidId');
+                              context.push(
+                                '/review-bid/$propertyId/$bidId',
+                              );
                             },
-                            style: OutlinedButton.styleFrom(
+                            style:
+                                OutlinedButton.styleFrom(
                               side: BorderSide(
-                                color: AppColors.primaryBlue.withValues(
+                                color: AppColors
+                                    .primaryBlue
+                                    .withValues(
                                   alpha: 0.2,
                                 ),
                                 width: 1.5,
                               ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                              shape:
+                                  RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius
+                                        .circular(12),
                               ),
                               padding: EdgeInsets.zero,
                             ),
                             child: Text(
                               'Review',
-                              style: GoogleFonts.manrope(
-                                color: AppColors.primaryBlue,
+                              style:
+                                  GoogleFonts.manrope(
+                                color: AppColors
+                                    .primaryBlue,
                                 fontSize: 14,
-                                fontWeight: FontWeight.w700,
+                                fontWeight:
+                                    FontWeight.w700,
                               ),
                             ),
                           ),
@@ -510,38 +586,63 @@ class _BidCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 12),
                     ],
+
                     Expanded(
                       flex: 5,
                       child: SizedBox(
                         height: 48,
                         child: ElevatedButton(
-                          onPressed: () {
+                          onPressed: () async {
                             if (isAcceptable) {
-                              showDialog(
-                                context: context,
-                                builder: (context) => const BidSuccessOverlay(),
-                              );
+                              await ref
+                                  .read(
+                                    bidNotifierProvider
+                                        .notifier,
+                                  )
+                                  .acceptBid(bidId);
+
+                              if (context.mounted) {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) =>
+                                      const BidSuccessOverlay(),
+                                );
+                              }
                             } else {
-                              context.push('/review-bid/$propertyId/$bidId');
+                              context.push(
+                                '/review-bid/$propertyId/$bidId',
+                              );
                             }
                           },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: isAcceptable
-                                ? AppColors.primaryLightBlue
-                                : const Color(0xFFD6DFE8),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                          style:
+                              ElevatedButton.styleFrom(
+                            backgroundColor:
+                                isAcceptable
+                                    ? AppColors
+                                        .primaryLightBlue
+                                    : const Color(
+                                        0xFFD6DFE8),
+                            shape:
+                                RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(
+                                      12),
                             ),
                             elevation: 0,
                           ),
                           child: Text(
-                            isAcceptable ? 'Accept Offer' : 'Review Buyer',
-                            style: GoogleFonts.manrope(
+                            isAcceptable
+                                ? 'Accept Offer'
+                                : 'Review Buyer',
+                            style:
+                                GoogleFonts.manrope(
                               color: isAcceptable
                                   ? Colors.white
-                                  : const Color(0xFF0C2442),
+                                  : const Color(
+                                      0xFF0C2442),
                               fontSize: 14,
-                              fontWeight: FontWeight.w800,
+                              fontWeight:
+                                  FontWeight.w800,
                             ),
                           ),
                         ),

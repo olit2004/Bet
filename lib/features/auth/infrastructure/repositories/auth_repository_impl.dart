@@ -55,8 +55,10 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> deleteAccount() async {
-    // In a full implementation, we'd call a remote data source method to delete the account
-    // For now, just clear local data
+    final token = await _localDataSource.getToken();
+    if (token != null) {
+      await _remoteDataSource.deleteAccount(token);
+    }
     await _localDataSource.clearAuthData();
   }
 
