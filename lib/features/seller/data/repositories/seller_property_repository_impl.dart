@@ -3,28 +3,70 @@ import '../models/seller_property_model.dart';
 import '../../domain/repositories/seller_property_repository.dart';
 import '../data_sources/seller_property_remote_data_source.dart';
 
+import '../data_sources/seller_property_local_data_source.dart';
+
 class SellerPropertyRepositoryImpl implements SellerPropertyRepository {
   final SellerPropertyRemoteDataSource _remoteDataSource;
+  final SellerPropertyLocalDataSource _localDataSource;
 
   SellerPropertyRepositoryImpl({
     required SellerPropertyRemoteDataSource remoteDataSource,
-  }) : _remoteDataSource = remoteDataSource;
+    required SellerPropertyLocalDataSource localDataSource,
+  }) : _remoteDataSource = remoteDataSource,
+       _localDataSource = localDataSource;
 
   @override
   Future<SellerProperty> createProperty(
-      Map<String, dynamic> propertyData) async {
+    Map<String, dynamic> propertyData,
+  ) async {
     final json = await _remoteDataSource.createProperty(propertyData);
-    return SellerPropertyModel.fromJson(json);
+    final property = SellerPropertyModel.fromJson(json);
+    await _localDataSource.cacheProperty(property);
+    return property;
   }
 
   @override
   Future<List<SellerProperty>> getSellerProperties(String sellerId) async {
-    return await _remoteDataSource.getSellerProperties(sellerId);
+    final localProperties = await _localDataSource.getSellerProperties(
+      sellerId,
+    );
+
+    if (localProperties.isNotEmpty) {
+      _fetchAndCachePropertiesInBackground(sellerId);
+      return localProperties;
+    }
+
+    return await _fetchAndCacheProperties(sellerId);
+  }
+
+  Future<List<SellerProperty>> _fetchAndCacheProperties(String sellerId) async {
+    try {
+      final properties = await _remoteDataSource.getSellerProperties(sellerId);
+
+      final models = properties.whereType<SellerPropertyModel>().toList();
+      await _localDataSource.cacheSellerProperties(sellerId, models);
+      return properties;
+    } catch (e) {
+      return [];
+    }
+  }
+
+  void _fetchAndCachePropertiesInBackground(String sellerId) {
+    _fetchAndCacheProperties(sellerId).catchError((_) {
+      return <SellerProperty>[];
+    });
   }
 
   @override
   Future<SellerProperty> getPropertyById(String propertyId) async {
-    return await _remoteDataSource.getPropertyById(propertyId);
+    final localProperty = await _localDataSource.getPropertyById(propertyId);
+    if (localProperty != null) {
+      return localProperty;
+    }
+
+    final property = await _remoteDataSource.getPropertyById(propertyId);
+    await _localDataSource.cacheProperty(property as SellerPropertyModel);
+    return property;
   }
 
   @override

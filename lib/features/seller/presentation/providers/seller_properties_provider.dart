@@ -6,5 +6,9 @@ import 'create_property_provider.dart';
 final sellerPropertiesProvider =
     FutureProvider.family<List<SellerProperty>, String>((ref, sellerId) async {
   final repository = ref.watch(sellerPropertyRepositoryProvider);
-  return await repository.getSellerProperties(sellerId);
+  try {
+    return await repository.getSellerProperties(sellerId);
+  } catch (e) {
+    throw Exception('Failed to load properties. Please try again later.');
+  }
 });

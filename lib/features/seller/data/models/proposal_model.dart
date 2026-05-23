@@ -32,4 +32,25 @@ class ProposalModel extends Proposal {
       updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt'] as String) : null,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'propertyId': propertyId,
+      'bidderId': bidderId,
+      'bidder': {
+        'user': {
+          'name': bidderName,
+          'email': bidderEmail,
+          'isVerified': isVerified,
+        }
+      },
+      if (amount != null) 'amount': amount,
+      'details': details,
+      if (fileUrl != null) 'fileUrl': fileUrl,
+      'status': status,
+      if (createdAt != null) 'createdAt': createdAt?.toIso8601String(),
+      if (updatedAt != null) 'updatedAt': updatedAt?.toIso8601String(),
+    };
+  }
 }
