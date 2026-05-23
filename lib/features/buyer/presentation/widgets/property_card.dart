@@ -277,6 +277,15 @@ class PropertyCard extends StatelessWidget {
         errorBuilder: (context, error, stackTrace) => _buildErrorContainer(),
       );
     }
+    if (url.startsWith('/')) {
+      return Image.network(
+        'http://localhost:8080$url',
+        height: 320,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => _buildErrorContainer(),
+      );
+    }
     return Image.asset(
       url,
       height: 320,

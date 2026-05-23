@@ -60,7 +60,7 @@ class PropertyDetailsScreen extends StatelessWidget {
                   child: imageUrl.startsWith('assets/')
                       ? Image.asset(imageUrl, fit: BoxFit.cover)
                       : Image.network(
-                          imageUrl,
+                          imageUrl.startsWith('/') ? 'http://localhost:8080$imageUrl' : imageUrl,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) => Container(
                             color: AppColors.inputFill,

@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/core/widgets/app_logo.dart';
-import 'package:bet/core/property/providers/property_provider.dart';
-import 'package:bet/core/property/models/property_model.dart';
 import 'package:bet/features/buyer/buyer_routes.dart';
+import 'package:bet/features/buyer/application/providers/buyer_provider.dart';
+import 'package:bet/features/buyer/domain/entities/buyer_dashboard.dart';
 
-class ActionsScreen extends StatefulWidget {
+class ActionsScreen extends ConsumerStatefulWidget {
   const ActionsScreen({super.key});
 
   @override
-  State<ActionsScreen> createState() => _ActionsScreenState();
+  ConsumerState<ActionsScreen> createState() => _ActionsScreenState();
 }
 
-class _ActionsScreenState extends State<ActionsScreen> with SingleTickerProviderStateMixin {
+class _ActionsScreenState extends ConsumerState<ActionsScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -37,6 +38,8 @@ class _ActionsScreenState extends State<ActionsScreen> with SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
+    final dashboardAsync = ref.watch(buyerDashboardProvider);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -64,56 +67,75 @@ class _ActionsScreenState extends State<ActionsScreen> with SingleTickerProvider
           const SizedBox(width: 8),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // 1. Stats Grid
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-              child: GridView.count(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisCount: 2,
-                crossAxisSpacing: 20,
-                mainAxisSpacing: 20,
-                childAspectRatio: 1.4,
-                children: [
-                  _buildStatCard('12', 'ACTIVE BIDS', const Color(0xFF374CE2)),
-                  _buildStatCard('4', 'PROPOSALS', const Color(0xFF059669)),
-                  _buildStatCard('\$4.2M', 'ASSET VALUE', const Color(0xFF05345C)),
-                  _buildStatCard('7', 'HOUSES RENTED', const Color(0xFF9CA3AF)),
-                ],
-              ),
-            ),
-            
-            // 2. Tab Bar (Pill Toggle)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: Row(
-                children: [
-                  _buildPillTab('Active Bids', _tabController.index == 0, () {
-                    setState(() => _tabController.index = 0);
-                  }),
-                  const Spacer(),
-                  _buildPillTab('History', _tabController.index == 1, () {
-                    setState(() => _tabController.index = 1);
-                  }),
-                ],
-              ),
-            ),
-            
-            const SizedBox(height: 12),
-            const Divider(height: 1, color: Color(0xFFE5E7EB)),
-            const SizedBox(height: 20),
-            
-            // 3. Activity List
-            _tabController.index == 0 
-                ? _buildActiveBidsList() 
-                : _buildHistoryList(),
-            
-            const SizedBox(height: 32), // Add bottom padding for better scroll experience
-          ],
+      body: dashboardAsync.when(
+        loading: () => const Center(
+          child: CircularProgressIndicator(color: AppColors.primaryBlue),
         ),
+        error: (err, stack) => Center(
+          child: Text(
+            'Failed to load dashboard: $err',
+            style: const TextStyle(color: AppColors.error),
+          ),
+        ),
+        data: (dashboard) {
+          return RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(buyerDashboardProvider);
+            },
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                children: [
+                  // 1. Stats Grid
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+                    child: GridView.count(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 20,
+                      mainAxisSpacing: 20,
+                      childAspectRatio: 1.4,
+                      children: [
+                        _buildStatCard('${dashboard.statistics.activeBids}', 'ACTIVE BIDS', const Color(0xFF374CE2)),
+                        _buildStatCard('${dashboard.statistics.totalProposals}', 'PROPOSALS', const Color(0xFF059669)),
+                        _buildStatCard('${dashboard.statistics.acceptedBids + dashboard.statistics.acceptedProposals}', 'ACCEPTED OFFERS', const Color(0xFF05345C)),
+                        _buildStatCard('${dashboard.statistics.totalBids}', 'TOTAL BIDS', const Color(0xFF9CA3AF)),
+                      ],
+                    ),
+                  ),
+                  
+                  // 2. Tab Bar (Pill Toggle)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: Row(
+                      children: [
+                        _buildPillTab('Active Bids', _tabController.index == 0, () {
+                          setState(() => _tabController.index = 0);
+                        }),
+                        const Spacer(),
+                        _buildPillTab('History', _tabController.index == 1, () {
+                          setState(() => _tabController.index = 1);
+                        }),
+                      ],
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 12),
+                  const Divider(height: 1, color: Color(0xFFE5E7EB)),
+                  const SizedBox(height: 20),
+                  
+                  // 3. Activity List
+                  _tabController.index == 0 
+                      ? _buildActiveBidsList(dashboard.recentBids.where((b) => b.status == 'ACTIVE').toList()) 
+                      : _buildHistoryList(dashboard),
+                  
+                  const SizedBox(height: 32),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -181,85 +203,119 @@ class _ActionsScreenState extends State<ActionsScreen> with SingleTickerProvider
     );
   }
 
-  Widget _buildActiveBidsList() {
-    final properties = context.watch<PropertyProvider>().properties;
-    
-    if (properties.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+  Widget _buildActiveBidsList(List<DashboardActionItem> activeBids) {
+    if (activeBids.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.all(32.0),
+        child: Center(
+          child: Text(
+            'You do not have any active bids right now.',
+            style: TextStyle(color: AppColors.secondaryText),
+          ),
+        ),
+      );
     }
-
-    final villa = properties.firstWhere((p) => p.id == '1', orElse: () => properties.first);
-    final apartments = properties.firstWhere((p) => p.id == '2', orElse: () => properties.first);
 
     return ListView(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      children: [
-        _buildBidCard(
-          title: 'Exquisite Villa',
-          location: 'Garment • 500 SQM',
-          price: '13,100,000 ETB',
-          timeLeft: '2d 14h 22m',
-          status: 'WINNING BID',
+      children: activeBids.map((bid) {
+        String timeLeft = 'Ended';
+        if (bid.property.endTime != null) {
+          final diff = bid.property.endTime!.difference(DateTime.now());
+          if (!diff.isNegative) {
+            final days = diff.inDays;
+            final hours = diff.inHours % 24;
+            final minutes = diff.inMinutes % 60;
+            if (days > 0) {
+              timeLeft = '${days}d ${hours}h ${minutes}m';
+            } else {
+              timeLeft = '${hours}h ${minutes}m';
+            }
+          }
+        }
+        
+        return _buildBidCard(
+          title: bid.property.title,
+          location: bid.property.location,
+          price: '${bid.amount.toStringAsFixed(0)} ETB',
+          timeLeft: timeLeft,
+          status: bid.status,
           statusColor: const Color(0xFFD1FAE5),
           statusTextColor: const Color(0xFF059669),
-          onTap: () => context.push('${BuyerRoutes.detail}/${villa.id}', extra: villa),
-        ),
-        _buildBidCard(
-          title: 'Elegant Apartments',
-          location: 'Tsehay Realstate • 3 Units',
-          price: '7,450,000 ETB',
-          status: 'OUTBID',
-          statusColor: const Color(0xFFFFEDD5),
-          statusTextColor: const Color(0xFFEA580C),
-          showRaiseButton: apartments.category == PropertyCategory.buy,
-          onTap: () => context.push('${BuyerRoutes.detail}/${apartments.id}', extra: apartments),
-        ),
-      ],
+          onTap: () {
+            // Push to detail screen, but wait, actions API doesn't return full property
+            // We pass propertyId and it will fetch it in PropertyDetailScreen
+            context.push('${BuyerRoutes.detail}/${bid.property.id}');
+          },
+        );
+      }).toList(),
     );
   }
 
-  Widget _buildHistoryList() {
-    final properties = context.watch<PropertyProvider>().properties;
-    
-    if (properties.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
-    }
+  Widget _buildHistoryList(BuyerDashboard dashboard) {
+    // Combine all proposals and non-active bids to create the history list
+    final List<DashboardActionItem> historyItems = [
+      ...dashboard.recentBids.where((b) => b.status != 'ACTIVE'),
+      ...dashboard.recentProposals
+    ];
 
-    final villa = properties.firstWhere((p) => p.id == '1', orElse: () => properties.first);
-    final apartments = properties.firstWhere((p) => p.id == '2', orElse: () => properties.first);
+    // Sort by createdAt descending
+    historyItems.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+    if (historyItems.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.all(32.0),
+        child: Center(
+          child: Text(
+            'Your history is empty.',
+            style: TextStyle(color: AppColors.secondaryText),
+          ),
+        ),
+      );
+    }
 
     return ListView(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      children: [
-        _buildHistoryCard(
-          title: 'Elegant Apartments',
-          description: 'Look for the best apartments in Addis Ababa. We provide all the things you require including in house equipments.',
-          date: 'JULY 12, 2023',
-          badgeText: 'RENTED',
-          badgeColor: const Color(0xFFE0E7FF),
-          badgeTextColor: const Color(0xFF374CE2),
-          price: '30,000 ETB',
-          icon: Icons.description_outlined,
-          iconColor: const Color(0xFF374CE2),
-          onTap: () => context.push('${BuyerRoutes.detail}/${apartments.id}', extra: apartments),
-        ),
-        _buildHistoryCard(
-          title: 'Grand Villa',
-          description: 'Sky-scraping houses for your needs. We provide the best that exists in the whole country wide.',
-          date: 'JUNE 28, 2023',
-          badgeText: 'BOUGHT',
-          badgeColor: const Color(0xFFD1FAE5),
-          badgeTextColor: const Color(0xFF059669),
-          price: '10,420,000 ETB',
-          icon: Icons.check_circle_outline,
-          iconColor: const Color(0xFF059669),
-          onTap: () => context.push('${BuyerRoutes.detail}/${villa.id}', extra: villa),
-        ),
-      ],
+      children: historyItems.map((item) {
+        final isAccepted = item.status == 'ACCEPTED';
+        final isRejected = item.status == 'REJECTED';
+        
+        Color badgeColor = const Color(0xFFE0E7FF);
+        Color badgeTextColor = const Color(0xFF374CE2);
+        IconData icon = item.isBid ? Icons.gavel : Icons.description_outlined;
+        Color iconColor = const Color(0xFF374CE2);
+
+        if (isAccepted) {
+          badgeColor = const Color(0xFFD1FAE5);
+          badgeTextColor = const Color(0xFF059669);
+          icon = Icons.check_circle_outline;
+          iconColor = const Color(0xFF059669);
+        } else if (isRejected) {
+          badgeColor = const Color(0xFFFFEDD5);
+          badgeTextColor = const Color(0xFFEA580C);
+          icon = Icons.cancel_outlined;
+          iconColor = const Color(0xFFEA580C);
+        }
+
+        return _buildHistoryCard(
+          title: item.property.title,
+          description: item.property.description.isNotEmpty ? item.property.description : item.property.location,
+          date: DateFormat('MMMM d, yyyy').format(item.createdAt).toUpperCase(),
+          badgeText: item.status,
+          badgeColor: badgeColor,
+          badgeTextColor: badgeTextColor,
+          price: '${item.amount.toStringAsFixed(0)} ETB',
+          icon: icon,
+          iconColor: iconColor,
+          onTap: () {
+            context.push('${BuyerRoutes.detail}/${item.property.id}');
+          },
+        );
+      }).toList(),
     );
   }
 
@@ -321,6 +377,8 @@ class _ActionsScreenState extends State<ActionsScreen> with SingleTickerProvider
           const SizedBox(height: 8),
           Text(
             description,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.inter(
               fontSize: 13,
               color: const Color(0xFF3D618C),
@@ -395,14 +453,18 @@ class _ActionsScreenState extends State<ActionsScreen> with SingleTickerProvider
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  title,
-                  style: GoogleFonts.manrope(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 18,
-                    color: AppColors.primaryText,
+                Expanded(
+                  child: Text(
+                    title,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.manrope(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 18,
+                      color: AppColors.primaryText,
+                    ),
                   ),
                 ),
+                const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(

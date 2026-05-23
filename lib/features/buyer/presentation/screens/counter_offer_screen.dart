@@ -56,7 +56,7 @@ class _CounterOfferScreenState extends ConsumerState<CounterOfferScreen> {
     }
   }
 
-  void _submitProposal() {
+  Future<void> _submitProposal() async {
     if (_selectedFile == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please upload a proposal PDF')),
@@ -72,39 +72,40 @@ class _CounterOfferScreenState extends ConsumerState<CounterOfferScreen> {
       return;
     }
 
-    ref.read(proposalNotifierProvider.notifier).createProposal(
-      widget.property.id,
-      fileBytes: _selectedFile!.bytes,
-      fileName: _selectedFile!.name,
-      amount: amount,
-      details: 'Counter offer submitted via app',
-    );
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await ref.read(proposalNotifierProvider.notifier).createProposal(
+        widget.property.id,
+        fileBytes: _selectedFile!.bytes,
+        fileName: _selectedFile!.name,
+        amount: amount,
+        details: 'Counter offer submitted via app',
+      );
+
+      if (mounted) {
+        final state = ref.read(proposalNotifierProvider);
+        if (state.status == ProposalStatus.error) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.errorMessage ?? 'An error occurred')),
+          );
+        } else if (state.status == ProposalStatus.success) {
+          _showSuccessDialog();
+        }
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<ProposalStateData>(proposalNotifierProvider, (previous, next) {
-      if (next.lastAction == ProposalAction.create) {
-        if (next.status == ProposalStatus.loading) {
-          setState(() {
-            _isLoading = true;
-          });
-        } else if (next.status == ProposalStatus.error) {
-          setState(() {
-            _isLoading = false;
-          });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(next.errorMessage ?? 'An error occurred')),
-          );
-        } else if (next.status == ProposalStatus.success) {
-          setState(() {
-            _isLoading = false;
-          });
-          _showSuccessDialog();
-        }
-      }
-    });
-
     final releaseDate = widget.property.createdAt != null 
         ? '${widget.property.createdAt!.day}/${widget.property.createdAt!.month}/${widget.property.createdAt!.year}'
         : 'Unknown';
@@ -131,9 +132,9 @@ class _CounterOfferScreenState extends ConsumerState<CounterOfferScreen> {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(24),
-                  child: widget.property.imageUrls.isNotEmpty && widget.property.imageUrls.first.startsWith('http')
+                  child: widget.property.imageUrls.isNotEmpty && (widget.property.imageUrls.first.startsWith('http') || widget.property.imageUrls.first.startsWith('/'))
                     ? Image.network(
-                        widget.property.imageUrls.first,
+                        widget.property.imageUrls.first.startsWith('/') ? 'http://localhost:8080${widget.property.imageUrls.first}' : widget.property.imageUrls.first,
                         height: 220,
                         width: double.infinity,
                         fit: BoxFit.cover,
@@ -276,8 +277,10 @@ class _CounterOfferScreenState extends ConsumerState<CounterOfferScreen> {
             ),
             const SizedBox(height: 12),
             UploadContainer(
-              title: _selectedFile != null ? _selectedFile!.name : 'Select a proposal to upload',
-              subtitle: 'Only PDF format is Allowed:\nCBE-Bank_Statement_Form_Validated.pdf',
+              title: 'Proposal Document',
+              subtitle: 'Only PDF format is allowed',
+              fileName: _selectedFile?.name,
+              buttonText: _selectedFile != null ? 'Change File' : 'Browse',
               onBrowse: _pickFile,
             ),
             const SizedBox(height: 32),

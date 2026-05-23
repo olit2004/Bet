@@ -78,7 +78,14 @@ class ProposalRemoteDataSourceImpl implements ProposalRemoteDataSource {
       final data = jsonDecode(response.body);
       return ProposalModel.fromJson(data['data']);
     } else {
-      throw Exception('Failed to create proposal');
+      String errorMessage = 'Failed to create proposal';
+      try {
+        final data = jsonDecode(response.body);
+        if (data['message'] != null) {
+          errorMessage = data['message'];
+        }
+      } catch (_) {}
+      throw Exception(errorMessage);
     }
   }
 

@@ -45,7 +45,7 @@ class PropertyDetailsScreen extends ConsumerWidget {
         ),
         data: (property) {
           final imageUrl = property.imageUrls.isNotEmpty 
-              ? 'http://localhost:8080${property.imageUrls.first}' 
+              ? (property.imageUrls.first.startsWith('/') ? 'http://localhost:8080${property.imageUrls.first}' : property.imageUrls.first)
               : 'assets/images/properties/apartment.png';
           
           final title = property.title;

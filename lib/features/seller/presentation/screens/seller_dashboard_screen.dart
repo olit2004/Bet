@@ -64,9 +64,12 @@ class _SellerDashboardScreenState extends ConsumerState<SellerDashboardScreen> {
                     : CircleAvatar(
                         radius: 18,
                         backgroundColor: Colors.grey.shade200,
-                        backgroundImage: user?.avatarUrl != null
-                            ? NetworkImage('http://localhost:8080${user!.avatarUrl}')
-                            : const AssetImage('assets/images/seller_profile.png') as ImageProvider,
+                        backgroundImage: (user?.avatarUrl != null && user!.avatarUrl!.isNotEmpty)
+                            ? NetworkImage('http://localhost:8080${user.avatarUrl}') as ImageProvider
+                            : null,
+                        child: (user?.avatarUrl == null || user!.avatarUrl!.isEmpty)
+                            ? const Icon(Icons.person, size: 24, color: Colors.grey)
+                            : null,
                       ),
                 const SizedBox(width: 16),
               ],

@@ -30,7 +30,7 @@ class PlaceBidScreen extends ConsumerStatefulWidget {
 class _PlaceBidScreenState extends ConsumerState<PlaceBidScreen> {
   final TextEditingController _bidController = TextEditingController();
   PlatformFile? _bankStatementFile;
-  PlatformFile? _proposalFile;
+  bool _isSubmitting = false;
 
   Future<void> _pickBankStatement() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -41,19 +41,6 @@ class _PlaceBidScreenState extends ConsumerState<PlaceBidScreen> {
     if (result != null) {
       setState(() {
         _bankStatementFile = result.files.single;
-      });
-    }
-  }
-
-  Future<void> _pickProposal() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf'],
-      withData: true,
-    );
-    if (result != null) {
-      setState(() {
-        _proposalFile = result.files.single;
       });
     }
   }
@@ -98,9 +85,9 @@ class _PlaceBidScreenState extends ConsumerState<PlaceBidScreen> {
     return '${hours.toString().padLeft(2, '0')}h ${mins.toString().padLeft(2, '0')}m';
   }
 
-  Future<void> _submitBid(BidStateData bidState) async {
+  Future<void> _submitBid() async {
     final amount = double.tryParse(_bidController.text.replaceAll(',', '')) ?? 0.0;
-    final highestBid = _getHighestBidAmount(bidState);
+    final highestBid = _getHighestBidAmount(ref.read(bidNotifierProvider));
     
     if (amount <= highestBid) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -109,27 +96,40 @@ class _PlaceBidScreenState extends ConsumerState<PlaceBidScreen> {
       return;
     }
 
-    await ref.read(bidNotifierProvider.notifier).placeBid(
-      widget.property.id,
-      amount,
-      bankStatementBytes: _bankStatementFile?.bytes,
-      bankStatementFileName: _bankStatementFile?.name,
-    );
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    try {
+      await ref.read(bidNotifierProvider.notifier).placeBid(
+        widget.property.id,
+        amount,
+        bankStatementBytes: _bankStatementFile?.bytes,
+        bankStatementFileName: _bankStatementFile?.name,
+      );
+
+      if (mounted) {
+        final state = ref.read(bidNotifierProvider);
+        if (state.status == BidStatus.error) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.errorMessage ?? 'Error submitting bid')),
+          );
+        } else if (state.status == BidStatus.success) {
+          _showSuccessDialog();
+        }
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final bidState = ref.watch(bidNotifierProvider);
-
-    ref.listen<BidStateData>(bidNotifierProvider, (previous, next) {
-      if (next.status == BidStatus.success && next.lastAction == BidAction.place) {
-        _showSuccessDialog();
-      } else if (next.status == BidStatus.error && next.lastAction == BidAction.place) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(next.errorMessage ?? 'Error submitting bid')),
-        );
-      }
-    });
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -154,9 +154,9 @@ class _PlaceBidScreenState extends ConsumerState<PlaceBidScreen> {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(24),
-                  child: widget.property.imageUrls.isNotEmpty && widget.property.imageUrls.first.startsWith('http')
+                  child: widget.property.imageUrls.isNotEmpty && (widget.property.imageUrls.first.startsWith('http') || widget.property.imageUrls.first.startsWith('/'))
                       ? Image.network(
-                          widget.property.imageUrls.first,
+                          widget.property.imageUrls.first.startsWith('/') ? 'http://localhost:8080${widget.property.imageUrls.first}' : widget.property.imageUrls.first,
                           height: 220,
                           width: double.infinity,
                           fit: BoxFit.cover,
@@ -309,30 +309,11 @@ class _PlaceBidScreenState extends ConsumerState<PlaceBidScreen> {
             ),
             const SizedBox(height: 12),
             UploadContainer(
-              title: _bankStatementFile != null 
-                  ? 'Selected: ${_bankStatementFile!.name}' 
-                  : 'Select your Bank Statement to upload',
-              subtitle: 'Only PDF format is Allowed:\nCBE-Bank_Statement_Form_Validated.pdf',
-              buttonText: _bankStatementFile != null ? 'Upload' : 'Browse',
-              onBrowse: _bankStatementFile != null ? () => _submitBid(bidState) : _pickBankStatement,
-            ),
-            const SizedBox(height: 24),
-            Text(
-              '(Optional) Upload Your Proposal',
-              style: GoogleFonts.manrope(
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
-                color: AppColors.primaryText,
-              ),
-            ),
-            const SizedBox(height: 12),
-            UploadContainer(
-              title: _proposalFile != null 
-                  ? 'Selected: ${_proposalFile!.name}' 
-                  : 'Select a proposal to upload',
-              subtitle: 'Only PDF format is Allowed:\nCBE-Bank_Statement_Form_Validated.pdf',
-              buttonText: _proposalFile != null ? 'Upload' : 'Browse',
-              onBrowse: _proposalFile != null ? () => _submitBid(bidState) : _pickProposal,
+              title: 'Bank Statement (Optional)',
+              subtitle: 'Only PDF format is allowed',
+              fileName: _bankStatementFile?.name,
+              buttonText: _bankStatementFile != null ? 'Change File' : 'Browse',
+              onBrowse: _pickBankStatement,
             ),
             const SizedBox(height: 32),
             const LegalNoticeCard(
@@ -340,8 +321,8 @@ class _PlaceBidScreenState extends ConsumerState<PlaceBidScreen> {
             ),
             const SizedBox(height: 32),
             CustomButton(
-              text: bidState.status == BidStatus.loading ? 'Submitting...' : 'Submit',
-              onPressed: bidState.status == BidStatus.loading ? () {} : () => _submitBid(bidState),
+              text: _isSubmitting ? 'Submitting...' : 'Submit',
+              onPressed: _isSubmitting ? () {} : _submitBid,
             ),
             const SizedBox(height: 40),
           ],

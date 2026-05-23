@@ -112,7 +112,7 @@ class _ReviewBidScreenState extends ConsumerState<ReviewBidScreen> {
           final bidderName = offer.bidderName ?? 'Anonymous';
           final amount = offer.amount?.toStringAsFixed(0) ?? '--';
           final propertyImageUrl = property.imageUrls.isNotEmpty 
-              ? 'http://localhost:8080${property.imageUrls.first}' 
+              ? (property.imageUrls.first.startsWith('/') ? 'http://localhost:8080${property.imageUrls.first}' : property.imageUrls.first)
               : 'assets/images/properties/apartment.png';
           final isAcceptable = offer.status == 'PENDING' || offer.status == 'ACTIVE';
 

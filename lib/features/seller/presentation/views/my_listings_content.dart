@@ -181,7 +181,7 @@ class _MyListingsContentState extends ConsumerState<MyListingsContent> {
 
                             // Ensure an image exists or fallback
                             final imageUrl = property.imageUrls.isNotEmpty 
-                                ? 'http://localhost:8080${property.imageUrls.first}'
+                                ? (property.imageUrls.first.startsWith('/') ? 'http://localhost:8080${property.imageUrls.first}' : property.imageUrls.first)
                                 : 'assets/images/properties/villa.png'; // A local fallback
 
                             return Padding(

@@ -80,7 +80,7 @@ class ActiveAuctionsContent extends ConsumerWidget {
               else
                 ...activeAuctions.map((property) {
                   final imageUrl = property.imageUrls.isNotEmpty 
-                      ? 'http://localhost:8080${property.imageUrls.first}'
+                      ? (property.imageUrls.first.startsWith('/') ? 'http://localhost:8080${property.imageUrls.first}' : property.imageUrls.first)
                       : 'assets/images/properties/apartment.png';
 
                   // Calculate time remaining based on endTime

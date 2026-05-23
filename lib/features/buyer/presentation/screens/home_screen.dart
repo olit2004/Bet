@@ -9,6 +9,8 @@ import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/core/widgets/app_logo.dart';
 import 'package:bet/core/providers/navigation_provider.dart';
 import 'package:bet/features/notification/presentation/widgets/notification_bell.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
+import 'package:bet/features/auth/application/providers/auth_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -41,18 +43,23 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           const NotificationBell(),
           const SizedBox(width: 8),
-          GestureDetector(
-            onTap: () => context.read<NavigationProvider>().setIndex(2),
-            child: CircleAvatar(
-              radius: 18,
-              backgroundColor: AppColors.inputFill,
-              child: ClipOval(
-                child: Image.asset(
-                  'assets/images/avater.png',
-                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.person, color: AppColors.secondaryText),
+          riverpod.Consumer(
+            builder: (context, ref, child) {
+              final user = ref.watch(authNotifierProvider).user;
+              return GestureDetector(
+                onTap: () => context.read<NavigationProvider>().setIndex(2),
+                child: CircleAvatar(
+                  radius: 18,
+                  backgroundColor: AppColors.inputFill,
+                  backgroundImage: (user?.avatarUrl != null && user!.avatarUrl!.isNotEmpty)
+                      ? NetworkImage('http://localhost:8080${user.avatarUrl}') as ImageProvider
+                      : null,
+                  child: (user?.avatarUrl == null || user!.avatarUrl!.isEmpty)
+                      ? const Icon(Icons.person, size: 24, color: Colors.grey)
+                      : null,
                 ),
-              ),
-            ),
+              );
+            },
           ),
           const SizedBox(width: 16),
         ],
