@@ -85,8 +85,42 @@ class PropertyService {
       where: { id },
       include: {
         owner: true,
-        bids: true,
-        proposals: true,
+        bids: {
+          include: {
+            bidder: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    email: true,
+                    role: true,
+                    name: true,
+                    isVerified: true,
+                  }
+                }
+              }
+            }
+          },
+          orderBy: { amount: 'desc' }
+        },
+        proposals: {
+          include: {
+            bidder: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    email: true,
+                    role: true,
+                    name: true,
+                    isVerified: true,
+                  }
+                }
+              }
+            }
+          },
+          orderBy: { createdAt: 'desc' }
+        },
       },
     });
   }

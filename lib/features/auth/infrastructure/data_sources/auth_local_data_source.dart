@@ -25,6 +25,11 @@ class AuthLocalDataSource {
       'email': user.email,
       'role': user.role,
       'name': user.name,
+      'avatarUrl': user.avatarUrl,
+      'faydaId': user.faydaId,
+      'faydaImageUrl': user.faydaImageUrl,
+      'faydaStatus': user.faydaStatus,
+      'isVerified': user.isVerified,
     };
     await _storage.write(key: _userKey, value: jsonEncode(userMap));
   }
