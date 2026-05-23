@@ -51,7 +51,7 @@ class AuthRemoteDataSource {
           'role': role,
           'name': name,
           'phone': phone,
-          if (company != null) 'company': company,
+          'company': ?company,
         }),
       );
 

@@ -45,7 +45,7 @@ const getUser = async (req, res, next) => {
 
 const moderateUser = async (req, res, next) => {
   try {
-    const updatedUser = await adminService.moderateUser(
+    const user = await adminService.moderateUser(
       req.params.id,
       req.body,
       req.user.id
@@ -53,7 +53,7 @@ const moderateUser = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       message: 'User account moderated successfully.',
-      data: updatedUser,
+      data: user,
     });
   } catch (error) {
     next(error);
@@ -62,11 +62,11 @@ const moderateUser = async (req, res, next) => {
 
 const getPendingIdentities = async (req, res, next) => {
   try {
-    const pendingList = await adminService.getPendingIdentities();
+    const pending = await adminService.getPendingIdentities();
     return res.status(200).json({
       success: true,
-      count: pendingList.length,
-      data: pendingList,
+      count: pending.length,
+      data: pending,
     });
   } catch (error) {
     next(error);
@@ -82,7 +82,7 @@ const verifyIdentity = async (req, res, next) => {
         message: "Missing 'approve' boolean in request body",
       });
     }
-    const updatedUser = await adminService.verifyUserIdentity(
+    const user = await adminService.verifyUserIdentity(
       req.params.id,
       approve,
       req.user.id
@@ -90,7 +90,7 @@ const verifyIdentity = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       message: `User identity ${approve ? 'verified/approved' : 'rejected'} successfully.`,
-      data: updatedUser,
+      data: user,
     });
   } catch (error) {
     next(error);
@@ -119,7 +119,7 @@ const reviewProperty = async (req, res, next) => {
         message: "Missing 'status' string in request body",
       });
     }
-    const updatedProperty = await adminService.reviewProperty(
+    const property = await adminService.reviewProperty(
       req.params.id,
       status,
       req.user.id
@@ -127,7 +127,7 @@ const reviewProperty = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       message: `Property status successfully updated to '${status}'.`,
-      data: updatedProperty,
+      data: property,
     });
   } catch (error) {
     next(error);

@@ -15,7 +15,7 @@ import 'package:bet/core/widgets/main_wrapper.dart';
 
 class GoRouterRefreshNotifier extends ChangeNotifier {
   GoRouterRefreshNotifier(Ref ref) {
-    _subscription = ref.listen<AuthStateData>(authNotifierProvider, (_, __) {
+    _subscription = ref.listen<AuthStateData>(authNotifierProvider, (_, _) {
       notifyListeners();
     });
   }

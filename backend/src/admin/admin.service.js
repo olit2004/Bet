@@ -29,69 +29,32 @@ const getDashboardStats = async () => {
       },
     },
   });
-  const isDbEmpty = (await prisma.user.count()) === 0;
-  const revenue = isDbEmpty ? 4200000 : dbRevenue;
-  const activeAuctions = isDbEmpty ? 142 : activeAuctionsCount;
-  const pendingVerifications = isDbEmpty ? 28 : pendingVerificationsCount;
-  const recentActivities = isDbEmpty 
-    ? [
-        {
-          id: 'mock-1',
-          title: 'New Bid: $1.2M',
-          subtitle: 'Skyline Penthouse • 2m ago',
-          type: 'BID',
-          timestamp: new Date(Date.now() - 2 * 60000),
-          avatar: '/images/auction.png',
-        },
-        {
-          id: 'mock-2',
-          title: 'Property Verified',
-          subtitle: 'Oak Ridge Manor • 15m ago',
-          type: 'VERIFICATION',
-          timestamp: new Date(Date.now() - 15 * 60000),
-          avatar: '/images/verify.png',
-        },
-        {
-          id: 'mock-3',
-          title: 'Sale Confirmed',
-          subtitle: 'Azure Shores Villa • 42m ago',
-          type: 'SALE',
-          timestamp: new Date(Date.now() - 42 * 60000),
-          avatar: '/images/clipboard.png',
-        }
-      ]
-    : dbAuditLogs.map(log => ({
-        id: log.id,
-        title: log.action,
-        subtitle: `${log.details} • ${log.user.email}`,
-        type: 'LOG',
-        timestamp: log.createdAt,
-        avatar: '/images/verify.png',
-      }));
-  const weeklyChartData = [
-    { day: 'Mon', volume: 40 },
-    { day: 'Tue', volume: 70 },
-    { day: 'Wed', volume: 50 },
-    { day: 'Thu', volume: 90 },
-    { day: 'Fri', volume: 60 },
-    { day: 'Sat', volume: 100 },
-    { day: 'Sun', volume: 110 }
-  ];
+  const recentActivities = dbAuditLogs.map(log => ({
+    id: log.id,
+    title: log.action,
+    subtitle: `${log.details} • ${log.user.email}`,
+    type: 'LOG',
+    timestamp: log.createdAt,
+    avatar: '/images/verify.png',
+  }));
+
+  const weeklyChartData = [];
+
   const adminUser = await prisma.user.findFirst({
     where: { role: 'ADMIN' },
     select: { email: true, role: true, createdAt: true, name: true }
   });
 
   return {
-    revenue,
-    activeAuctions,
-    pendingVerifications,
+    revenue: dbRevenue,
+    activeAuctions: activeAuctionsCount,
+    pendingVerifications: pendingVerificationsCount,
     recentActivities,
     weeklyChartData,
     adminName: adminUser?.name || 'Admin',
     adminEmail: adminUser?.email || 'admin@bet.com',
     adminRole: adminUser?.role || 'ADMIN',
-    memberSince: adminUser ? adminUser.createdAt.getFullYear().toString() : '2024',
+    memberSince: adminUser ? adminUser.createdAt.getFullYear().toString() : '',
   };
 };
 
@@ -137,7 +100,11 @@ const getUserById = async (userId) => {
       createdAt: true,
       updatedAt: true,
       buyer: true,
-      seller: true,
+      seller: {
+        include: {
+          properties: true,
+        },
+      },
       auditLogs: {
         take: 10,
         orderBy: { createdAt: 'desc' },
@@ -155,13 +122,21 @@ const moderateUser = async (userId, data, adminUserId) => {
       ...(isVerified !== undefined && { isVerified }),
     },
   });
-  await prisma.auditLog.create({
-    data: {
-      userId: adminUserId,
-      action: 'USER_MODERATION',
-      details: `Moderated user ${updatedUser.email}: role set to '${updatedUser.role}', verified set to '${updatedUser.isVerified}'`,
-    },
-  });
+  let actualAdminId = adminUserId;
+  if (adminUserId === 'dev-admin-uuid-1234') {
+    const fallbackAdmin = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
+    if (fallbackAdmin) actualAdminId = fallbackAdmin.id;
+  }
+
+  if (actualAdminId !== 'dev-admin-uuid-1234') {
+    await prisma.auditLog.create({
+      data: {
+        userId: actualAdminId,
+        action: 'USER_MODERATION',
+        details: `Moderated user ${updatedUser.email}: role set to '${updatedUser.role}', verified set to '${updatedUser.isVerified}'`,
+      },
+    });
+  }
   return updatedUser;
 };
 
@@ -192,13 +167,21 @@ const verifyUserIdentity = async (userId, approve, adminUserId) => {
       ...(approve && user.role === 'GUEST' && { role: 'BUYER' }),
     },
   });
-  await prisma.auditLog.create({
-    data: {
-      userId: adminUserId,
-      action: approve ? 'IDENTITY_APPROVED' : 'IDENTITY_REJECTED',
-      details: `${approve ? 'Approved' : 'Rejected'} Fayda ID ${user.faydaId || 'N/A'} for ${user.email}`,
-    },
-  });
+  let actualAdminId = adminUserId;
+  if (adminUserId === 'dev-admin-uuid-1234') {
+    const fallbackAdmin = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
+    if (fallbackAdmin) actualAdminId = fallbackAdmin.id;
+  }
+
+  if (actualAdminId !== 'dev-admin-uuid-1234') {
+    await prisma.auditLog.create({
+      data: {
+        userId: actualAdminId,
+        action: approve ? 'IDENTITY_APPROVED' : 'IDENTITY_REJECTED',
+        details: `${approve ? 'Approved' : 'Rejected'} Fayda ID ${user.faydaId || 'N/A'} for ${user.email}`,
+      },
+    });
+  }
   return updatedUser;
 };
 
@@ -229,23 +212,26 @@ const reviewProperty = async (propertyId, status, adminUserId) => {
     where: { id: propertyId },
     data: { status }, 
   });
-  await prisma.auditLog.create({
-    data: {
-      userId: adminUserId,
-      action: 'PROPERTY_REVIEWED',
-      details: `Property '${property.title}' status set to '${status}' by admin`,
-    },
-  });
+  let actualAdminId = adminUserId;
+  if (adminUserId === 'dev-admin-uuid-1234') {
+    const fallbackAdmin = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
+    if (fallbackAdmin) actualAdminId = fallbackAdmin.id;
+  }
+
+  if (actualAdminId !== 'dev-admin-uuid-1234') {
+    await prisma.auditLog.create({
+      data: {
+        userId: actualAdminId,
+        action: 'PROPERTY_REVIEWED',
+        details: `Property '${property.title}' status set to '${status}' by admin`,
+      },
+    });
+  }
   return updatedProperty;
 };
 
 const updateAdminPassword = async (userId, oldPassword, newPassword) => {
-  let user;
-  if (userId === 'dev-admin-uuid-1234') {
-    user = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
-  } else {
-    user = await prisma.user.findUnique({ where: { id: userId } });
-  }
+  const user = await prisma.user.findUnique({ where: { id: userId } });
   
   if (!user) throw new Error('User not found');
 
@@ -266,13 +252,8 @@ const updateAdminPassword = async (userId, oldPassword, newPassword) => {
 };
 
 const deleteAdminAccount = async (userId) => {
-  let targetId = userId;
-  if (userId === 'dev-admin-uuid-1234') {
-    const adminUser = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
-    if (adminUser) targetId = adminUser.id;
-  }
   await prisma.user.delete({
-    where: { id: targetId },
+    where: { id: userId },
   });
 };
 

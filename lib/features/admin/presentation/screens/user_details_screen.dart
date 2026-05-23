@@ -81,6 +81,13 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
           );
           _fetchUserDetails();
         }
+      } else {
+        final jsonRes = json.decode(response.body);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(jsonRes['message'] ?? 'Failed to suspend user')),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -206,12 +213,12 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
           isSuspending
               ? const CircularProgressIndicator()
               : CustomButton(
-                  text: "Suspend",
+                  text: (role == 'GUEST' && !isVerified) ? "Suspended" : "Suspend",
                   color: const Color.fromARGB(255, 229, 238, 255),
                   textColor: const Color.fromARGB(255, 9, 13, 255),
                   width: 450,
                   height: 60,
-                  onPressed: _suspendUser,
+                  onPressed: (role == 'GUEST' && !isVerified) ? null : () => _suspendUser(),
                 ),
         ],
       ),
@@ -442,6 +449,12 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
   }
 
   Widget _activeListing() {
+    final List<dynamic> properties = user?['seller']?['properties'] ?? [];
+    
+    if (properties.isEmpty) {
+       return const SizedBox.shrink();
+    }
+    
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 10),
       child: Column(
@@ -466,48 +479,20 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              children: [
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    _houseCard(
-                      "assets/images/garden-state.png",
-                      "The Obsidian Pavilion ",
-                      4,
-                      2,
-                    ),
-                    const SizedBox(width: 15),
-                    _houseCard(
-                      "assets/images/Industrial-loft.png",
-                      "Azure Shores Villa",
-                      5,
-                      3,
-                    ),
-                    const SizedBox(width: 15),
-                    _houseCard(
-                      "assets/images/skyline-retreat.png",
-                      "Skyline Penthouse",
-                      3,
-                      2,
-                    ),
-                    const SizedBox(width: 15),
-                    _houseCard(
-                      "assets/images/the-glass-Pavillion.png",
-                      "Oak Ridge Manor",
-                      6,
-                      4,
-                    ),
-                    const SizedBox(width: 15),
-                    _houseCard(
-                      "assets/images/garden-state.png",
-                      "Emerald Valley Estate",
-                      4,
-                      3,
-                    ),
-                  ],
-                ),
-              ],
+            child: Row(
+              children: properties.map<Widget>((prop) {
+                final imageUrls = prop['imageUrls'] as List<dynamic>? ?? [];
+                final imagePath = imageUrls.isNotEmpty ? imageUrls[0] : "assets/images/garden-state.png";
+                return Padding(
+                  padding: const EdgeInsets.only(right: 15.0),
+                  child: _houseCard(
+                    imagePath,
+                    prop['title'] ?? 'Untitled Property',
+                    prop['beds'] ?? 0,
+                    prop['baths'] ?? 0,
+                  ),
+                );
+              }).toList(),
             ),
           ),
         ],
@@ -534,7 +519,9 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
             child: SizedBox(
               height: 280,
               width: 400,
-              child: Image.asset(imageUrl, fit: BoxFit.cover),
+              child: imageUrl.startsWith('http') 
+                  ? Image.network(imageUrl, fit: BoxFit.cover) 
+                  : Image.asset(imageUrl, fit: BoxFit.cover),
             ),
           ),
           Padding(

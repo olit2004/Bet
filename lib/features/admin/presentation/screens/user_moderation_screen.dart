@@ -374,8 +374,21 @@ class _UsersScreenState extends State<UsersScreen> {
                       );
                       _fetchUsers();
                     }
+                  } else {
+                    final jsonRes = json.decode(response.body);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(jsonRes['message'] ?? 'Failed to suspend user')),
+                      );
+                    }
                   }
-                } catch (_) {}
+                } catch (_) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Connection failed.')),
+                    );
+                  }
+                }
               },
               color: const Color.fromARGB(255, 229, 238, 255),
             ),
@@ -422,8 +435,21 @@ class _UsersScreenState extends State<UsersScreen> {
                       );
                       _fetchUsers();
                     }
+                  } else {
+                    final jsonRes = json.decode(response.body);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(jsonRes['message'] ?? 'Failed to approve seller')),
+                      );
+                    }
                   }
-                } catch (_) {}
+                } catch (_) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Connection failed.')),
+                    );
+                  }
+                }
               },
               color: const Color.fromARGB(255, 0, 121, 66),
             ),
@@ -456,8 +482,21 @@ class _UsersScreenState extends State<UsersScreen> {
                       );
                       _fetchUsers();
                     }
+                  } else {
+                    final jsonRes = json.decode(response.body);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(jsonRes['message'] ?? 'Failed to restrict user')),
+                      );
+                    }
                   }
-                } catch (_) {}
+                } catch (_) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Connection failed.')),
+                    );
+                  }
+                }
               },
               color: const Color.fromARGB(255, 245, 129, 156),
             ),

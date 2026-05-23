@@ -15,6 +15,9 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  static const String _passwordApi = 'http://localhost:8080/api/admin/settings/password';
+  static const String _accountApi = 'http://localhost:8080/api/admin/settings/account';
+
   final _oldPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -48,7 +51,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     try {
       final response = await http.patch(
-        Uri.parse('http://localhost:8080/api/admin/settings/password'),
+        Uri.parse(_passwordApi),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'oldPassword': oldPassword,
@@ -56,7 +59,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         }),
       );
 
-      final responseData = json.decode(response.body);
+      final jsonRes = json.decode(response.body);
 
       if (response.statusCode == 200) {
         if (mounted) {
@@ -70,14 +73,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(responseData['message'] ?? 'Failed to update password')),
+            SnackBar(content: Text(jsonRes['message'] ?? 'Failed to update password')),
           );
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error communicating with server.')),
+          const SnackBar(content: Text('Request failed.')),
         );
       }
     }
@@ -95,26 +98,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _deleteAccount() async {
     try {
       final response = await http.delete(
-        Uri.parse('http://localhost:8080/api/admin/settings/account'),
+        Uri.parse(_accountApi),
       );
 
       if (response.statusCode == 200) {
         if (mounted) {
-          Navigator.pop(context); // Close dialog
-          context.go('/login'); // Redirect to login
+          Navigator.pop(context);
+          context.go('/login');
         }
       } else {
-        final responseData = json.decode(response.body);
+        final jsonRes = json.decode(response.body);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(responseData['message'] ?? 'Failed to delete account')),
+            SnackBar(content: Text(jsonRes['message'] ?? 'Failed to delete account')),
           );
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error communicating with server.')),
+          const SnackBar(content: Text('Request failed.')),
         );
       }
     }

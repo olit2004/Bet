@@ -11,6 +11,8 @@ class AdminDashboardScreen extends StatefulWidget {
 }
 
 class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
+  static const String _dashboardApi = 'http://localhost:8080/api/admin/dashboard';
+  
   bool isLoading = true;
   String errorMessage = '';
 
@@ -28,11 +30,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   Future<void> _fetchDashboardData() async {
     try {
-      final response = await http.get(Uri.parse('http://localhost:8080/api/admin/dashboard'));
+      final response = await http.get(Uri.parse(_dashboardApi));
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> responseData = json.decode(response.body);
-        final data = responseData['data'];
+        final Map<String, dynamic> jsonRes = json.decode(response.body);
+        final data = jsonRes['data'];
 
         if (mounted) {
           setState(() {
@@ -47,7 +49,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       } else {
         if (mounted) {
           setState(() {
-            errorMessage = 'Failed to load data: ${response.statusCode}';
+            errorMessage = 'Request failed with status: ${response.statusCode}';
             isLoading = false;
           });
         }
@@ -55,7 +57,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          errorMessage = 'Error connecting to server. Is the backend running?';
+          errorMessage = 'Connection failed.';
           isLoading = false;
         });
       }
@@ -65,7 +67,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(248, 249, 255, 1),
+      backgroundColor: const Color(0xFFF8F9FF),
       appBar: _buildAppBar(context),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -176,8 +178,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         ),
         Text(
           subtitle,
-          style: TextStyle(
-            color: const Color.fromARGB(255, 73, 82, 129),
+          style: const TextStyle(
+            color: Color(0xFF495281),
             fontSize: 20,
           ),
         ),
@@ -218,7 +220,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
-                  color: Color.fromARGB(255, 76, 90, 109),
+                  color: Color(0xFF4C5A6D),
                 ),
               ),
               const SizedBox(height: 8),
@@ -289,7 +291,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 124, 139, 177),
+                color: Color(0xFF7C8BB1),
               ),
             ),
           ],
@@ -330,7 +332,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       margin: const EdgeInsets.symmetric(vertical: 15),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 154, 177, 240).withValues(alpha: 0.3),
+        color: const Color(0xFF9AB1F0).withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -343,7 +345,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     : (item is num ? item.toDouble() : 40);
                 return _bar(value.clamp(10, 150));
               }).toList()
-            : [_bar(40), _bar(70), _bar(50), _bar(90), _bar(60), _bar(100), _bar(110)],
+            : List.generate(7, (_) => _bar(10)),
       ),
     );
   }
@@ -358,12 +360,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       width: 60,
       height: height,
       decoration: BoxDecoration(
-        color: const Color.fromARGB(
-          255,
-          112,
-          79,
-          218,
-        ).withValues(alpha: opacity),
+        color: const Color(0xFF704FDA).withValues(alpha: opacity),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(6),
           topRight: Radius.circular(6),

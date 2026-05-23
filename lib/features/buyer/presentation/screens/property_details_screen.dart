@@ -31,9 +31,9 @@ class PropertyDetailsScreen extends StatelessWidget {
     const grayText = Color(0xFF64748B);
 
     final formatCurrency = NumberFormat.currency(symbol: 'ETB ', decimalDigits: 0);
-    final String listingPrice = property != null ? formatCurrency.format(property!.price).replaceAll('ETB ', '') + ' ETB' : '12,450,000 ETB';
+    final String listingPrice = property != null ? '${formatCurrency.format(property!.price).replaceAll('ETB ', '')} ETB' : '12,450,000 ETB';
     // Mock highest bid (e.g., 5% higher)
-    final String highestBid = property != null ? formatCurrency.format(property!.price * 1.05).replaceAll('ETB ', '') + ' ETB' : '13,100,000 ETB';
+    final String highestBid = property != null ? '${formatCurrency.format(property!.price * 1.05).replaceAll('ETB ', '')} ETB' : '13,100,000 ETB';
 
     return Scaffold(
       backgroundColor: bgColor,

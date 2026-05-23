@@ -261,9 +261,27 @@ Widget _buttons(BuildContext context, Map<String, dynamic> property) {
               body: json.encode({'status': 'APPROVED'}),
             );
             if (response.statusCode == 200) {
-              Navigator.pop(context);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Property approved successfully.')),
+                );
+                Navigator.pop(context);
+              }
+            } else {
+              final jsonRes = json.decode(response.body);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(jsonRes['message'] ?? 'Failed to approve property')),
+                );
+              }
             }
-          } catch (e) {}
+          } catch (e) {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Connection failed.')),
+              );
+            }
+          }
         },
       ),
       SizedBox(height: 10),
@@ -281,9 +299,27 @@ Widget _buttons(BuildContext context, Map<String, dynamic> property) {
               body: json.encode({'status': 'REJECTED'}),
             );
             if (response.statusCode == 200) {
-              Navigator.pop(context);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Property flagged for revision.')),
+                );
+                Navigator.pop(context);
+              }
+            } else {
+              final jsonRes = json.decode(response.body);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(jsonRes['message'] ?? 'Failed to flag property')),
+                );
+              }
             }
-          } catch (e) {}
+          } catch (e) {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Connection failed.')),
+              );
+            }
+          }
         },
       ),
     ],
