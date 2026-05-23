@@ -75,7 +75,9 @@ class _PlaceBidScreenState extends ConsumerState<PlaceBidScreen> {
   String _getEndsInText() {
     if (widget.property.endTime == null) return 'N/A';
     final diff = widget.property.endTime!.difference(DateTime.now());
-    if (diff.isNegative) return 'Ended';
+    if (diff.isNegative) {
+      return widget.property.status == 'ACTIVE' ? 'Awaiting Acceptance' : 'Ended';
+    }
     
     if (diff.inDays > 0) {
       return '${diff.inDays}d ${diff.inHours % 24}h';
@@ -106,6 +108,7 @@ class _PlaceBidScreenState extends ConsumerState<PlaceBidScreen> {
         amount,
         bankStatementBytes: _bankStatementFile?.bytes,
         bankStatementFileName: _bankStatementFile?.name,
+        bankStatementFilePath: _bankStatementFile?.path,
       );
 
       if (mounted) {
@@ -360,7 +363,7 @@ class _PlaceBidScreenState extends ConsumerState<PlaceBidScreen> {
               ),
               const SizedBox(height: 12),
               Text(
-                'Your proposal has been submitted successfully.',
+                'Your bid has been placed successfully.',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   color: AppColors.secondaryText,

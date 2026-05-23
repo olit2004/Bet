@@ -138,6 +138,23 @@ class _SellerProfileContentState extends ConsumerState<SellerProfileContent> {
               ),
             ),
           ),
+          if (user?.bio != null && user!.bio!.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Text(
+                  user.bio!,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(
+                    color: AppColors.primaryText.withValues(alpha: 0.7),
+                    fontSize: 14,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 32),
 
           // ── Dynamic Stats ──

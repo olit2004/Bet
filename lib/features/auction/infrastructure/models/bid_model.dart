@@ -19,7 +19,7 @@ class BidModel extends BidEntity {
       buyerId: json['buyer'] ?? json['buyerId'] ?? '',
       amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
       status: json['status'] ?? 'PENDING',
-      bankStatementUrl: json['bankStatement'],
+      bankStatementUrl: (json['bankStatementUrl'] ?? json['bankStatement']) as String?,
       createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
       updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : DateTime.now(),
     );

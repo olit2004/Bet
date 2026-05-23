@@ -4,7 +4,16 @@ import 'package:go_router/go_router.dart';
 import 'package:bet/core/constants/app_colors.dart';
 
 class BidSuccessOverlay extends StatelessWidget {
-  const BidSuccessOverlay({super.key});
+  final String propertyTitle;
+  final String amount;
+  final String bidderName;
+
+  const BidSuccessOverlay({
+    super.key,
+    this.propertyTitle = 'Property',
+    this.amount = 'the bid amount',
+    this.bidderName = 'The buyer',
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -43,11 +52,20 @@ class BidSuccessOverlay extends StatelessWidget {
                   ),
 
                   Text(
-                    'Bid Accepted!',
+                    'Successful!',
                     style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                      color: AppColors.primaryText,
+                      color: const Color(0xFF00684A),
                       fontWeight: FontWeight.w900,
                       fontSize: 28,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Bid Accepted Successfully',
+                    style: GoogleFonts.inter(
+                      color: AppColors.primaryText.withValues(alpha: 0.6),
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -59,16 +77,16 @@ class BidSuccessOverlay extends StatelessWidget {
                         fontSize: 14,
                         height: 1.5,
                       ),
-                      children: const [
-                        TextSpan(
+                      children: [
+                        const TextSpan(
                           text:
                               'Congratulations! You have\naccepted the bid for the ',
                         ),
                         TextSpan(
-                          text: 'Skyline\nPenthouse',
-                          style: TextStyle(fontWeight: FontWeight.w800),
+                          text: propertyTitle,
+                          style: const TextStyle(fontWeight: FontWeight.w800),
                         ),
-                        TextSpan(
+                        const TextSpan(
                           text:
                               '. We are now initiating\nthe secure escrow process.',
                         ),
@@ -93,6 +111,12 @@ class BidSuccessOverlay extends StatelessWidget {
                             width: 72,
                             height: 72,
                             fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => Container(
+                              width: 72,
+                              height: 72,
+                              color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                              child: const Icon(Icons.home, color: AppColors.primaryBlue),
+                            ),
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -111,7 +135,7 @@ class BidSuccessOverlay extends StatelessWidget {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                '18,450,000 Birr',
+                                amount,
                                 style: GoogleFonts.manrope(
                                   color: const Color(0xFF00684A),
                                   fontSize: 18,
@@ -135,13 +159,13 @@ class BidSuccessOverlay extends StatelessWidget {
                         fontSize: 13,
                         height: 1.5,
                       ),
-                      children: const [
-                        TextSpan(text: 'The buyer, '),
+                      children: [
+                        const TextSpan(text: 'The buyer, '),
                         TextSpan(
-                          text: 'Abebe Tesfaye',
-                          style: TextStyle(fontWeight: FontWeight.w800),
+                          text: bidderName,
+                          style: const TextStyle(fontWeight: FontWeight.w800),
                         ),
-                        TextSpan(text: ', will be notified immediately.'),
+                        const TextSpan(text: ', will be notified immediately.'),
                       ],
                     ),
                   ),

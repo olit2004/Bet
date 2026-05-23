@@ -24,7 +24,7 @@ class DashboardPropertyInfo {
       title: json['title'] ?? '',
       status: json['status'] ?? '',
       location: json['location'] ?? 'Unknown Location',
-      endTime: json['endTime'] != null ? DateTime.tryParse(json['endTime']) : null,
+      endTime: (json['endingAt'] ?? json['endTime']) != null ? DateTime.tryParse((json['endingAt'] ?? json['endTime']) as String) : null,
       imageUrls: json['imageUrls'] != null ? List<String>.from(json['imageUrls']) : [],
       description: json['description'] ?? '',
     );

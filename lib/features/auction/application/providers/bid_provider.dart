@@ -85,10 +85,22 @@ class BidNotifier extends Notifier<BidStateData> {
     }
   }
 
-  Future<void> placeBid(String propertyId, double amount, {List<int>? bankStatementBytes, String? bankStatementFileName}) async {
+  Future<void> placeBid(
+    String propertyId,
+    double amount, {
+    List<int>? bankStatementBytes,
+    String? bankStatementFileName,
+    String? bankStatementFilePath,
+  }) async {
     state = state.copyWith(status: BidStatus.loading, lastAction: BidAction.place, errorMessage: null);
     try {
-      final newBid = await _repository.placeBid(propertyId, amount, bankStatementBytes: bankStatementBytes, bankStatementFileName: bankStatementFileName);
+      final newBid = await _repository.placeBid(
+        propertyId,
+        amount,
+        bankStatementBytes: bankStatementBytes,
+        bankStatementFileName: bankStatementFileName,
+        bankStatementFilePath: bankStatementFilePath,
+      );
       state = state.copyWith(
         status: BidStatus.success,
         lastAction: BidAction.place,

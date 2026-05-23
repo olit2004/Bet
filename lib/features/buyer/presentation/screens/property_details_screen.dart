@@ -5,8 +5,10 @@ import 'package:intl/intl.dart';
 import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/core/widgets/app_logo.dart';
 import 'package:bet/core/property/models/property_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:bet/features/auction/application/providers/bid_provider.dart';
 
-class PropertyDetailsScreen extends StatelessWidget {
+class PropertyDetailsScreen extends ConsumerStatefulWidget {
   final String propertyId;
   final String imageUrl;
   final String title;
@@ -23,6 +25,19 @@ class PropertyDetailsScreen extends StatelessWidget {
   });
 
   @override
+  ConsumerState<PropertyDetailsScreen> createState() => _PropertyDetailsScreenState();
+}
+
+class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref.read(bidNotifierProvider.notifier).fetchPropertyBids(widget.propertyId);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     const bgColor = Color(0xFFF8FAFC);
     const darkBlue = Color(0xFF05345C);
@@ -30,10 +45,18 @@ class PropertyDetailsScreen extends StatelessWidget {
     const greenColor = Color(0xFF008955);
     const grayText = Color(0xFF64748B);
 
+    final bidState = ref.watch(bidNotifierProvider);
+    final property = widget.property;
+
     final formatCurrency = NumberFormat.currency(symbol: 'ETB ', decimalDigits: 0);
-    final String listingPrice = property != null ? '${formatCurrency.format(property!.price).replaceAll('ETB ', '')} ETB' : '12,450,000 ETB';
-    // Mock highest bid (e.g., 5% higher)
-    final String highestBid = property != null ? '${formatCurrency.format(property!.price * 1.05).replaceAll('ETB ', '')} ETB' : '13,100,000 ETB';
+    final String listingPrice = property != null ? '${formatCurrency.format(property.price).replaceAll('ETB ', '')} ETB' : '12,450,000 ETB';
+
+    // Evaluate the actual highest bid from the fetched bids list
+    double highestBidVal = property?.price ?? 0.0;
+    if (bidState.bids.isNotEmpty) {
+      highestBidVal = bidState.bids.map((b) => b.amount).reduce((a, b) => a > b ? a : b);
+    }
+    final String highestBid = '${formatCurrency.format(highestBidVal).replaceAll('ETB ', '')} ETB';
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -57,10 +80,10 @@ class PropertyDetailsScreen extends StatelessWidget {
                 SizedBox(
                   height: 380,
                   width: double.infinity,
-                  child: imageUrl.startsWith('assets/')
-                      ? Image.asset(imageUrl, fit: BoxFit.cover)
+                  child: widget.imageUrl.startsWith('assets/')
+                      ? Image.asset(widget.imageUrl, fit: BoxFit.cover)
                       : Image.network(
-                          imageUrl.startsWith('/') ? 'http://localhost:8080$imageUrl' : imageUrl,
+                          widget.imageUrl.startsWith('/') ? 'http://localhost:8080${widget.imageUrl}' : widget.imageUrl,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) => Container(
                             color: AppColors.inputFill,
@@ -125,7 +148,7 @@ class PropertyDetailsScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            title,
+                            widget.title,
                             style: GoogleFonts.manrope(
                               color: darkBlue,
                               fontSize: 24,
@@ -138,7 +161,7 @@ class PropertyDetailsScreen extends StatelessWidget {
                               const Icon(Icons.location_on_outlined, color: grayText, size: 16),
                               const SizedBox(width: 4),
                               Text(
-                                location,
+                                widget.location,
                                 style: GoogleFonts.inter(
                                   color: grayText,
                                   fontSize: 13,
@@ -303,24 +326,34 @@ class PropertyDetailsScreen extends StatelessWidget {
                         children: [
                           Stack(
                             children: [
-                              const CircleAvatar(
+                              CircleAvatar(
                                 radius: 24,
-                                backgroundImage: AssetImage('assets/images/avater.png'),
-                                backgroundColor: Color(0xFFE2E8F0),
+                                backgroundImage: (property != null && property.sellerAvatarUrl != null && property.sellerAvatarUrl!.isNotEmpty)
+                                    ? NetworkImage(
+                                        property.sellerAvatarUrl!.startsWith('http')
+                                            ? property.sellerAvatarUrl!
+                                            : 'http://localhost:8080${property.sellerAvatarUrl!}',
+                                      ) as ImageProvider
+                                    : null,
+                                backgroundColor: const Color(0xFFE2E8F0),
+                                child: (property == null || property.sellerAvatarUrl == null || property.sellerAvatarUrl!.isEmpty)
+                                    ? const Icon(Icons.person, size: 24, color: Colors.grey)
+                                    : null,
                               ),
-                              Positioned(
-                                bottom: 0,
-                                right: 0,
-                                child: Container(
-                                  padding: const EdgeInsets.all(2),
-                                  decoration: BoxDecoration(
-                                    color: greenColor,
-                                    shape: BoxShape.circle,
-                                    border: Border.all(color: Colors.white, width: 2),
+                              if (property != null && (property.isSellerVerified || property.sellerFaydaStatus == 'APPROVED'))
+                                Positioned(
+                                  bottom: 0,
+                                  right: 0,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(2),
+                                    decoration: BoxDecoration(
+                                      color: greenColor,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(color: Colors.white, width: 2),
+                                    ),
+                                    child: const Icon(Icons.check, color: Colors.white, size: 10),
                                   ),
-                                  child: const Icon(Icons.check, color: Colors.white, size: 10),
                                 ),
-                              ),
                             ],
                           ),
                           const SizedBox(width: 16),
@@ -335,6 +368,17 @@ class PropertyDetailsScreen extends StatelessWidget {
                                   fontWeight: FontWeight.w800,
                                 ),
                               ),
+                               if (property != null && property.sellerPhone != null && property.sellerPhone!.isNotEmpty) ...[
+                                const SizedBox(height: 2),
+                                Text(
+                                  property.sellerPhone!,
+                                  style: GoogleFonts.inter(
+                                    color: grayText,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
                               Text(
                                 (property?.category == PropertyCategory.rent || property?.category == PropertyCategory.commercial) ? 'Landlord' : 'Seller',
                                 style: GoogleFonts.inter(
@@ -343,6 +387,52 @@ class PropertyDetailsScreen extends StatelessWidget {
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
+                              if (property != null) ...[
+                                const SizedBox(height: 2),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      (property.isSellerVerified || property.sellerFaydaStatus == 'APPROVED')
+                                          ? Icons.verified
+                                          : Icons.info_outline,
+                                      color: (property.isSellerVerified || property.sellerFaydaStatus == 'APPROVED')
+                                          ? const Color(0xFF059669)
+                                          : (property.sellerFaydaStatus == 'PENDING'
+                                              ? const Color(0xFFD97706)
+                                              : Colors.grey.shade600),
+                                      size: 14,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      (property.isSellerVerified || property.sellerFaydaStatus == 'APPROVED')
+                                          ? 'Verified'
+                                          : (property.sellerFaydaStatus == 'PENDING'
+                                              ? 'Pending verification'
+                                              : 'Unverified'),
+                                      style: GoogleFonts.inter(
+                                        color: (property.isSellerVerified || property.sellerFaydaStatus == 'APPROVED')
+                                            ? const Color(0xFF059669)
+                                            : (property.sellerFaydaStatus == 'PENDING'
+                                                ? const Color(0xFFD97706)
+                                                : Colors.grey.shade600),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                              if (property != null && property.sellerBio != null && property.sellerBio!.isNotEmpty) ...[
+                                const SizedBox(height: 4),
+                                Text(
+                                  property.sellerBio!,
+                                  style: GoogleFonts.inter(
+                                    color: grayText,
+                                    fontSize: 11,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
                         ],
@@ -447,20 +537,30 @@ class PropertyDetailsScreen extends StatelessWidget {
           child: ElevatedButton.icon(
             onPressed: () {
               if (property != null) {
-                if (property!.category == PropertyCategory.rent || property!.category == PropertyCategory.commercial) {
-                  context.pushNamed('counter-offer', pathParameters: {'id': propertyId}, extra: property);
+                if (property.isFeatured) {
+                  context.pushNamed('place-bid', pathParameters: {'id': widget.propertyId}, extra: property);
+                } else if (property.category == PropertyCategory.rent || property.category == PropertyCategory.commercial) {
+                  context.pushNamed('counter-offer', pathParameters: {'id': widget.propertyId}, extra: property);
                 } else {
-                  context.pushNamed('place-bid', pathParameters: {'id': propertyId}, extra: property);
+                  context.pushNamed('place-bid', pathParameters: {'id': widget.propertyId}, extra: property);
                 }
               }
             },
             icon: Icon(
-              (property?.category == PropertyCategory.rent || property?.category == PropertyCategory.commercial) ? Icons.vpn_key_outlined : Icons.gavel_rounded,
+              property?.isFeatured == true
+                  ? Icons.gavel_rounded
+                  : (property?.category == PropertyCategory.rent || property?.category == PropertyCategory.commercial)
+                      ? Icons.vpn_key_outlined
+                      : Icons.gavel_rounded,
               color: Colors.white,
               size: 20,
             ),
             label: Text(
-              (property?.category == PropertyCategory.rent || property?.category == PropertyCategory.commercial) ? 'Rent It' : 'Place Bid',
+              property?.isFeatured == true
+                  ? 'Place Bid'
+                  : (property?.category == PropertyCategory.rent || property?.category == PropertyCategory.commercial)
+                      ? 'Rent It'
+                      : 'Place Bid',
               style: GoogleFonts.manrope(
                 color: Colors.white,
                 fontSize: 16,
@@ -518,7 +618,8 @@ class PropertyDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildDynamicSpecs() {
-    if (property == null || property!.specs.isEmpty) {
+    final property = widget.property;
+    if (property == null || property.specs.isEmpty) {
       return Row(
         children: [
           _buildSpecCard(Icons.king_bed_outlined, '5', 'BEDS'),
@@ -530,7 +631,7 @@ class PropertyDetailsScreen extends StatelessWidget {
       );
     }
 
-    final specs = property!.specs.take(3).toList();
+    final specs = property.specs.take(3).toList();
     return Row(
       children: specs.asMap().entries.map((entry) {
         final index = entry.key;

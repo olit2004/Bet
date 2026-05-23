@@ -37,9 +37,22 @@ class BidRepositoryImpl implements BidRepository {
   }
 
   @override
-  Future<BidEntity> placeBid(String propertyId, double amount, {List<int>? bankStatementBytes, String? bankStatementFileName}) async {
+  Future<BidEntity> placeBid(
+    String propertyId,
+    double amount, {
+    List<int>? bankStatementBytes,
+    String? bankStatementFileName,
+    String? bankStatementFilePath,
+  }) async {
     final token = await _getToken();
-    final bid = await remoteDataSource.placeBid(propertyId, amount, token, bankStatementBytes: bankStatementBytes, bankStatementFileName: bankStatementFileName);
+    final bid = await remoteDataSource.placeBid(
+      propertyId,
+      amount,
+      token,
+      bankStatementBytes: bankStatementBytes,
+      bankStatementFileName: bankStatementFileName,
+      bankStatementFilePath: bankStatementFilePath,
+    );
     await localDataSource.cacheBid(bid);
     return bid;
   }

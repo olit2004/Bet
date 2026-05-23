@@ -127,7 +127,10 @@ class _ActionsScreenState extends ConsumerState<ActionsScreen> with SingleTicker
                   
                   // 3. Activity List
                   _tabController.index == 0 
-                      ? _buildActiveBidsList(dashboard.recentBids.where((b) => b.status == 'ACTIVE').toList()) 
+                      ? _buildActiveBidsList([
+                          ...dashboard.recentBids.where((b) => b.status == 'ACTIVE'),
+                          ...dashboard.recentProposals.where((p) => p.status == 'PENDING'),
+                        ]..sort((a, b) => b.createdAt.compareTo(a.createdAt))) 
                       : _buildHistoryList(dashboard),
                   
                   const SizedBox(height: 32),
@@ -209,7 +212,7 @@ class _ActionsScreenState extends ConsumerState<ActionsScreen> with SingleTicker
         padding: EdgeInsets.all(32.0),
         child: Center(
           child: Text(
-            'You do not have any active bids right now.',
+            'You do not have any active bids or proposals right now.',
             style: TextStyle(color: AppColors.secondaryText),
           ),
         ),
@@ -222,6 +225,9 @@ class _ActionsScreenState extends ConsumerState<ActionsScreen> with SingleTicker
       padding: const EdgeInsets.symmetric(horizontal: 20),
       children: activeBids.map((bid) {
         String timeLeft = 'Ended';
+        if (bid.property.status == 'ACTIVE') {
+          timeLeft = 'Awaiting Acceptance';
+        }
         if (bid.property.endTime != null) {
           final diff = bid.property.endTime!.difference(DateTime.now());
           if (!diff.isNegative) {
@@ -236,14 +242,16 @@ class _ActionsScreenState extends ConsumerState<ActionsScreen> with SingleTicker
           }
         }
         
+        final isBid = bid.isBid;
+        
         return _buildBidCard(
           title: bid.property.title,
           location: bid.property.location,
           price: '${bid.amount.toStringAsFixed(0)} ETB',
-          timeLeft: timeLeft,
-          status: bid.status,
-          statusColor: const Color(0xFFD1FAE5),
-          statusTextColor: const Color(0xFF059669),
+          timeLeft: isBid ? timeLeft : null,
+          status: bid.status == 'ACTIVE' ? 'PENDING' : bid.status,
+          statusColor: (isBid && bid.status != 'ACTIVE') ? const Color(0xFFD1FAE5) : const Color(0xFFFEF3C7),
+          statusTextColor: (isBid && bid.status != 'ACTIVE') ? const Color(0xFF059669) : const Color(0xFFD97706),
           onTap: () {
             // Push to detail screen, but wait, actions API doesn't return full property
             // We pass propertyId and it will fetch it in PropertyDetailScreen
@@ -256,9 +264,10 @@ class _ActionsScreenState extends ConsumerState<ActionsScreen> with SingleTicker
 
   Widget _buildHistoryList(BuyerDashboard dashboard) {
     // Combine all proposals and non-active bids to create the history list
+    // Exclude pending proposals (which are shown in the active list)
     final List<DashboardActionItem> historyItems = [
       ...dashboard.recentBids.where((b) => b.status != 'ACTIVE'),
-      ...dashboard.recentProposals
+      ...dashboard.recentProposals.where((p) => p.status != 'PENDING')
     ];
 
     // Sort by createdAt descending

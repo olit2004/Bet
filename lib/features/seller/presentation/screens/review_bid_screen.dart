@@ -1,8 +1,11 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/features/seller/presentation/widgets/bid_success_overlay.dart';
+import 'package:bet/core/utils/url_launcher.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bet/features/seller/presentation/providers/property_detail_provider.dart';
@@ -22,7 +25,7 @@ class ReviewBidScreen extends ConsumerStatefulWidget {
 class _ReviewBidScreenState extends ConsumerState<ReviewBidScreen> {
   bool _isLoading = false;
 
-  Future<void> _handleAcceptOffer(bool isAuction) async {
+  Future<void> _handleAcceptOffer(bool isAuction, String propertyTitle, String amountText, String bidderName) async {
     setState(() => _isLoading = true);
     try {
       final repository = ref.read(sellerPropertyRepositoryProvider);
@@ -39,7 +42,11 @@ class _ReviewBidScreenState extends ConsumerState<ReviewBidScreen> {
         showDialog(
           context: context,
           barrierDismissible: false,
-          builder: (context) => const BidSuccessOverlay(),
+          builder: (context) => BidSuccessOverlay(
+            propertyTitle: propertyTitle,
+            amount: amountText,
+            bidderName: bidderName,
+          ),
         );
       }
     } catch (e) {
@@ -99,10 +106,14 @@ class _ReviewBidScreenState extends ConsumerState<ReviewBidScreen> {
           final isAuction = property.listingType == 'AUCTION';
           
           dynamic offer;
-          if (isAuction) {
-            offer = property.bids?.firstWhere((b) => b.id == widget.bidId);
-          } else {
-            offer = property.proposals?.firstWhere((p) => p.id == widget.bidId);
+          try {
+            if (isAuction) {
+              offer = property.bids?.firstWhere((b) => b.id == widget.bidId);
+            } else {
+              offer = property.proposals?.firstWhere((p) => p.id == widget.bidId);
+            }
+          } catch (_) {
+            offer = null;
           }
 
           if (offer == null) {
@@ -186,7 +197,13 @@ class _ReviewBidScreenState extends ConsumerState<ReviewBidScreen> {
                         children: [
                           CircleAvatar(
                             radius: 28,
-                            backgroundImage: const AssetImage('assets/images/bidder_1.png'),
+                            backgroundImage: (offer.bidderAvatarUrl != null && offer.bidderAvatarUrl!.isNotEmpty)
+                                ? NetworkImage(
+                                    offer.bidderAvatarUrl!.startsWith('http')
+                                        ? offer.bidderAvatarUrl!
+                                        : 'http://localhost:8080${offer.bidderAvatarUrl!}',
+                                  ) as ImageProvider
+                                : const AssetImage('assets/images/bidder_1.png'),
                           ),
                           const SizedBox(width: 16),
                           Expanded(
@@ -202,8 +219,19 @@ class _ReviewBidScreenState extends ConsumerState<ReviewBidScreen> {
                                     height: 1.2,
                                   ),
                                 ),
+                                if (offer.bidderPhone != null && offer.bidderPhone!.isNotEmpty) ...[
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    offer.bidderPhone!,
+                                    style: GoogleFonts.inter(
+                                      color: AppColors.secondaryText,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
                                 const SizedBox(height: 8),
-                                if (offer.isVerified)
+                                if (offer.isVerified || offer.bidderFaydaStatus == 'APPROVED')
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                     decoration: BoxDecoration(
@@ -214,6 +242,38 @@ class _ReviewBidScreenState extends ConsumerState<ReviewBidScreen> {
                                       'VERIFIED',
                                       style: GoogleFonts.inter(
                                         color: const Color(0xFF00684A),
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                  )
+                                else if (offer.bidderFaydaStatus == 'PENDING')
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFFDE68A),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      'PENDING',
+                                      style: GoogleFonts.inter(
+                                        color: const Color(0xFF92400E),
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                  )
+                                else
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade300,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      'UNVERIFIED',
+                                      style: GoogleFonts.inter(
+                                        color: Colors.grey.shade700,
                                         fontSize: 10,
                                         fontWeight: FontWeight.w800,
                                       ),
@@ -248,16 +308,45 @@ class _ReviewBidScreenState extends ConsumerState<ReviewBidScreen> {
                         ],
                       ),
                       const SizedBox(height: 24),
-                      if (offer.isVerified)
+                      if (offer.bidderBio != null && offer.bidderBio!.isNotEmpty) ...[
+                        Text(
+                          '"${offer.bidderBio!}"',
+                          style: GoogleFonts.inter(
+                            color: AppColors.secondaryText,
+                            fontSize: 13,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                      if (offer.isVerified || offer.bidderFaydaStatus == 'APPROVED')
                         Text(
                           'Verified Buyer',
                           style: GoogleFonts.inter(
-                            color: AppColors.primaryBlue.withValues(alpha: 0.8),
+                            color: const Color(0xFF00684A),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        )
+                      else if (offer.bidderFaydaStatus == 'PENDING')
+                        Text(
+                          'Pending verification',
+                          style: GoogleFonts.inter(
+                            color: const Color(0xFFD97706),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        )
+                      else
+                        Text(
+                          'Unverified',
+                          style: GoogleFonts.inter(
+                            color: Colors.grey.shade600,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                      if (offer.details != null && offer.details!.isNotEmpty) ...[
+                      if (!isAuction && offer.details != null && offer.details!.isNotEmpty) ...[
                         const SizedBox(height: 12),
                         Container(
                           width: double.infinity,
@@ -280,7 +369,108 @@ class _ReviewBidScreenState extends ConsumerState<ReviewBidScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 24),
+
+                // Submitted Document Section
+                if (isAuction ? (offer.bankStatementUrl != null && offer.bankStatementUrl!.isNotEmpty) : (offer.fileUrl != null && offer.fileUrl!.isNotEmpty)) ...[
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'SUBMITTED DOCUMENT',
+                      style: GoogleFonts.inter(
+                        color: AppColors.primaryBlue.withValues(alpha: 0.8),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFDCDFE5),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AppColors.primaryBlue.withValues(alpha: 0.1), width: 1.5),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEBECEE),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.description_rounded,
+                            color: Color(0xFFC0392B), // PDF red color
+                            size: 28,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                isAuction ? 'Bank Statement' : 'Proposal Document',
+                                style: GoogleFonts.inter(
+                                  color: const Color(0xFF0C2442),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                kIsWeb ? 'Tap to view document' : 'Tap to copy link',
+                                style: GoogleFonts.inter(
+                                  color: AppColors.secondaryText,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(kIsWeb ? Icons.open_in_new_rounded : Icons.copy_rounded, color: AppColors.primaryLightBlue),
+                          onPressed: () {
+                            final String rawUrl = isAuction ? offer.bankStatementUrl! : offer.fileUrl!;
+                            final fullUrl = rawUrl.startsWith('http')
+                                ? rawUrl
+                                : 'http://localhost:8080$rawUrl';
+                            
+                            if (kIsWeb) {
+                              openUrl(fullUrl);
+                            } else {
+                              Clipboard.setData(ClipboardData(text: fullUrl));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Document link copied: $fullUrl')),
+                              );
+                            }
+                          },
+                        ),
+                        if (kIsWeb) ...[
+                          const SizedBox(width: 8),
+                          IconButton(
+                            icon: const Icon(Icons.download_rounded, color: AppColors.primaryLightBlue),
+                            onPressed: () {
+                              final String rawUrl = isAuction ? offer.bankStatementUrl! : offer.fileUrl!;
+                              final fullUrl = rawUrl.startsWith('http')
+                                  ? rawUrl
+                                  : 'http://localhost:8080$rawUrl';
+                              final fileName = isAuction ? 'bank_statement.pdf' : 'proposal_document.pdf';
+                              downloadFile(fullUrl, fileName);
+                            },
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+                const SizedBox(height: 16),
 
                 // Current Offer
                 Text(
@@ -387,7 +577,7 @@ class _ReviewBidScreenState extends ConsumerState<ReviewBidScreen> {
                     width: double.infinity,
                     height: 56,
                     child: ElevatedButton.icon(
-                      onPressed: _isLoading ? null : () => _handleAcceptOffer(isAuction),
+                      onPressed: _isLoading ? null : () => _handleAcceptOffer(isAuction, property.title, '$amount Birr', bidderName),
                       icon: _isLoading 
                           ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                           : const Icon(Icons.check_circle_outline, color: Colors.white, size: 20),

@@ -5,7 +5,14 @@ import '../models/bid_model.dart';
 
 abstract class BidRemoteDataSource {
   Future<List<BidModel>> getPropertyBids(String propertyId, String token);
-  Future<BidModel> placeBid(String propertyId, double amount, String token, {List<int>? bankStatementBytes, String? bankStatementFileName});
+  Future<BidModel> placeBid(
+    String propertyId,
+    double amount,
+    String token, {
+    List<int>? bankStatementBytes,
+    String? bankStatementFileName,
+    String? bankStatementFilePath,
+  });
   Future<BidModel> acceptBid(String bidId, String token);
   Future<BidModel> retractBid(String bidId, String token);
 }
@@ -33,7 +40,14 @@ class BidRemoteDataSourceImpl implements BidRemoteDataSource {
   }
 
   @override
-  Future<BidModel> placeBid(String propertyId, double amount, String token, {List<int>? bankStatementBytes, String? bankStatementFileName}) async {
+  Future<BidModel> placeBid(
+    String propertyId,
+    double amount,
+    String token, {
+    List<int>? bankStatementBytes,
+    String? bankStatementFileName,
+    String? bankStatementFilePath,
+  }) async {
     var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/properties/$propertyId/bids'));
     request.headers['Authorization'] = 'Bearer $token';
     request.fields['amount'] = amount.toString();
@@ -45,10 +59,12 @@ class BidRemoteDataSourceImpl implements BidRemoteDataSource {
         filename: bankStatementFileName,
         contentType: MediaType('application', 'pdf'),
       ));
+    } else if (bankStatementFilePath != null) {
+      request.files.add(await http.MultipartFile.fromPath('bankStatement', bankStatementFilePath));
     }
 
-    final streamedResponse = await request.send();
-    final response = await http.Response.fromStream(streamedResponse);
+    final streamedResponse = await request.send().timeout(const Duration(seconds: 10));
+    final response = await http.Response.fromStream(streamedResponse).timeout(const Duration(seconds: 10));
 
     if (response.statusCode == 201) {
       final data = jsonDecode(response.body);

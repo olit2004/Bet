@@ -7,6 +7,7 @@ import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/features/seller/presentation/widgets/bid_success_overlay.dart';
 import 'package:bet/features/auction/application/providers/bid_provider.dart';
 import 'package:bet/features/seller/presentation/providers/property_detail_provider.dart';
+import 'package:bet/features/seller/presentation/providers/create_property_provider.dart';
 import '../../../auth/application/providers/auth_provider.dart';
 
 class ManageBidsScreen extends ConsumerWidget {
@@ -50,13 +51,12 @@ class ManageBidsScreen extends ConsumerWidget {
           CircleAvatar(
             radius: 18,
             backgroundColor: Colors.grey.shade200,
-            backgroundImage: user?.avatarUrl != null
-                ? NetworkImage(
-                    'http://localhost:8080${user!.avatarUrl}',
-                  )
-                : const AssetImage(
-                    'assets/images/seller_profile.png',
-                  ) as ImageProvider,
+            backgroundImage: (user?.avatarUrl != null && user!.avatarUrl!.isNotEmpty)
+                ? NetworkImage('http://localhost:8080${user.avatarUrl}') as ImageProvider
+                : null,
+            child: (user?.avatarUrl == null || user!.avatarUrl!.isEmpty)
+                ? const Icon(Icons.person, size: 24, color: Colors.grey)
+                : null,
           ),
           const SizedBox(width: 16),
         ],
@@ -100,7 +100,7 @@ class ManageBidsScreen extends ConsumerWidget {
             final diff = property.endTime!.difference(DateTime.now());
 
             if (diff.isNegative) {
-              timeRemaining = 'Ended';
+              timeRemaining = property.status == 'ACTIVE' ? 'Awaiting Acceptance' : 'Ended';
             } else {
               final hours = diff.inHours;
               final minutes = diff.inMinutes % 60;
@@ -329,8 +329,9 @@ class ManageBidsScreen extends ConsumerWidget {
                         price:
                             '${offer.amount?.toStringAsFixed(0) ?? '--'} Birr',
                         timeAgo: timeAgo,
-                        imageUrl:
-                            'assets/images/bidder_${(index % 2) + 1}.png',
+                        imageUrl: (offer.bidderAvatarUrl != null && offer.bidderAvatarUrl!.isNotEmpty)
+                            ? offer.bidderAvatarUrl!
+                            : 'assets/images/bidder_${(index % 2) + 1}.png',
                         isHighest: isHighestOffer,
                         isAcceptable:
                             offer.status == 'PENDING' ||
@@ -338,6 +339,8 @@ class ManageBidsScreen extends ConsumerWidget {
                         isAuction: isAuction,
                         isVerified:
                             offer.isVerified ?? false,
+                        bidderFaydaStatus: offer.bidderFaydaStatus,
+                        propertyTitle: property.title,
                       ),
                     );
                   }),
@@ -364,6 +367,8 @@ class _BidCard extends ConsumerWidget {
   final bool isAcceptable;
   final bool isAuction;
   final bool isVerified;
+  final String? bidderFaydaStatus;
+  final String propertyTitle;
 
   const _BidCard({
     required this.propertyId,
@@ -376,6 +381,8 @@ class _BidCard extends ConsumerWidget {
     required this.isAcceptable,
     required this.isAuction,
     required this.isVerified,
+    this.bidderFaydaStatus,
+    required this.propertyTitle,
   });
 
   @override
@@ -451,10 +458,15 @@ class _BidCard extends ConsumerWidget {
                   crossAxisAlignment:
                       CrossAxisAlignment.center,
                   children: [
-                    CircleAvatar(
+                     CircleAvatar(
                       radius: 20,
-                      backgroundImage:
-                          AssetImage(imageUrl),
+                      backgroundImage: (imageUrl.startsWith('http') || imageUrl.startsWith('/'))
+                          ? NetworkImage(
+                              imageUrl.startsWith('http')
+                                  ? imageUrl
+                                  : 'http://localhost:8080$imageUrl',
+                            ) as ImageProvider
+                          : AssetImage(imageUrl),
                     ),
                     const SizedBox(width: 12),
 
@@ -474,7 +486,7 @@ class _BidCard extends ConsumerWidget {
                             ),
                           ),
 
-                          if (isVerified)
+                          if (isVerified || bidderFaydaStatus == 'APPROVED')
                             Row(
                               children: [
                                 const Icon(
@@ -491,6 +503,52 @@ class _BidCard extends ConsumerWidget {
                                       GoogleFonts.inter(
                                     color: AppColors
                                         .primaryBlue,
+                                    fontSize: 11,
+                                    fontWeight:
+                                        FontWeight
+                                            .w500,
+                                  ),
+                                ),
+                              ],
+                            )
+                          else if (bidderFaydaStatus == 'PENDING')
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.hourglass_empty,
+                                  color: const Color(0xFFD97706),
+                                  size: 12,
+                                ),
+                                const SizedBox(
+                                    width: 4),
+                                Text(
+                                  'Pending verification',
+                                  style:
+                                      GoogleFonts.inter(
+                                    color: const Color(0xFFD97706),
+                                    fontSize: 11,
+                                    fontWeight:
+                                        FontWeight
+                                            .w500,
+                                  ),
+                                ),
+                              ],
+                            )
+                          else
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.info_outline,
+                                  color: Colors.grey.shade600,
+                                  size: 12,
+                                ),
+                                const SizedBox(
+                                    width: 4),
+                                Text(
+                                  'Unverified',
+                                  style:
+                                      GoogleFonts.inter(
+                                    color: Colors.grey.shade600,
                                     fontSize: 11,
                                     fontWeight:
                                         FontWeight
@@ -594,18 +652,29 @@ class _BidCard extends ConsumerWidget {
                         child: ElevatedButton(
                           onPressed: () async {
                             if (isAcceptable) {
-                              await ref
-                                  .read(
-                                    bidNotifierProvider
-                                        .notifier,
-                                  )
-                                  .acceptBid(bidId);
+                              if (isAuction) {
+                                await ref
+                                    .read(
+                                      bidNotifierProvider
+                                          .notifier,
+                                    )
+                                    .acceptBid(bidId);
+                              } else {
+                                final repository = ref.read(sellerPropertyRepositoryProvider);
+                                await repository.acceptOffer(bidId, false);
+                              }
 
-                              if (context.mounted) {
+                              ref.invalidate(propertyDetailProvider(propertyId));
+
+                               if (context.mounted) {
                                 showDialog(
                                   context: context,
                                   builder: (context) =>
-                                      const BidSuccessOverlay(),
+                                      BidSuccessOverlay(
+                                        propertyTitle: propertyTitle,
+                                        amount: price,
+                                        bidderName: name,
+                                      ),
                                 );
                               }
                             } else {

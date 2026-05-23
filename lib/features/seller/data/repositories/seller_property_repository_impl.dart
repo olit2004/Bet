@@ -59,14 +59,17 @@ class SellerPropertyRepositoryImpl implements SellerPropertyRepository {
 
   @override
   Future<SellerProperty> getPropertyById(String propertyId) async {
-    final localProperty = await _localDataSource.getPropertyById(propertyId);
-    if (localProperty != null) {
-      return localProperty;
+    try {
+      final property = await _remoteDataSource.getPropertyById(propertyId);
+      await _localDataSource.cacheProperty(property as SellerPropertyModel);
+      return property;
+    } catch (e) {
+      final localProperty = await _localDataSource.getPropertyById(propertyId);
+      if (localProperty != null) {
+        return localProperty;
+      }
+      rethrow;
     }
-
-    final property = await _remoteDataSource.getPropertyById(propertyId);
-    await _localDataSource.cacheProperty(property as SellerPropertyModel);
-    return property;
   }
 
   @override

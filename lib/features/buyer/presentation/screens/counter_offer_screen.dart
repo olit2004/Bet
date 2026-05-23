@@ -79,6 +79,7 @@ class _CounterOfferScreenState extends ConsumerState<CounterOfferScreen> {
     try {
       await ref.read(proposalNotifierProvider.notifier).createProposal(
         widget.property.id,
+        proposalFilePath: _selectedFile!.path,
         fileBytes: _selectedFile!.bytes,
         fileName: _selectedFile!.name,
         amount: amount,

@@ -77,9 +77,12 @@ class _MyListingsContentState extends ConsumerState<MyListingsContent> {
                   CircleAvatar(
                     radius: 22,
                     backgroundColor: Colors.grey.shade200,
-                    backgroundImage: authState.user?.avatarUrl != null
-                        ? NetworkImage('http://localhost:8080${authState.user!.avatarUrl}')
-                        : const AssetImage('assets/images/seller_profile.png') as ImageProvider,
+                    backgroundImage: (authState.user?.avatarUrl != null && authState.user!.avatarUrl!.isNotEmpty)
+                        ? NetworkImage('http://localhost:8080${authState.user!.avatarUrl}') as ImageProvider
+                        : null,
+                    child: (authState.user?.avatarUrl == null || authState.user!.avatarUrl!.isEmpty)
+                        ? const Icon(Icons.person, size: 24, color: Colors.grey)
+                        : null,
                   ),
                 ],
               ),

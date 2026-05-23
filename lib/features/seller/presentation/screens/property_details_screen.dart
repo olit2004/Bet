@@ -62,7 +62,7 @@ class PropertyDetailsScreen extends ConsumerWidget {
           if (property.endTime != null) {
             final diff = property.endTime!.difference(DateTime.now());
             if (diff.isNegative) {
-              endsIn = 'Ended';
+              endsIn = property.status == 'ACTIVE' ? 'Awaiting Acceptance' : 'Ended';
             } else {
               final days = diff.inDays;
               final hours = diff.inHours % 24;
