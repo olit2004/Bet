@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'admin_http.dart' as http;
 import 'package:flutter/material.dart';
 
 class IdentityReviewScreen extends StatefulWidget {
@@ -55,7 +55,7 @@ class _IdentityReviewScreenState extends State<IdentityReviewScreen> {
       final response = await http.post(
         Uri.parse('http://localhost:8080/api/admin/users/$userId/verify-identity'),
         headers: {'Content-Type': 'application/json'},
-        body: json.encode({'status': status}),
+        body: json.encode({'approve': status == 'VERIFIED'}),
       );
       if (response.statusCode == 200) {
         _fetchPendingVerifications();

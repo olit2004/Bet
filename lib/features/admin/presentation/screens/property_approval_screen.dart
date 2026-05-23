@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'admin_http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:bet/core/widgets/app_logo.dart';
 import 'package:bet/features/admin/presentation/screens/admin_profile.dart';
@@ -105,8 +105,8 @@ class _PropertiesScreenState extends State<PropertiesScreen> {
                           property,
                           imagePath,
                           property['title'] ?? 'Untitled Property',
-                          property['startingPrice']?.toString() ?? '0',
-                          property['seller'] != null ? property['seller']['email'].split('@')[0] : 'Unknown Seller',
+                          property['price']?.toString() ?? '0',
+                          property['owner'] != null && property['owner']['user'] != null ? property['owner']['user']['email'].split('@')[0] : 'Unknown Seller',
                         );
                       }),
                     ],
@@ -294,7 +294,7 @@ class _PropertiesScreenState extends State<PropertiesScreen> {
                     SizedBox(
                       width: 180,
                       child: CustomButton(
-                        text: "Review & approve",
+                        text: "Review Property",
                         onPressed: () => _buttonAction(context, property),
                       ),
                     ),

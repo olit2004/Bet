@@ -1,8 +1,9 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'admin_http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:bet/core/widgets/app_logo.dart';
 import 'package:bet/features/admin/presentation/screens/admin_profile.dart';
+import 'identity_review_screen.dart';
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
 
@@ -97,13 +98,21 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         Colors.orange[50]!,
                         Colors.orange,
                       ),
-                      _buildStatCard(
-                        "PENDING VERIFICATIONS",
-                        "$pendingVerifications",
-                        "Priority",
-                        Icons.verified,
-                        Colors.teal[50]!,
-                        Colors.teal,
+                       GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const IdentityReviewScreen()),
+                          ).then((_) => _fetchDashboardData());
+                        },
+                        child: _buildStatCard(
+                          "PENDING VERIFICATIONS",
+                          "$pendingVerifications",
+                          "Priority",
+                          Icons.verified,
+                          Colors.teal[50]!,
+                          Colors.teal,
+                        ),
                       ),
 
                       const SizedBox(height: 30),

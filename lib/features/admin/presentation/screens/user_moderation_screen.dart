@@ -1,10 +1,11 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'admin_http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:bet/core/widgets/app_logo.dart';
 import 'package:bet/core/widgets/custom_button.dart';
 import 'package:bet/features/admin/presentation/screens/admin_profile.dart';
 import 'user_details_screen.dart';
+import 'identity_review_screen.dart';
 
 class UsersScreen extends StatefulWidget {
   const UsersScreen({super.key});
@@ -90,9 +91,11 @@ class _UsersScreenState extends State<UsersScreen> {
                           user['email']?.split('@')[0] ??
                               'Unknown',
                           user['role'] ?? 'GUEST',
-                          user['isVerified']
+                          (user['isVerified'] == true || user['faydaStatus'] == 'APPROVED')
                               ? "Verified"
-                              : "Pending Verification",
+                              : (user['faydaStatus'] == 'PENDING'
+                                  ? "Pending verification"
+                                  : "Unverified"),
                           user['avatarUrl'],
                           user['role'] == 'SELLER',
                           user['id'] ?? '',
@@ -508,7 +511,12 @@ class _UsersScreenState extends State<UsersScreen> {
             child: CustomButton(
               text: "Verify Identity",
               textColor: Colors.black,
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const IdentityReviewScreen()),
+                ).then((_) => _fetchUsers());
+              },
               color: const Color.fromARGB(255, 200, 216, 243),
             ),
           ),

@@ -1,19 +1,22 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'admin_http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/features/admin/presentation/screens/admin_settings_screen.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:bet/features/auth/application/providers/auth_provider.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   String adminName = '';
   String adminEmail = '';
   String adminRole = '';
@@ -187,8 +190,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 32.0),
                     child: OutlinedButton.icon(
-                      onPressed: () {
-                        context.go('/login');
+                      onPressed: () async {
+                        await ref.read(authNotifierProvider.notifier).logout();
                       },
                       icon: const Icon(Icons.logout_rounded, color: Color(0xFFFF4D4F), size: 20),
                       label: Text(

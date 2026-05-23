@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'admin_http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:bet/core/widgets/custom_button.dart';
 
@@ -141,7 +141,7 @@ Widget _profileInfo(Map<String, dynamic> property) {
               ),
               SizedBox(height: 20),
               Text(
-                "${property['startingPrice'] ?? '0'} ETB",
+                "${property['price'] ?? '0'} ETB",
                 style: _textStyle(
                   34,
                   FontWeight.bold,
@@ -243,7 +243,9 @@ Widget _profile(Map<String, dynamic> property) {
               ),
             ),
             Text(
-              property['seller'] != null ? property['seller']['email'].split('@')[0] : "Unknown",
+              property['owner'] != null && property['owner']['user'] != null 
+                  ? property['owner']['user']['email'].split('@')[0] 
+                  : "Unknown",
               style: _textStyle(20, FontWeight.bold, Colors.black),
             ),
           ],
@@ -257,8 +259,8 @@ Widget _buttons(BuildContext context, Map<String, dynamic> property) {
   return Column(
     children: [
       CustomButton(
-        text: "Approve Submission",
-        color: const Color.fromARGB(255, 10, 87, 229),
+        text: "Suspend Property",
+        color: const Color.fromARGB(255, 237, 95, 88),
         textColor: const Color.fromARGB(255, 255, 255, 255),
         width: 450,
         height: 60,
@@ -267,12 +269,12 @@ Widget _buttons(BuildContext context, Map<String, dynamic> property) {
             final response = await http.patch(
               Uri.parse('http://localhost:8080/api/admin/properties/${property['id']}/review'),
               headers: {'Content-Type': 'application/json'},
-              body: json.encode({'status': 'APPROVED'}),
+              body: json.encode({'status': 'SUSPENDED'}),
             );
             if (response.statusCode == 200) {
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Property approved successfully.')),
+                  const SnackBar(content: Text('Property suspended successfully.')),
                 );
                 Navigator.pop(context);
               }
@@ -280,45 +282,7 @@ Widget _buttons(BuildContext context, Map<String, dynamic> property) {
               final jsonRes = json.decode(response.body);
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(jsonRes['message'] ?? 'Failed to approve property')),
-                );
-              }
-            }
-          } catch (e) {
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Connection failed.')),
-              );
-            }
-          }
-        },
-      ),
-      SizedBox(height: 10),
-      CustomButton(
-        text: "Flag for Revision",
-        color: const Color.fromARGB(255, 200, 213, 237),
-        textColor: const Color.fromARGB(255, 0, 0, 0),
-        width: 450,
-        height: 60,
-        onPressed: () async {
-          try {
-            final response = await http.patch(
-              Uri.parse('http://localhost:8080/api/admin/properties/${property['id']}/review'),
-              headers: {'Content-Type': 'application/json'},
-              body: json.encode({'status': 'REJECTED'}),
-            );
-            if (response.statusCode == 200) {
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Property flagged for revision.')),
-                );
-                Navigator.pop(context);
-              }
-            } else {
-              final jsonRes = json.decode(response.body);
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(jsonRes['message'] ?? 'Failed to flag property')),
+                  SnackBar(content: Text(jsonRes['message'] ?? 'Failed to suspend property')),
                 );
               }
             }

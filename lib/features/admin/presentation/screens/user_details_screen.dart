@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'admin_http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:bet/core/widgets/custom_button.dart';
 
@@ -194,12 +194,16 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                 child: Container(
                   padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
                   decoration: BoxDecoration(
-                    color: isVerified ? const Color(0xFF00695C) : Colors.amber[800],
+                    color: isVerified 
+                        ? const Color(0xFF00695C) 
+                        : (user?['faydaStatus'] == 'PENDING' ? Colors.amber[800] : Colors.red[800]),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: Colors.white, width: 2),
                   ),
                   child: Text(
-                    isVerified ? "ACTIVE" : "PENDING",
+                    isVerified 
+                        ? "VERIFIED" 
+                        : (user?['faydaStatus'] == 'PENDING' ? "PENDING" : "UNVERIFIED"),
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 12,
@@ -238,7 +242,30 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
 
   Widget _stats() {
     final isVerified = user?['isVerified'] ?? false;
+    final faydaStatus = user?['faydaStatus'];
     final joinDate = _formatDate(user?['createdAt']);
+    
+    String verificationText = "Unverified";
+    Color statusBgColor = const Color.fromARGB(255, 255, 243, 224);
+    Color statusTextColor = const Color.fromARGB(255, 94, 60, 0);
+    IconData statusIcon = Icons.warning_amber_rounded;
+
+    if (isVerified) {
+      verificationText = "Verified";
+      statusBgColor = const Color.fromARGB(255, 207, 250, 236);
+      statusTextColor = const Color.fromARGB(255, 11, 49, 2);
+      statusIcon = Icons.safety_check;
+    } else if (faydaStatus == 'PENDING') {
+      verificationText = "Pending verification";
+      statusBgColor = const Color.fromARGB(255, 255, 243, 224);
+      statusTextColor = const Color.fromARGB(255, 94, 60, 0);
+      statusIcon = Icons.warning_amber_rounded;
+    } else {
+      verificationText = "Unverified";
+      statusBgColor = const Color(0xFFFEE2E2);
+      statusTextColor = const Color(0xFFDC2626);
+      statusIcon = Icons.cancel_outlined;
+    }
     
     return Container(
       padding: const EdgeInsets.all(20),
@@ -269,7 +296,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
           const SizedBox(height: 20),
           Container(
             decoration: BoxDecoration(
-              color: isVerified ? const Color.fromARGB(255, 207, 250, 236) : const Color.fromARGB(255, 255, 243, 224),
+              color: statusBgColor,
               borderRadius: BorderRadius.circular(24),
             ),
             padding: const EdgeInsets.all(20),
@@ -277,8 +304,8 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
             child: Row(
               children: [
                 Icon(
-                  isVerified ? Icons.safety_check : Icons.warning_amber_rounded,
-                  color: isVerified ? Colors.green : Colors.orange,
+                  statusIcon,
+                  color: isVerified ? Colors.green : (faydaStatus == 'PENDING' ? Colors.orange : Colors.red),
                   size: 70,
                 ),
                 const SizedBox(width: 10),
@@ -287,19 +314,19 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        isVerified ? "Fayda Verified" : "Verification Pending",
+                        verificationText,
                         style: _textStyle(
                           25,
                           FontWeight.bold,
-                          isVerified ? const Color.fromARGB(255, 11, 49, 2) : const Color.fromARGB(255, 94, 60, 0),
+                          statusTextColor,
                         ),
                       ),
                       Text(
-                        "Identity and assets verified on",
+                        isVerified ? "Identity and assets verified on" : "Status updated on",
                         style: _textStyle(
                           15,
                           FontWeight.bold,
-                          isVerified ? const Color.fromARGB(255, 11, 49, 2) : const Color.fromARGB(255, 94, 60, 0),
+                          statusTextColor,
                         ),
                       ),
                       Text(
@@ -307,7 +334,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                         style: _textStyle(
                           15,
                           FontWeight.bold,
-                          isVerified ? const Color.fromARGB(255, 11, 49, 2) : const Color.fromARGB(255, 94, 60, 0),
+                          statusTextColor,
                         ),
                       ),
                     ],
