@@ -222,4 +222,34 @@ const submitVerification = async (req, res, next) => {
   }
 };
 
-export { register, login, deleteAccount, uploadProfileImage, submitVerification };
+// --- Get Current User (Me) ---
+const getMe = async (req, res, next) => {
+  try {
+    const user = await userService.findUserById(req.user.id);
+    if (!user) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'User not found.',
+      });
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        name: user.name,
+        avatarUrl: user.avatarUrl,
+        faydaId: user.faydaId,
+        faydaImageUrl: user.faydaImageUrl,
+        faydaStatus: user.faydaStatus,
+        isVerified: user.isVerified,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export { register, login, deleteAccount, uploadProfileImage, submitVerification, getMe };

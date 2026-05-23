@@ -1,6 +1,6 @@
 import express from 'express';
 const router = express.Router();
-import { register, login, deleteAccount, uploadProfileImage, submitVerification } from './user.controller.js';
+import { register, login, deleteAccount, uploadProfileImage, submitVerification, getMe } from './user.controller.js';
 
 import { verifyToken } from './user.middleware.js';
 import upload from '../shared/upload.middleware.js';
@@ -10,6 +10,9 @@ router.post('/register', register);
 
 // POST /api/auth/login
 router.post('/login', login);
+
+// GET /api/auth/me
+router.get('/me', verifyToken, getMe);
 
 // DELETE /api/auth/account
 router.delete('/account', verifyToken, deleteAccount);

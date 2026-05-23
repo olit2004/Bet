@@ -95,6 +95,7 @@ class PropertyService {
                     email: true,
                     role: true,
                     name: true,
+                    isVerified: true,
                   }
                 }
               }
@@ -112,6 +113,7 @@ class PropertyService {
                     email: true,
                     role: true,
                     name: true,
+                    isVerified: true,
                   }
                 }
               }
