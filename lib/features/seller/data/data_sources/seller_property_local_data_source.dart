@@ -14,11 +14,9 @@ class SellerPropertyLocalDataSource {
     final db = await _databaseHelper.database;
     final batch = db.batch();
 
-    // Clear existing properties for this seller
     batch.delete('seller_properties',
         where: 'ownerId = ?', whereArgs: [sellerId]);
 
-    // Insert new properties
     for (var property in properties) {
       batch.insert(
         'seller_properties',
@@ -65,7 +63,6 @@ class SellerPropertyLocalDataSource {
         final data = jsonDecode(map['data'] as String) as Map<String, dynamic>;
         properties.add(SellerPropertyModel.fromJson(data));
       } catch (e) {
-        // Skip corrupted or incompatible cache entries
       }
     }
     return properties;
@@ -87,7 +84,7 @@ class SellerPropertyLocalDataSource {
       final data = jsonDecode(maps.first['data'] as String) as Map<String, dynamic>;
       return SellerPropertyModel.fromJson(data);
     } catch (e) {
-      return null; // Return null if cache is corrupted
+      return null;
     }
   }
 }
