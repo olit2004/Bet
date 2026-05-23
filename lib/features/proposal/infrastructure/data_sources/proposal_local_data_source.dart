@@ -1,3 +1,4 @@
+import 'package:sqflite/sqflite.dart';
 import '../../../../core/database/database_helper.dart';
 import '../models/proposal_model.dart';
 
@@ -22,7 +23,7 @@ class ProposalLocalDataSourceImpl implements ProposalLocalDataSource {
       batch.insert(
         'proposals',
         proposal.toJson(),
-        conflictAlgorithm: 5, // CONFLICT_REPLACE
+        conflictAlgorithm: ConflictAlgorithm.replace,
       );
     }
     await batch.commit(noResult: true);
@@ -56,7 +57,7 @@ class ProposalLocalDataSourceImpl implements ProposalLocalDataSource {
     await db.insert(
       'proposals',
       proposal.toJson(),
-      conflictAlgorithm: 5, // CONFLICT_REPLACE
+      conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 

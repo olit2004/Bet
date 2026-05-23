@@ -1,36 +1,104 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 
-class IdentityReviewScreen extends StatelessWidget {
+class IdentityReviewScreen extends StatefulWidget {
   const IdentityReviewScreen({super.key});
 
+  @override
+  State<IdentityReviewScreen> createState() => _IdentityReviewScreenState();
+}
+
+class _IdentityReviewScreenState extends State<IdentityReviewScreen> {
+  List<dynamic> pendingUsers = [];
+  bool isLoading = true;
+  String errorMessage = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchPendingVerifications();
+  }
+
+  Future<void> _fetchPendingVerifications() async {
+    setState(() { isLoading = true; errorMessage = ""; });
+    try {
+      final response = await http.get(Uri.parse('http://localhost:8080/api/admin/verifications/pending'));
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = json.decode(response.body);
+        if (mounted) {
+          setState(() {
+            pendingUsers = responseData['data'] ?? [];
+            isLoading = false;
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            errorMessage = 'Failed to load verifications';
+            isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          errorMessage = 'Error connecting to server.';
+          isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _verifyIdentity(String userId, String status) async {
+    try {
+      final response = await http.post(
+        Uri.parse('http://localhost:8080/api/admin/users/$userId/verify-identity'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'status': status}),
+      );
+      if (response.statusCode == 200) {
+        _fetchPendingVerifications(); // Refresh list
+      }
+    } catch (e) {}
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromRGBO(248, 249, 255, 1),
-
       appBar: _topNavigator(context),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            _profile(),
-            SizedBox(height: 20),
-            _idCard(),
-            SizedBox(height: 20),
-            _verification(),
-            SizedBox(height: 20),
-            _approval(
-              "Approve Identity",
-              const Color.fromARGB(255, 37, 73, 230),
-            ),
-            SizedBox(height: 20),
-            _approval(
-              "Reject Withe Reason",
-              const Color.fromARGB(255, 255, 255, 255),
-            ),
-            SizedBox(height: 50),
-          ],
-        ),
+      body: isLoading 
+          ? const Center(child: CircularProgressIndicator()) 
+          : errorMessage.isNotEmpty 
+              ? Center(child: Text(errorMessage, style: const TextStyle(color: Colors.red)))
+              : pendingUsers.isEmpty 
+                  ? const Center(child: Text("No pending verifications", style: TextStyle(fontSize: 18)))
+                  : _buildUserReview(pendingUsers.first),
+    );
+  }
+
+  Widget _buildUserReview(Map<String, dynamic> user) {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          _profile(user),
+          SizedBox(height: 20),
+          _idCard(user),
+          SizedBox(height: 20),
+          _verification(user),
+          SizedBox(height: 20),
+          GestureDetector(
+            onTap: () => _verifyIdentity(user['id'], 'VERIFIED'),
+            child: _approval("Approve Identity", const Color.fromARGB(255, 37, 73, 230)),
+          ),
+          SizedBox(height: 20),
+          GestureDetector(
+            onTap: () => _verifyIdentity(user['id'], 'REJECTED'),
+            child: _approval("Reject With Reason", const Color.fromARGB(255, 255, 255, 255)),
+          ),
+          SizedBox(height: 50),
+        ],
       ),
     );
   }
@@ -57,46 +125,46 @@ class IdentityReviewScreen extends StatelessWidget {
   }
 }
 
-Widget _profile() {
+Widget _profile(Map<String, dynamic> user) {
   return Container(
     padding: EdgeInsets.fromLTRB(30, 30, 0, 0),
     margin: EdgeInsets.all(30),
-
     decoration: _boxStyle(),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
-
       children: [
         CircleAvatar(
           radius: 50,
-          backgroundImage: AssetImage("/images/avater.png"),
+          backgroundImage: AssetImage("assets/images/avater.png"),
         ),
         SizedBox(width: 20),
-        Column(
-          children: [
-            Text("Lemi Gobena", style: TextStyle(fontSize: 24)),
-            SizedBox(height: 5),
-            Text(
-              "lemi@gmail.com",
-              style: _textStyle(15, FontWeight.w400, Colors.black),
-            ),
-            Text(
-              "+251988553202",
-              style: _textStyle(15, FontWeight.w400, Colors.black),
-            ),
-          ],
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(user['email'].split('@')[0], style: TextStyle(fontSize: 24)),
+              SizedBox(height: 5),
+              Text(
+                user['email'] ?? "No Email",
+                style: _textStyle(15, FontWeight.w400, Colors.black),
+              ),
+              Text(
+                user['phoneNumber'] ?? "+251900000000",
+                style: _textStyle(15, FontWeight.w400, Colors.black),
+              ),
+            ],
+          ),
         ),
       ],
     ),
   );
 }
 
-Widget _idCard() {
+Widget _idCard(Map<String, dynamic> user) {
   return Container(
     padding: EdgeInsets.all(30),
     margin: EdgeInsets.fromLTRB(30, 0, 30, 0),
     height: 360,
-
     decoration: _boxStyle(),
     child: Column(
       children: [
@@ -118,13 +186,13 @@ Widget _idCard() {
           ],
         ),
         SizedBox(height: 10),
-        Image.asset("/images/Fayda_National_ID_Card_-_Front.jpg"),
+        Expanded(child: Image.asset("assets/images/Fayda_National_ID_Card_-_Front.jpg")),
       ],
     ),
   );
 }
 
-Widget _verification() {
+Widget _verification(Map<String, dynamic> user) {
   return Container(
     padding: EdgeInsets.all(20),
     margin: EdgeInsets.fromLTRB(30, 0, 30, 0),
@@ -141,7 +209,7 @@ Widget _verification() {
           children: [
             Icon(Icons.email, color: Colors.blue, size: 40),
             Text(
-              "  Email Adress",
+              "  Email Address",
               style: _textStyle(15, FontWeight.w400, Colors.black),
             ),
             const Spacer(),
@@ -158,9 +226,7 @@ Widget _verification() {
             ),
           ],
         ),
-
         SizedBox(height: 15),
-
         Row(
           children: [
             Icon(Icons.location_city, color: Colors.blue, size: 40),
@@ -234,4 +300,3 @@ BoxDecoration _boxStyle() {
 TextStyle _textStyle(double fontsize, FontWeight fontweight, Color color) {
   return TextStyle(fontSize: fontsize, fontWeight: fontweight, color: color);
 }
-

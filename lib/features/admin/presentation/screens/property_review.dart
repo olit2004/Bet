@@ -1,8 +1,11 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:bet/core/widgets/custom_button.dart';
 
 class PropertyReview extends StatelessWidget {
-  const PropertyReview({super.key});
+  final Map<String, dynamic> property;
+  const PropertyReview({super.key, required this.property});
 
   @override
   Widget build(BuildContext context) {
@@ -12,13 +15,13 @@ class PropertyReview extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            _profileInfo(),
+            _profileInfo(property),
             SizedBox(height: 20),
-            _description(),
+            _description(property),
             SizedBox(height: 20),
-            _buttons(),
+            _buttons(context, property),
             SizedBox(height: 20),
-            _map(),
+            _map(property),
             SizedBox(height: 60),
           ],
         ),
@@ -54,7 +57,7 @@ PreferredSizeWidget _profileAppBar(BuildContext context) {
   );
 }
 
-Widget _profileInfo() {
+Widget _profileInfo(Map<String, dynamic> property) {
   return Container(
     width: double.infinity,
     margin: const EdgeInsets.all(10),
@@ -99,8 +102,8 @@ Widget _profileInfo() {
                   ],
                 ),
 
-                child: const Text(
-                  "PENDING REVIEW",
+                child: Text(
+                  property['status']?.toUpperCase() ?? "PENDING REVIEW",
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 18,
@@ -129,14 +132,14 @@ Widget _profileInfo() {
               ),
               SizedBox(height: 20),
               Text(
-                "45,000,000 ETB",
+                "${property['startingPrice'] ?? '0'} ETB",
                 style: _textStyle(
                   34,
                   FontWeight.bold,
                   const Color.fromARGB(255, 0, 0, 0),
                 ),
               ),
-              _profile(),
+              _profile(property),
             ],
           ),
         ),
@@ -145,7 +148,7 @@ Widget _profileInfo() {
   );
 }
 
-Widget _description() {
+Widget _description(Map<String, dynamic> property) {
   return Container(
     padding: EdgeInsets.all(30),
     margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
@@ -153,12 +156,12 @@ Widget _description() {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
-          "The Bole Pavilion",
+          property['title'] ?? "The Bole Pavilion",
           style: _textStyle(38, FontWeight.bold, Colors.black),
         ),
         SizedBox(height: 20),
         Text(
-          "A glass-walled masterpiece offering panoramic views of the city's diplomatic quarter. Fully furnished with Italian finishes, this residence redefines luxury in Addis Ababa.",
+          property['description'] ?? "A beautiful property.",
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 20,
@@ -171,16 +174,16 @@ Widget _description() {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _simpleContainer(Icons.area_chart, "1,200", " sqft"),
-            _simpleContainer(Icons.bed, "4.5", "BEDROOMS"),
+            _simpleContainer(Icons.area_chart, property['sqFootage']?.toString() ?? "-", " sqft"),
+            _simpleContainer(Icons.bed, property['beds']?.toString() ?? "-", "BEDROOMS"),
           ],
         ),
         SizedBox(height: 20),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _simpleContainer(Icons.bathtub, "4.5", "BATHS"),
-            _simpleContainer(Icons.calendar_month, "2023", "BUILT YEAR"),
+            _simpleContainer(Icons.bathtub, property['baths']?.toString() ?? "-", "BATHS"),
+            _simpleContainer(Icons.calendar_month, property['createdAt'] != null ? DateTime.parse(property['createdAt']).year.toString() : "2023", "BUILT YEAR"),
           ],
         ),
       ],
@@ -207,7 +210,7 @@ Widget _simpleContainer(IconData iconName, String mainTxt, String secondTxt) {
   );
 }
 
-Widget _profile() {
+Widget _profile(Map<String, dynamic> property) {
   return Container(
     padding: EdgeInsets.fromLTRB(0, 20, 0, 20),
     decoration: _boxStyle(const Color.fromARGB(255, 232, 240, 255)),
@@ -231,7 +234,7 @@ Widget _profile() {
               ),
             ),
             Text(
-              "Dawit Mengist",
+              property['seller'] != null ? property['seller']['email'].split('@')[0] : "Unknown",
               style: _textStyle(20, FontWeight.bold, Colors.black),
             ),
           ],
@@ -241,7 +244,7 @@ Widget _profile() {
   );
 }
 
-Widget _buttons() {
+Widget _buttons(BuildContext context, Map<String, dynamic> property) {
   return Column(
     children: [
       CustomButton(
@@ -250,7 +253,18 @@ Widget _buttons() {
         textColor: const Color.fromARGB(255, 255, 255, 255),
         width: 450,
         height: 60,
-        onPressed: () {},
+        onPressed: () async {
+          try {
+            final response = await http.patch(
+              Uri.parse('http://localhost:8080/api/admin/properties/${property['id']}/review'),
+              headers: {'Content-Type': 'application/json'},
+              body: json.encode({'status': 'APPROVED'}),
+            );
+            if (response.statusCode == 200) {
+              Navigator.pop(context);
+            }
+          } catch (e) {}
+        },
       ),
       SizedBox(height: 10),
       CustomButton(
@@ -259,13 +273,24 @@ Widget _buttons() {
         textColor: const Color.fromARGB(255, 0, 0, 0),
         width: 450,
         height: 60,
-        onPressed: () {},
+        onPressed: () async {
+          try {
+            final response = await http.patch(
+              Uri.parse('http://localhost:8080/api/admin/properties/${property['id']}/review'),
+              headers: {'Content-Type': 'application/json'},
+              body: json.encode({'status': 'REJECTED'}),
+            );
+            if (response.statusCode == 200) {
+              Navigator.pop(context);
+            }
+          } catch (e) {}
+        },
       ),
     ],
   );
 }
 
-Widget _map() {
+Widget _map(Map<String, dynamic> property) {
   return Container(
     padding: EdgeInsets.all(20),
     margin: EdgeInsets.all(15),

@@ -73,4 +73,25 @@ class AuthRemoteDataSource {
       throw const NetworkFailure();
     }
   }
+
+  Future<void> deleteAccount(String token) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('$baseUrl/account'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode != 200 || data['status'] != 'success') {
+        throw AuthFailure(data['message'] ?? 'Failed to delete account');
+      }
+    } catch (e) {
+      if (e is AuthFailure) rethrow;
+      throw const NetworkFailure();
+    }
+  }
 }

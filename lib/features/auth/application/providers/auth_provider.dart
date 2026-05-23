@@ -119,6 +119,16 @@ class AuthNotifier extends Notifier<AuthStateData> {
     await _repository.logout();
     state = state.copyWith(status: AuthState.unauthenticated, user: null);
   }
+
+  Future<void> deleteAccount() async {
+    state = state.copyWith(status: AuthState.loading);
+    try {
+      await _repository.deleteAccount();
+      state = state.copyWith(status: AuthState.unauthenticated, user: null);
+    } catch (e) {
+      state = state.copyWith(status: AuthState.error, errorMessage: e.toString());
+    }
+  }
 }
 
 final authNotifierProvider = NotifierProvider<AuthNotifier, AuthStateData>(() {
