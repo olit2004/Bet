@@ -7,6 +7,7 @@ import 'package:bet/core/widgets/app_logo.dart';
 import 'package:bet/features/seller/presentation/widgets/seller_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bet/features/seller/presentation/providers/property_detail_provider.dart';
+import 'package:bet/features/seller/presentation/providers/create_property_provider.dart';
 
 class PropertyDetailsScreen extends ConsumerWidget {
   final String propertyId;
@@ -293,9 +294,9 @@ class PropertyDetailsScreen extends ConsumerWidget {
             Expanded(
               flex: 2,
               child: SellerButton(
-                text: 'Watch',
+                text: 'Edit Listing',
                 onPressed: () {
-                  context.push('${SellerRoutes.manageBids}/$propertyId');
+                  context.push('${SellerRoutes.editProperty}/$propertyId');
                 },
                 color: const Color(0xFFD6DFE8),
                 textColor: AppColors.primaryText,
@@ -306,17 +307,113 @@ class PropertyDetailsScreen extends ConsumerWidget {
             Expanded(
               flex: 3,
               child: SellerButton(
-                text: 'Stop Bid',
-                onPressed: () {
-                  // Action: Stop Bid
-                },
-                icon: Icons.gavel_rounded,
+                text: 'Delete Listing',
+                onPressed: () => _confirmDelete(context, ref),
+                icon: Icons.delete_outline_rounded,
+                color: AppColors.error,
                 height: 56,
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  void _confirmDelete(BuildContext screenContext, WidgetRef ref) {
+    showDialog(
+      context: screenContext,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          title: Text(
+            'Delete Listing',
+            style: GoogleFonts.manrope(
+              fontWeight: FontWeight.w800,
+              color: AppColors.primaryText,
+            ),
+          ),
+          content: Text(
+            'Are you sure you want to permanently delete this property listing? This action cannot be undone.',
+            style: GoogleFonts.inter(
+              color: AppColors.secondaryText,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(
+                'Cancel',
+                style: GoogleFonts.inter(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.secondaryText,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(dialogContext).pop();
+                
+                showDialog(
+                  context: screenContext,
+                  barrierDismissible: false,
+                  builder: (BuildContext loadingContext) => const Center(
+                    child: CircularProgressIndicator(color: AppColors.primaryBlue),
+                  ),
+                );
+
+                final success = await ref
+                    .read(createPropertyNotifierProvider.notifier)
+                    .deleteProperty(propertyId);
+
+                if (screenContext.mounted) {
+                  Navigator.of(screenContext).pop();
+                }
+
+                if (success) {
+                  if (screenContext.mounted) {
+                    ScaffoldMessenger.of(screenContext).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Property deleted successfully!',
+                          style: GoogleFonts.inter(),
+                        ),
+                        backgroundColor: AppColors.success,
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                    screenContext.pop();
+                  }
+                } else {
+                  final errorMsg = ref.read(createPropertyNotifierProvider).errorMessage ?? 'Failed to delete listing.';
+                  if (screenContext.mounted) {
+                    ScaffoldMessenger.of(screenContext).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          errorMsg,
+                          style: GoogleFonts.inter(),
+                        ),
+                        backgroundColor: AppColors.error,
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                }
+              },
+              child: Text(
+                'Delete',
+                style: GoogleFonts.inter(
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.error,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 

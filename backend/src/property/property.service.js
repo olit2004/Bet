@@ -167,9 +167,23 @@ class PropertyService {
   }
 
   async updateProperty(id, data) {
+    const updateData = {};
+    if (data.title !== undefined) updateData.title = data.title;
+    if (data.description !== undefined) updateData.description = data.description;
+    if (data.price !== undefined) updateData.price = parseFloat(data.price);
+    if (data.value !== undefined) updateData.value = data.value ? parseFloat(data.value) : null;
+    if (data.location !== undefined) updateData.location = data.location;
+    if (data.latitude !== undefined) updateData.latitude = parseFloat(data.latitude);
+    if (data.longitude !== undefined) updateData.longitude = parseFloat(data.longitude);
+    if (data.type !== undefined) updateData.type = data.type;
+    if (data.status !== undefined) updateData.status = data.status;
+    if (data.sqFootage !== undefined) updateData.sqFootage = data.sqFootage ? parseFloat(data.sqFootage) : null;
+    if (data.imageUrls !== undefined) updateData.imageUrls = data.imageUrls;
+    if (data.endingAt !== undefined) updateData.endingAt = data.endingAt ? new Date(data.endingAt) : null;
+
     return prisma.property.update({
       where: { id },
-      data,
+      data: updateData,
     });
   }
 

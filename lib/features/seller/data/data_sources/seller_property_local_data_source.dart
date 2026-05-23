@@ -87,4 +87,13 @@ class SellerPropertyLocalDataSource {
       return null;
     }
   }
+
+  Future<void> deleteProperty(String propertyId) async {
+    final db = await _databaseHelper.database;
+    await db.delete(
+      'seller_properties',
+      where: 'id = ?',
+      whereArgs: [propertyId],
+    );
+  }
 }

@@ -171,4 +171,58 @@ class SellerPropertyRemoteDataSource {
       throw Exception('Network error. Please check your connection.');
     }
   }
+
+  Future<SellerPropertyModel> updateProperty(
+    String propertyId,
+    Map<String, dynamic> propertyData,
+  ) async {
+    try {
+      final headers = await _getAuthHeaders();
+      headers['Content-Type'] = 'application/json';
+
+      final response = await http.put(
+        Uri.parse('$baseUrl/$propertyId'),
+        headers: headers,
+        body: jsonEncode(propertyData),
+      );
+
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+
+      if (response.statusCode == 200 && data['success'] == true) {
+        return SellerPropertyModel.fromJson(
+          data['data'] as Map<String, dynamic>,
+        );
+      } else {
+        throw Exception(
+          data['message'] as String? ?? 'Failed to update property.',
+        );
+      }
+    } catch (e) {
+      if (e is Exception) rethrow;
+      throw Exception('Network error. Please check your connection.');
+    }
+  }
+
+  Future<void> deleteProperty(String propertyId) async {
+    try {
+      final headers = await _getAuthHeaders();
+      headers['Content-Type'] = 'application/json';
+
+      final response = await http.delete(
+        Uri.parse('$baseUrl/$propertyId'),
+        headers: headers,
+      );
+
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+
+      if (response.statusCode != 200 || data['success'] != true) {
+        throw Exception(
+          data['message'] as String? ?? 'Failed to delete property.',
+        );
+      }
+    } catch (e) {
+      if (e is Exception) rethrow;
+      throw Exception('Network error. Please check your connection.');
+    }
+  }
 }

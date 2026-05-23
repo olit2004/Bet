@@ -5,6 +5,8 @@
 .pub-cache/
 .pub/
 /build/
+# Gradle temporary build files
+android/build/
 
 # Android
 /android/local.properties

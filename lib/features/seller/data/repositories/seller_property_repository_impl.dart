@@ -76,4 +76,23 @@ class SellerPropertyRepositoryImpl implements SellerPropertyRepository {
   Future<void> acceptOffer(String offerId, bool isAuction) async {
     return await _remoteDataSource.acceptOffer(offerId, isAuction);
   }
+
+  @override
+  Future<SellerProperty> updateProperty(
+    String propertyId,
+    Map<String, dynamic> propertyData,
+  ) async {
+    final updatedModel = await _remoteDataSource.updateProperty(
+      propertyId,
+      propertyData,
+    );
+    await _localDataSource.cacheProperty(updatedModel);
+    return updatedModel;
+  }
+
+  @override
+  Future<void> deleteProperty(String propertyId) async {
+    await _remoteDataSource.deleteProperty(propertyId);
+    await _localDataSource.deleteProperty(propertyId);
+  }
 }

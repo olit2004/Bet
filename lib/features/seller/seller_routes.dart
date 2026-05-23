@@ -7,6 +7,7 @@ import 'presentation/screens/seller_profile_screen.dart';
 import 'presentation/screens/active_auctions_screen.dart';
 import 'presentation/screens/seller_dashboard_screen.dart';
 import 'presentation/screens/property_details_screen.dart';
+import 'presentation/screens/edit_property_screen.dart';
 
 class SellerRoutes {
   static const String dashboard = '/seller-dashboard';
@@ -17,6 +18,7 @@ class SellerRoutes {
   static const String activeAuctions = '/active-auctions';
   static const String profile = '/seller-profile';
   static const String propertyDetail = '/seller-property';
+  static const String editProperty = '/edit-property';
 
   static List<RouteBase> get routes => [
     // Seller Dashboard (Main Entry Point)
@@ -31,6 +33,14 @@ class SellerRoutes {
       builder: (context, state) {
         final id = state.pathParameters['id']!;
         return PropertyDetailsScreen(propertyId: id);
+      },
+    ),
+
+    GoRoute(
+      path: '$editProperty/:id',
+      builder: (context, state) {
+        final id = state.pathParameters['id']!;
+        return EditPropertyScreen(propertyId: id);
       },
     ),
 

@@ -12,9 +12,12 @@ import 'package:bet/features/seller/presentation/widgets/listing_success_overlay
 import 'package:bet/features/seller/presentation/providers/create_property_provider.dart';
 import 'package:bet/features/seller/presentation/providers/seller_properties_provider.dart';
 import 'package:bet/features/auth/application/providers/auth_provider.dart';
+import 'package:bet/features/seller/domain/entities/seller_property.dart';
 
 class CreatePropertyContent extends ConsumerStatefulWidget {
-  const CreatePropertyContent({super.key});
+  final SellerProperty? propertyToEdit;
+
+  const CreatePropertyContent({super.key, this.propertyToEdit});
 
   @override
   ConsumerState<CreatePropertyContent> createState() =>
@@ -40,6 +43,26 @@ class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
   LatLng _selectedLocation = const LatLng(9.0054, 38.7636);
   String _locationName = 'Bole, Addis Ababa';
   final MapController _mapController = MapController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.propertyToEdit != null) {
+      final p = widget.propertyToEdit!;
+      _titleController.text = p.title;
+      _descriptionController.text = p.description;
+      _valueController.text = p.value?.toStringAsFixed(0) ?? '';
+      _sqFootageController.text = p.sqFootage?.toStringAsFixed(0) ?? '';
+      _priceController.text = p.price.toStringAsFixed(0);
+      _listingType = p.listingType == 'AUCTION' ? 1 : 0;
+      _listingIntent = p.type == 'RENT' ? 1 : 0;
+      _selectedLocation = LatLng(p.latitude, p.longitude);
+      _locationName = p.location;
+      if (p.endTime != null) {
+        _endDateController.text = p.endTime!.toIso8601String();
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -237,6 +260,47 @@ class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
   // Image Upload Area
 
   Widget _buildImageUploadArea(BuildContext context) {
+    final isEditMode = widget.propertyToEdit != null;
+    if (isEditMode) {
+      final imageUrls = widget.propertyToEdit!.imageUrls;
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionLabel(context, 'PROPERTY IMAGES'),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 120,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: imageUrls.length,
+              separatorBuilder: (context, index) => const SizedBox(width: 12),
+              itemBuilder: (context, index) {
+                final imgUrl = imageUrls[index];
+                final fullImgUrl = imgUrl.startsWith('/') ? 'http://localhost:8080$imgUrl' : imgUrl;
+                return ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: imgUrl.startsWith('assets/')
+                      ? Image.asset(imgUrl, width: 120, height: 120, fit: BoxFit.cover)
+                      : Image.network(
+                          fullImgUrl,
+                          width: 120,
+                          height: 120,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Container(
+                            width: 120,
+                            height: 120,
+                            color: AppColors.inputFill,
+                            child: const Icon(Icons.image_outlined, color: AppColors.secondaryText),
+                          ),
+                        ),
+                );
+              },
+            ),
+          ),
+        ],
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -680,14 +744,19 @@ class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
   // Create Property Button
 
   Widget _buildCreateButton(BuildContext context, bool isLoading) {
+    final isEditMode = widget.propertyToEdit != null;
     return SellerButton(
-      text: isLoading ? 'Creating...' : 'Create property',
+      text: isLoading 
+          ? (isEditMode ? 'Saving changes...' : 'Creating...') 
+          : (isEditMode ? 'Save Changes' : 'Create property'),
       onPressed: isLoading ? () {} : () => _submitProperty(),
       height: 60,
     );
   }
 
   Future<void> _submitProperty() async {
+    final isEditMode = widget.propertyToEdit != null;
+
     // Validation
     if (_titleController.text.trim().isEmpty ||
         _priceController.text.trim().isEmpty) {
@@ -707,7 +776,7 @@ class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
       return;
     }
 
-    if (_selectedImages.isEmpty) {
+    if (!isEditMode && _selectedImages.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -753,13 +822,17 @@ class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
     if (_listingType == 1 && _endDateController.text.trim().isNotEmpty) {
       payload['endingAt'] = _endDateController.text.trim();
     }
-    if (_selectedImages.isNotEmpty) {
+    if (!isEditMode && _selectedImages.isNotEmpty) {
       payload['images'] = _selectedImages;
     }
 
-    final success = await ref
-        .read(createPropertyNotifierProvider.notifier)
-        .createProperty(payload);
+    final success = isEditMode
+        ? await ref
+            .read(createPropertyNotifierProvider.notifier)
+            .updateProperty(widget.propertyToEdit!.id, payload)
+        : await ref
+            .read(createPropertyNotifierProvider.notifier)
+            .createProperty(payload);
 
     if (!mounted) return;
     setState(() => _isSubmitting = false);
@@ -774,16 +847,27 @@ class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
         ref.invalidate(sellerPropertiesProvider(userId));
       }
 
-      showListingSuccessOverlay(
-        context,
-        onReturnToDashboard: () {
-          Navigator.of(context).maybePop();
-        },
-      );
+      if (isEditMode) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Property updated successfully!', style: GoogleFonts.inter()),
+            backgroundColor: AppColors.success,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        Navigator.of(context).maybePop();
+      } else {
+        showListingSuccessOverlay(
+          context,
+          onReturnToDashboard: () {
+            Navigator.of(context).maybePop();
+          },
+        );
+      }
     } else {
       final errorMsg =
           ref.read(createPropertyNotifierProvider).errorMessage ??
-          'Failed to create listing.';
+          (isEditMode ? 'Failed to update listing.' : 'Failed to create listing.');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(errorMsg, style: GoogleFonts.inter()),

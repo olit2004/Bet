@@ -8,6 +8,7 @@ import '../../../../core/database/database_helper.dart';
 import '../../../auth/application/providers/auth_provider.dart';
 import 'seller_properties_provider.dart';
 import 'seller_profile_provider.dart';
+import 'property_detail_provider.dart';
 
 // Dependency Injection Providers ---
 
@@ -99,6 +100,70 @@ class CreatePropertyNotifier extends Notifier<CreatePropertyState> {
       ref.invalidate(sellerPropertiesProvider);
       // Invalidate the seller's profile stats to update the counts in the profile tab
       ref.invalidate(sellerProfileStatsProvider);
+
+      return true;
+    } catch (e) {
+      String message = 'Something went wrong. Please try again.';
+      if (e is Exception) {
+        message = e.toString().replaceFirst('Exception: ', '');
+      }
+      state = state.copyWith(
+        status: CreatePropertyStatus.error,
+        errorMessage: message,
+      );
+      return false;
+    }
+  }
+
+  Future<bool> updateProperty(String propertyId, Map<String, dynamic> propertyData) async {
+    state = state.copyWith(
+      status: CreatePropertyStatus.loading,
+      errorMessage: null,
+    );
+
+    try {
+      final property = await _repository.updateProperty(propertyId, propertyData);
+      state = state.copyWith(
+        status: CreatePropertyStatus.success,
+        createdProperty: property,
+      );
+
+      final sellerId = property.ownerId;
+      ref.invalidate(sellerPropertiesProvider(sellerId));
+      ref.invalidate(propertyDetailProvider(propertyId));
+
+      return true;
+    } catch (e) {
+      String message = 'Something went wrong. Please try again.';
+      if (e is Exception) {
+        message = e.toString().replaceFirst('Exception: ', '');
+      }
+      state = state.copyWith(
+        status: CreatePropertyStatus.error,
+        errorMessage: message,
+      );
+      return false;
+    }
+  }
+
+  Future<bool> deleteProperty(String propertyId) async {
+    state = state.copyWith(
+      status: CreatePropertyStatus.loading,
+      errorMessage: null,
+    );
+
+    try {
+      await _repository.deleteProperty(propertyId);
+      state = state.copyWith(
+        status: CreatePropertyStatus.success,
+        createdProperty: null,
+      );
+
+      final userId = ref.read(authNotifierProvider).user?.id;
+      if (userId != null) {
+        ref.invalidate(sellerPropertiesProvider(userId));
+      }
+      ref.invalidate(propertyDetailProvider(propertyId));
 
       return true;
     } catch (e) {

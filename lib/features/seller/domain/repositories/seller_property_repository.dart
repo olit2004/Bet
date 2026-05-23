@@ -14,4 +14,13 @@ abstract class SellerPropertyRepository {
 
   /// Accepts a bid or proposal.
   Future<void> acceptOffer(String offerId, bool isAuction);
+
+  /// Updates a property listing.
+  Future<SellerProperty> updateProperty(
+    String propertyId,
+    Map<String, dynamic> propertyData,
+  );
+
+  /// Deletes a property listing.
+  Future<void> deleteProperty(String propertyId);
 }
