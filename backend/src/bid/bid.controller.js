@@ -1,5 +1,6 @@
 import * as bidService from './bid.service.js';
 import prisma from '../shared/prisma.client.js';
+import { NotificationService } from '../notification/notification.service.js';
 
 async function placeBid(req, res, next) {
   try {
@@ -29,6 +30,19 @@ async function placeBid(req, res, next) {
       parseFloat(amount),
       bankStatementUrl
     );
+
+    // Get property to notify seller
+    const property = await prisma.property.findUnique({
+      where: { id: propertyId }
+    });
+
+    if (property && property.ownerId) {
+      await NotificationService.createNotification(
+        property.ownerId,
+        `A new bid of $${amount} has been placed on your property (${property.title}).`,
+        'NEW_BID'
+      ).catch(err => console.error('Notification error:', err));
+    }
 
     res.status(201).json({
       status: 'success',
@@ -68,6 +82,14 @@ async function acceptBid(req, res, next) {
     const sellerId = req.user.id;
 
     const acceptedBid = await bidService.acceptBid(id, sellerId);
+
+    if (acceptedBid && acceptedBid.bidderId) {
+      await NotificationService.createNotification(
+        acceptedBid.bidderId,
+        `Congratulations! Your bid of $${acceptedBid.amount} has been accepted.`,
+        'BID_ACCEPTED'
+      ).catch(err => console.error('Notification error:', err));
+    }
 
     res.status(200).json({
       status: 'success',

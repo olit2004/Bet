@@ -8,6 +8,7 @@ import 'package:bet/features/buyer/presentation/widgets/search_bar.dart';
 import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/core/widgets/app_logo.dart';
 import 'package:bet/core/providers/navigation_provider.dart';
+import 'package:bet/features/notification/presentation/widgets/notification_bell.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -38,6 +39,8 @@ class _HomeScreenState extends State<HomeScreen> {
         scrolledUnderElevation: 0,
         title: const AppLogo(size: 20, isClickable: false),
         actions: [
+          const NotificationBell(),
+          const SizedBox(width: 8),
           GestureDetector(
             onTap: () => context.read<NavigationProvider>().setIndex(2),
             child: CircleAvatar(

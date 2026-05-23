@@ -11,6 +11,7 @@ import 'package:bet/features/admin/presentation/widgets/admin_routing.dart';
 import 'package:bet/features/buyer/buyer_routes.dart';
 import 'package:bet/features/seller/seller_routes.dart';
 import 'package:bet/features/profile/presentation/screens/settings_screen.dart';
+import 'package:bet/features/notification/presentation/screens/notifications_screen.dart';
 import 'package:bet/core/widgets/main_wrapper.dart';
 
 class GoRouterRefreshNotifier extends ChangeNotifier {
@@ -81,6 +82,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/settings',
         builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: '/notifications',
+        builder: (context, state) => const NotificationsScreen(),
       ),
       ...BuyerRoutes.routes,
       ...SellerRoutes.routes,
