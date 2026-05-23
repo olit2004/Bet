@@ -65,7 +65,8 @@ class PropertyController {
 
   async getPropertyById(req, res, next) {
     try {
-      const property = await propertyService.getPropertyById(req.params.id);
+      const incrementView = req.query.incrementView === 'true';
+      const property = await propertyService.getPropertyById(req.params.id, { incrementView });
       if (!property) {
         return res.status(404).json({ success: false, message: 'Property not found' });
       }

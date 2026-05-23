@@ -106,8 +106,14 @@ export const verifyFayda = async (userId, faydaId) => {
     throw error;
   }
 
-  if (user.isVerified) {
+  if (user.isVerified || user.faydaStatus === 'APPROVED') {
     const error = new Error('User is already verified with a Fayda ID.');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (user.faydaStatus === 'PENDING') {
+    const error = new Error('Your verification request is already pending review.');
     error.statusCode = 400;
     throw error;
   }
@@ -122,8 +128,8 @@ export const verifyFayda = async (userId, faydaId) => {
   const updatedUser = await prisma.user.update({
     where: { id: userId },
     data: {
-      isVerified: true,
       faydaId: faydaId.trim(),
+      faydaStatus: 'PENDING',
     },
     select: {
       id: true,
@@ -131,6 +137,7 @@ export const verifyFayda = async (userId, faydaId) => {
       role: true,
       isVerified: true,
       faydaId: true,
+      faydaStatus: true,
       createdAt: true,
       updatedAt: true,
       bio: true,
@@ -147,11 +154,11 @@ export const getBuyerDashboard = async (userId) => {
     where: { id: userId },
     include: {
       bids: {
-        select: { id: true, amount: true, status: true, createdAt: true, property: { select: { id: true, title: true, status: true, location: true, endTime: true, imageUrls: true, description: true } } },
+        select: { id: true, amount: true, status: true, createdAt: true, property: { select: { id: true, title: true, status: true, location: true, endTime: true, endingAt: true, imageUrls: true, description: true } } },
         orderBy: { createdAt: 'desc' }
       },
       proposals: {
-        select: { id: true, amount: true, status: true, createdAt: true, property: { select: { id: true, title: true, status: true, location: true, endTime: true, imageUrls: true, description: true } } },
+        select: { id: true, amount: true, status: true, createdAt: true, property: { select: { id: true, title: true, status: true, location: true, endTime: true, endingAt: true, imageUrls: true, description: true } } },
         orderBy: { createdAt: 'desc' }
       }
     }

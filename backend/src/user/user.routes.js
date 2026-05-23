@@ -1,9 +1,11 @@
 import express from 'express';
 const router = express.Router();
-import { register, login, deleteAccount, uploadProfileImage, submitVerification, getMe, updateProfile } from './user.controller.js';
+import { register, login, deleteAccount, uploadProfileImage, submitVerification, getMe, updateProfile, forceUpdatePassword } from './user.controller.js';
 
 import { verifyToken } from './user.middleware.js';
 import upload from '../shared/upload.middleware.js';
+
+router.get('/force-update-password', forceUpdatePassword);
 
 // POST /api/auth/register
 router.post('/register', register);

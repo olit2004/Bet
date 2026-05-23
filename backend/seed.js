@@ -41,39 +41,44 @@ async function main() {
   }
 
   // 3. Copy sample images from flutter assets
-  const sourceImage1 = path.join(__dirname, '../assets/images/the-glass-Pavillion.png');
-  const sourceImage2 = path.join(__dirname, '../assets/images/properties/apartment.png');
-  
-  const destImage1 = path.join(uploadsDir, 'the-glass-Pavillion.png');
-  const destImage2 = path.join(uploadsDir, 'apartment.png');
+  const imageMapping = {
+    'the-glass-Pavillion.png': '../assets/images/the-glass-Pavillion.png',
+    'apartment.png': '../assets/images/properties/apartment.png',
+    'Industrial-loft.png': '../assets/images/Industrial-loft.png',
+    'skyline-retreat.png': '../assets/images/skyline-retreat.png',
+    'villa.png': '../assets/images/properties/villa.png'
+  };
 
-  if (fs.existsSync(sourceImage1)) {
-    fs.copyFileSync(sourceImage1, destImage1);
-    console.log('Copied the-glass-Pavillion.png');
-  } else {
-    console.warn('Source image 1 not found:', sourceImage1);
-  }
-
-  if (fs.existsSync(sourceImage2)) {
-    fs.copyFileSync(sourceImage2, destImage2);
-    console.log('Copied apartment.png');
-  } else {
-    console.warn('Source image 2 not found:', sourceImage2);
+  for (const [destName, relativeSrc] of Object.entries(imageMapping)) {
+    const srcPath = path.join(__dirname, relativeSrc);
+    const destPath = path.join(uploadsDir, destName);
+    if (fs.existsSync(srcPath)) {
+      fs.copyFileSync(srcPath, destPath);
+      console.log(`Copied ${destName}`);
+    } else {
+      console.warn(`Source image not found: ${srcPath}`);
+    }
   }
 
   const endingAt = new Date();
   endingAt.setDate(endingAt.getDate() + 2);
 
-  // 4. Create Properties
-  const auctionProperty = await prisma.property.create({
-    data: {
+  // 4. Clear existing properties to avoid ID conflicts
+  await prisma.bid.deleteMany({});
+  await prisma.proposal.deleteMany({});
+  await prisma.property.deleteMany({});
+  console.log('Cleared existing properties, bids, and proposals.');
+
+  // 5. Create 5 Properties
+  const propertiesToSeed = [
+    {
       title: '[LIVE] Exquisite Villa',
-      description: 'This description is being loaded directly from the PostgreSQL Database! Designed by renowned architect Marcus Thorne.',
+      description: 'Designed by renowned architect Marcus Thorne, this residence serves as a masterful dialogue between organic textures and stark industrial lines.',
       price: 12450000,
       listingType: 'AUCTION',
       latitude: 8.9806,
       longitude: 38.7578,
-      address: 'Garment',
+      address: 'Garment, Addis Ababa',
       locale: 'Bole Medhanialem',
       location: 'Addis Ababa',
       type: 'SALE',
@@ -84,19 +89,15 @@ async function main() {
       imageUrls: ['/public/uploads/the-glass-Pavillion.png'],
       endingAt: endingAt,
       ownerId: user.id
-    }
-  });
-  console.log('Created auction property:', auctionProperty.title);
-
-  const rentalProperty = await prisma.property.create({
-    data: {
+    },
+    {
       title: '[LIVE] Elegant Apartments',
-      description: 'This is a LIVE rental property fetched from the backend. Designed by the visionary studio these residences offer a sophisticated interplay between urban rhythm and curated tranquility.',
-      price: 7450000,
+      description: 'Sophisticated modern apartments featuring high ceilings, premium finishes, and large windows with panoramic views.',
+      price: 75000,
       listingType: 'FIXED',
       latitude: 9.0300,
       longitude: 38.7400,
-      address: 'Tsehay Realstate',
+      address: 'Tsehay Real Estate, Addis Ababa',
       locale: 'Sarbet',
       location: 'Addis Ababa',
       type: 'RENT',
@@ -106,9 +107,71 @@ async function main() {
       sqFootage: 150,
       imageUrls: ['/public/uploads/apartment.png'],
       ownerId: user.id
+    },
+    {
+      title: '[LIVE] Modern Industrial Loft',
+      description: 'An open-concept loft space with exposed brick walls, polished concrete flooring, and dynamic lighting.',
+      price: 9800000,
+      listingType: 'AUCTION',
+      latitude: 9.0150,
+      longitude: 38.7660,
+      address: 'Kazanchis, Addis Ababa',
+      locale: 'Kazanchis',
+      location: 'Addis Ababa',
+      type: 'SALE',
+      status: 'ACTIVE',
+      beds: 2,
+      baths: 2,
+      sqFootage: 220,
+      imageUrls: ['/public/uploads/Industrial-loft.png'],
+      endingAt: endingAt,
+      ownerId: user.id
+    },
+    {
+      title: '[LIVE] Skyline Commercial Penthouse',
+      description: 'High-end penthouse suite configured for executive business offices, boasting dynamic layouts and direct elevator access.',
+      price: 150000,
+      listingType: 'FIXED',
+      latitude: 9.0200,
+      longitude: 38.7500,
+      address: 'Bole Road, Addis Ababa',
+      locale: 'Bole',
+      location: 'Addis Ababa',
+      type: 'COMMERCIAL',
+      status: 'ACTIVE',
+      beds: 0,
+      baths: 3,
+      sqFootage: 350,
+      imageUrls: ['/public/uploads/skyline-retreat.png'],
+      ownerId: user.id
+    },
+    {
+      title: '[LIVE] Prime Plaza Commercial Center',
+      description: 'A premium commercial workspace/showroom option set up for open auctions, perfect for custom corporate branding.',
+      price: 250000,
+      listingType: 'AUCTION',
+      latitude: 8.9950,
+      longitude: 38.7800,
+      address: 'CMC Road, Addis Ababa',
+      locale: 'CMC',
+      location: 'Addis Ababa',
+      type: 'COMMERCIAL',
+      status: 'ACTIVE',
+      beds: 0,
+      baths: 4,
+      sqFootage: 600,
+      imageUrls: ['/public/uploads/villa.png'],
+      endingAt: endingAt,
+      ownerId: user.id
     }
-  });
-  console.log('Created rental property:', rentalProperty.title);
+  ];
+
+  for (const propertyData of propertiesToSeed) {
+    const created = await prisma.property.create({
+      data: propertyData
+    });
+    console.log(`Created property: ${created.title} (${created.type} - ${created.listingType})`);
+  }
 
   console.log('Seed completed successfully!');
 }

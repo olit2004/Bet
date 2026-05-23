@@ -21,7 +21,7 @@ async function main() {
   const adminUser = await prisma.user.create({
     data: {
       email: 'admin@bet.com',
-      passwordHash: '$2a$12$HDEJTC/vvQI8.LdD6jLGP.OPgboNGvu5j/CkEm1LLRXKY0n0spVj2',
+      passwordHash: '$2a$10$rQCeV1oC5J3QQePALecEU.yc7/6F11znRmFJYxiS.2SUEWJv4lnbm',
       name: 'System Admin',
       phone: '+251911000000',
       role: 'ADMIN',

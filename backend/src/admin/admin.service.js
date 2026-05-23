@@ -81,6 +81,7 @@ const getAllUsers = async (query = {}) => {
       role: true,
       isVerified: true,
       faydaId: true,
+      faydaStatus: true,
       name: true,
       phone: true,
       avatarUrl: true,
@@ -101,6 +102,7 @@ const getUserById = async (userId) => {
       role: true,
       isVerified: true,
       faydaId: true,
+      faydaStatus: true,
       name: true,
       phone: true,
       avatarUrl: true,
@@ -176,6 +178,7 @@ const verifyUserIdentity = async (userId, approve, adminUserId) => {
     where: { id: userId },
     data: {
       isVerified: approve,
+      faydaStatus: approve ? 'APPROVED' : 'REJECTED',
       ...(approve && user.role === 'GUEST' && { role: 'BUYER' }),
     },
   });

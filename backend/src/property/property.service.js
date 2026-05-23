@@ -28,8 +28,15 @@ class PropertyService {
           include: {
             user: {
               select: {
+                id: true,
+                name: true,
                 email: true,
                 role: true,
+                phone: true,
+                avatarUrl: true,
+                bio: true,
+                isVerified: true,
+                faydaStatus: true,
               }
             }
           }
@@ -80,11 +87,37 @@ class PropertyService {
     };
   }
 
-  async getPropertyById(id) {
+  async getPropertyById(id, { incrementView = false } = {}) {
+    if (incrementView) {
+      try {
+        await prisma.property.update({
+          where: { id },
+          data: { views: { increment: 1 } }
+        });
+      } catch (e) {
+        // Ignore if update fails (e.g. key doesn't exist)
+      }
+    }
+
     return prisma.property.findUnique({
       where: { id },
       include: {
-        owner: true,
+        owner: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                phone: true,
+                avatarUrl: true,
+                email: true,
+                bio: true,
+                isVerified: true,
+                faydaStatus: true,
+              }
+            }
+          }
+        },
         bids: {
           include: {
             bidder: {
@@ -95,7 +128,11 @@ class PropertyService {
                     email: true,
                     role: true,
                     name: true,
+                    phone: true,
+                    avatarUrl: true,
+                    bio: true,
                     isVerified: true,
+                    faydaStatus: true,
                   }
                 }
               }
@@ -113,7 +150,11 @@ class PropertyService {
                     email: true,
                     role: true,
                     name: true,
+                    phone: true,
+                    avatarUrl: true,
+                    bio: true,
                     isVerified: true,
+                    faydaStatus: true,
                   }
                 }
               }
