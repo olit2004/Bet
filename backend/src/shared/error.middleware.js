@@ -7,6 +7,7 @@ function errorMiddleware(err, req, res, next) {
   const message = err.message || 'Internal Server Error';
 
   console.error(`[ERROR] ${statusCode} — ${message}`);
+  console.error(err.stack || err);
 
   res.status(statusCode).json({
     status: statusCode >= 500 ? 'error' : 'fail',
