@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import '../models/proposal_model.dart';
 
 abstract class ProposalRemoteDataSource {
   Future<List<ProposalModel>> getMyProposals(String token);
   Future<List<ProposalModel>> getProposalsByProperty(String propertyId, String token);
-  Future<ProposalModel> createProposal(String propertyId, String token, {String? proposalFilePath});
+  Future<ProposalModel> createProposal(String propertyId, String token, {String? proposalFilePath, List<int>? fileBytes, String? fileName, double? amount, String? details});
   Future<ProposalModel> updateProposalStatus(String proposalId, String status, String token);
 }
 
@@ -18,8 +19,8 @@ class ProposalRemoteDataSourceImpl implements ProposalRemoteDataSource {
   @override
   Future<List<ProposalModel>> getMyProposals(String token) async {
     final response = await client.get(
-      Uri.parse('\$baseUrl/proposals/my-proposals'),
-      headers: {'Authorization': 'Bearer \$token'},
+      Uri.parse('$baseUrl/proposals/my-proposals'),
+      headers: {'Authorization': 'Bearer $token'},
     );
 
     if (response.statusCode == 200) {
@@ -34,8 +35,8 @@ class ProposalRemoteDataSourceImpl implements ProposalRemoteDataSource {
   @override
   Future<List<ProposalModel>> getProposalsByProperty(String propertyId, String token) async {
     final response = await client.get(
-      Uri.parse('\$baseUrl/proposals/property/\$propertyId'),
-      headers: {'Authorization': 'Bearer \$token'},
+      Uri.parse('$baseUrl/proposals/property/$propertyId'),
+      headers: {'Authorization': 'Bearer $token'},
     );
 
     if (response.statusCode == 200) {
@@ -48,11 +49,25 @@ class ProposalRemoteDataSourceImpl implements ProposalRemoteDataSource {
   }
 
   @override
-  Future<ProposalModel> createProposal(String propertyId, String token, {String? proposalFilePath}) async {
-    var request = http.MultipartRequest('POST', Uri.parse('\$baseUrl/proposals/property/\$propertyId'));
-    request.headers['Authorization'] = 'Bearer \$token';
+  Future<ProposalModel> createProposal(String propertyId, String token, {String? proposalFilePath, List<int>? fileBytes, String? fileName, double? amount, String? details}) async {
+    var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/proposals/property/$propertyId'));
+    request.headers['Authorization'] = 'Bearer $token';
 
-    if (proposalFilePath != null) {
+    if (amount != null) {
+      request.fields['amount'] = amount.toString();
+    }
+    if (details != null && details.isNotEmpty) {
+      request.fields['details'] = details;
+    }
+
+    if (fileBytes != null && fileName != null) {
+      request.files.add(http.MultipartFile.fromBytes(
+        'proposalFile', 
+        fileBytes, 
+        filename: fileName,
+        contentType: MediaType('application', 'pdf'),
+      ));
+    } else if (proposalFilePath != null) {
       request.files.add(await http.MultipartFile.fromPath('proposalFile', proposalFilePath));
     }
 
@@ -70,9 +85,9 @@ class ProposalRemoteDataSourceImpl implements ProposalRemoteDataSource {
   @override
   Future<ProposalModel> updateProposalStatus(String proposalId, String status, String token) async {
     final response = await client.patch(
-      Uri.parse('\$baseUrl/proposals/\$proposalId/status'),
+      Uri.parse('$baseUrl/proposals/$proposalId/status'),
       headers: {
-        'Authorization': 'Bearer \$token',
+        'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
       },
       body: jsonEncode({'status': status}),

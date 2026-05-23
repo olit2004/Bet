@@ -12,6 +12,7 @@ import 'package:bet/core/property/widgets/upload_container.dart';
 import 'package:bet/core/property/widgets/legal_notice_card.dart';
 import 'package:bet/core/widgets/app_logo.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
 
 class PlaceBidScreen extends ConsumerStatefulWidget {
@@ -60,7 +61,10 @@ class _PlaceBidScreenState extends ConsumerState<PlaceBidScreen> {
   @override
   void initState() {
     super.initState();
-    _bidController.text = '4,860,000'; 
+    _bidController.text = ''; 
+    Future.microtask(() {
+      ref.read(bidNotifierProvider.notifier).fetchPropertyBids(widget.property.id);
+    });
   }
 
   @override
@@ -69,30 +73,63 @@ class _PlaceBidScreenState extends ConsumerState<PlaceBidScreen> {
     super.dispose();
   }
 
-  Future<void> _submitBid() async {
+  double _getHighestBidAmount(BidStateData bidState) {
+    if (bidState.bids.isEmpty) {
+      return widget.property.price;
+    }
+    return bidState.bids.map((b) => b.amount).reduce((a, b) => a > b ? a : b);
+  }
+
+  String _getHighestBidText(BidStateData bidState) {
+    final formatCurrency = NumberFormat.currency(symbol: '', decimalDigits: 0);
+    return formatCurrency.format(_getHighestBidAmount(bidState)).trim() + ' ETB';
+  }
+
+  String _getEndsInText() {
+    if (widget.property.endTime == null) return 'N/A';
+    final diff = widget.property.endTime!.difference(DateTime.now());
+    if (diff.isNegative) return 'Ended';
+    
+    if (diff.inDays > 0) {
+      return '${diff.inDays}d ${diff.inHours % 24}h';
+    }
+    final hours = diff.inHours;
+    final mins = diff.inMinutes % 60;
+    return '${hours.toString().padLeft(2, '0')}h ${mins.toString().padLeft(2, '0')}m';
+  }
+
+  Future<void> _submitBid(BidStateData bidState) async {
     final amount = double.tryParse(_bidController.text.replaceAll(',', '')) ?? 0.0;
+    final highestBid = _getHighestBidAmount(bidState);
+    
+    if (amount <= highestBid) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Your bid must be greater than the current highest bid!')),
+      );
+      return;
+    }
+
     await ref.read(bidNotifierProvider.notifier).placeBid(
       widget.property.id,
       amount,
       bankStatementBytes: _bankStatementFile?.bytes,
       bankStatementFileName: _bankStatementFile?.name,
     );
-    
-    if (mounted) {
-      final finalState = ref.read(bidNotifierProvider);
-      if (finalState.status == BidStatus.success) {
-        _showSuccessDialog();
-      } else if (finalState.status == BidStatus.error) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(finalState.errorMessage ?? 'Error submitting bid')),
-        );
-      }
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     final bidState = ref.watch(bidNotifierProvider);
+
+    ref.listen<BidStateData>(bidNotifierProvider, (previous, next) {
+      if (next.status == BidStatus.success && next.lastAction == BidAction.place) {
+        _showSuccessDialog();
+      } else if (next.status == BidStatus.error && next.lastAction == BidAction.place) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(next.errorMessage ?? 'Error submitting bid')),
+        );
+      }
+    });
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -117,17 +154,29 @@ class _PlaceBidScreenState extends ConsumerState<PlaceBidScreen> {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(24),
-                  child: Image.asset(
-                    widget.property.imageUrls.first,
-                    height: 220,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      height: 220,
-                      color: AppColors.inputFill,
-                      child: const Icon(Icons.home_outlined, size: 64, color: AppColors.secondaryText),
-                    ),
-                  ),
+                  child: widget.property.imageUrls.isNotEmpty && widget.property.imageUrls.first.startsWith('http')
+                      ? Image.network(
+                          widget.property.imageUrls.first,
+                          height: 220,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Container(
+                            height: 220,
+                            color: AppColors.inputFill,
+                            child: const Icon(Icons.home_outlined, size: 64, color: AppColors.secondaryText),
+                          ),
+                        )
+                      : Image.asset(
+                          widget.property.imageUrls.isNotEmpty ? widget.property.imageUrls.first : 'assets/images/placeholder.png',
+                          height: 220,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Container(
+                            height: 220,
+                            color: AppColors.inputFill,
+                            child: const Icon(Icons.home_outlined, size: 64, color: AppColors.secondaryText),
+                          ),
+                        ),
                 ),
                 Positioned(
                   top: 16,
@@ -184,10 +233,10 @@ class _PlaceBidScreenState extends ConsumerState<PlaceBidScreen> {
             const SizedBox(height: 32),
             Row(
               children: [
-                const Expanded(
+                Expanded(
                   child: BidInfoCard(
                     label: 'Highest Bid',
-                    value: '4,850,000 ETB',
+                    value: _getHighestBidText(bidState),
                     isDark: true,
                   ),
                 ),
@@ -195,7 +244,7 @@ class _PlaceBidScreenState extends ConsumerState<PlaceBidScreen> {
                 Expanded(
                   child: BidInfoCard(
                     label: 'Ends In',
-                    value: '02h 45m',
+                    value: _getEndsInText(),
                     icon: Icons.timer_outlined,
                   ),
                 ),
@@ -232,7 +281,7 @@ class _PlaceBidScreenState extends ConsumerState<PlaceBidScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Minimum increment: \$10,000',
+                  'Minimum increment: 10,000 ETB',
                   style: GoogleFonts.inter(
                     color: AppColors.secondaryText,
                     fontSize: 11,
@@ -240,7 +289,7 @@ class _PlaceBidScreenState extends ConsumerState<PlaceBidScreen> {
                   ),
                 ),
                 Text(
-                  '12 active bidders',
+                  '${bidState.bids.length} active bidders',
                   style: GoogleFonts.inter(
                     color: AppColors.secondaryText,
                     fontSize: 11,
@@ -265,7 +314,7 @@ class _PlaceBidScreenState extends ConsumerState<PlaceBidScreen> {
                   : 'Select your Bank Statement to upload',
               subtitle: 'Only PDF format is Allowed:\nCBE-Bank_Statement_Form_Validated.pdf',
               buttonText: _bankStatementFile != null ? 'Upload' : 'Browse',
-              onBrowse: _bankStatementFile != null ? _submitBid : _pickBankStatement,
+              onBrowse: _bankStatementFile != null ? () => _submitBid(bidState) : _pickBankStatement,
             ),
             const SizedBox(height: 24),
             Text(
@@ -283,7 +332,7 @@ class _PlaceBidScreenState extends ConsumerState<PlaceBidScreen> {
                   : 'Select a proposal to upload',
               subtitle: 'Only PDF format is Allowed:\nCBE-Bank_Statement_Form_Validated.pdf',
               buttonText: _proposalFile != null ? 'Upload' : 'Browse',
-              onBrowse: _proposalFile != null ? _submitBid : _pickProposal,
+              onBrowse: _proposalFile != null ? () => _submitBid(bidState) : _pickProposal,
             ),
             const SizedBox(height: 32),
             const LegalNoticeCard(
@@ -292,7 +341,7 @@ class _PlaceBidScreenState extends ConsumerState<PlaceBidScreen> {
             const SizedBox(height: 32),
             CustomButton(
               text: bidState.status == BidStatus.loading ? 'Submitting...' : 'Submit',
-              onPressed: bidState.status == BidStatus.loading ? () {} : _submitBid,
+              onPressed: bidState.status == BidStatus.loading ? () {} : () => _submitBid(bidState),
             ),
             const SizedBox(height: 40),
           ],

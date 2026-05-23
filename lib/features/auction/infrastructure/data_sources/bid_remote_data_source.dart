@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import '../models/bid_model.dart';
 
 abstract class BidRemoteDataSource {
@@ -18,8 +19,8 @@ class BidRemoteDataSourceImpl implements BidRemoteDataSource {
   @override
   Future<List<BidModel>> getPropertyBids(String propertyId, String token) async {
     final response = await client.get(
-      Uri.parse('\$baseUrl/properties/\$propertyId/bids'),
-      headers: {'Authorization': 'Bearer \$token'},
+      Uri.parse('$baseUrl/properties/$propertyId/bids'),
+      headers: {'Authorization': 'Bearer $token'},
     );
 
     if (response.statusCode == 200) {
@@ -33,12 +34,17 @@ class BidRemoteDataSourceImpl implements BidRemoteDataSource {
 
   @override
   Future<BidModel> placeBid(String propertyId, double amount, String token, {List<int>? bankStatementBytes, String? bankStatementFileName}) async {
-    var request = http.MultipartRequest('POST', Uri.parse('\$baseUrl/properties/\$propertyId/bids'));
-    request.headers['Authorization'] = 'Bearer \$token';
+    var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/properties/$propertyId/bids'));
+    request.headers['Authorization'] = 'Bearer $token';
     request.fields['amount'] = amount.toString();
 
     if (bankStatementBytes != null && bankStatementFileName != null) {
-      request.files.add(http.MultipartFile.fromBytes('bankStatement', bankStatementBytes, filename: bankStatementFileName));
+      request.files.add(http.MultipartFile.fromBytes(
+        'bankStatement', 
+        bankStatementBytes, 
+        filename: bankStatementFileName,
+        contentType: MediaType('application', 'pdf'),
+      ));
     }
 
     final streamedResponse = await request.send();
@@ -62,8 +68,8 @@ class BidRemoteDataSourceImpl implements BidRemoteDataSource {
   @override
   Future<BidModel> acceptBid(String bidId, String token) async {
     final response = await client.patch(
-      Uri.parse('\$baseUrl/bids/\$bidId/accept'),
-      headers: {'Authorization': 'Bearer \$token'},
+      Uri.parse('$baseUrl/bids/$bidId/accept'),
+      headers: {'Authorization': 'Bearer $token'},
     );
 
     if (response.statusCode == 200) {
@@ -77,8 +83,8 @@ class BidRemoteDataSourceImpl implements BidRemoteDataSource {
   @override
   Future<BidModel> retractBid(String bidId, String token) async {
     final response = await client.patch(
-      Uri.parse('\$baseUrl/bids/\$bidId/retract'),
-      headers: {'Authorization': 'Bearer \$token'},
+      Uri.parse('$baseUrl/bids/$bidId/retract'),
+      headers: {'Authorization': 'Bearer $token'},
     );
 
     if (response.statusCode == 200) {

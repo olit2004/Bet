@@ -59,12 +59,12 @@ class PropertyService {
       where: { property: { ownerId: sellerId } }
     });
 
-    const totalViewsAggregation = await prisma.property.aggregate({
+    const properties = await prisma.property.findMany({
       where: { ownerId: sellerId },
-      _sum: { views: true }
+      select: { views: true }
     });
 
-    const totalViews = totalViewsAggregation._sum.views || 0;
+    const totalViews = properties.reduce((sum, prop) => sum + (prop.views || 0), 0);
     
     // Simple conversion rate: (Total Bids / Total Views) * 100
     let conversionRate = 0;

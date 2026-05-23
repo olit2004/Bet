@@ -72,9 +72,8 @@ async function placeBid(propertyId, bidderId, amount, bankStatementUrl = null) {
         }
 
         return newBid;
-    });
+    }, { maxWait: 5000, timeout: 10000 });
 }
-
 /**
  * Retracts a bid.
  */
@@ -178,7 +177,7 @@ async function acceptBid(bidId, sellerId) {
         });
 
         return acceptedBid;
-    });
+    }, { maxWait: 5000, timeout: 10000 });
 }
 
 export { placeBid, retractBid, acceptBid };

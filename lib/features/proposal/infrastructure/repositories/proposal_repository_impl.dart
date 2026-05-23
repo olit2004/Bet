@@ -50,9 +50,9 @@ class ProposalRepositoryImpl implements ProposalRepository {
   }
 
   @override
-  Future<ProposalEntity> createProposal(String propertyId, {String? proposalFilePath}) async {
+  Future<ProposalEntity> createProposal(String propertyId, {String? proposalFilePath, List<int>? fileBytes, String? fileName, double? amount, String? details}) async {
     final token = await _getToken();
-    final proposal = await remoteDataSource.createProposal(propertyId, token, proposalFilePath: proposalFilePath);
+    final proposal = await remoteDataSource.createProposal(propertyId, token, proposalFilePath: proposalFilePath, fileBytes: fileBytes, fileName: fileName, amount: amount, details: details);
     await localDataSource.cacheProposal(proposal);
     return proposal;
   }

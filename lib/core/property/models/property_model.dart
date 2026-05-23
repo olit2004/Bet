@@ -25,6 +25,7 @@ class Property {
   final bool isVerified;
   final bool isFeatured;
   final DateTime? createdAt;
+  final DateTime? endTime;
   final String? sellerName;
   final String? locale;
 
@@ -41,6 +42,7 @@ class Property {
     this.isVerified = false,
     this.isFeatured = false,
     this.createdAt,
+    this.endTime,
     this.sellerName,
     this.locale,
   });
@@ -85,7 +87,12 @@ class Property {
     // Parse image URLs list
     final rawImages = json['imageUrls'];
     final imageUrls = rawImages is List
-        ? List<String>.from(rawImages)
+        ? List<String>.from(rawImages).map((url) {
+            if (url.startsWith('/public')) {
+              return 'http://localhost:8080$url';
+            }
+            return url;
+          }).toList()
         : <String>[];
 
     return Property(
@@ -103,6 +110,11 @@ class Property {
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'] as String)
           : null,
+      endTime: (json['endTime'] != null)
+          ? DateTime.tryParse(json['endTime'] as String)
+          : (json['endingAt'] != null)
+              ? DateTime.tryParse(json['endingAt'] as String)
+              : null,
       locale: json['locale'] as String?,
     );
   }
