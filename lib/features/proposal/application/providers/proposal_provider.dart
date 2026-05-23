@@ -27,26 +27,31 @@ final proposalRepositoryProvider = Provider<ProposalRepository>((ref) {
 
 // --- State Management ---
 
+enum ProposalAction { none, fetch, create, update }
 enum ProposalStatus { initial, loading, success, error }
 
 class ProposalStateData {
   final ProposalStatus status;
+  final ProposalAction lastAction;
   final List<ProposalEntity> proposals;
   final String? errorMessage;
 
   ProposalStateData({
     required this.status,
+    this.lastAction = ProposalAction.none,
     this.proposals = const [],
     this.errorMessage,
   });
 
   ProposalStateData copyWith({
     ProposalStatus? status,
+    ProposalAction? lastAction,
     List<ProposalEntity>? proposals,
     String? errorMessage,
   }) {
     return ProposalStateData(
       status: status ?? this.status,
+      lastAction: lastAction ?? this.lastAction,
       proposals: proposals ?? this.proposals,
       errorMessage: errorMessage ?? this.errorMessage,
     );
@@ -62,7 +67,7 @@ class ProposalNotifier extends Notifier<ProposalStateData> {
   }
 
   Future<void> fetchMyProposals() async {
-    state = state.copyWith(status: ProposalStatus.loading, errorMessage: null);
+    state = state.copyWith(status: ProposalStatus.loading, lastAction: ProposalAction.fetch, errorMessage: null);
     try {
       final proposals = await _repository.getMyProposals();
       state = state.copyWith(status: ProposalStatus.success, proposals: proposals);
@@ -72,7 +77,7 @@ class ProposalNotifier extends Notifier<ProposalStateData> {
   }
 
   Future<void> fetchPropertyProposals(String propertyId) async {
-    state = state.copyWith(status: ProposalStatus.loading, errorMessage: null);
+    state = state.copyWith(status: ProposalStatus.loading, lastAction: ProposalAction.fetch, errorMessage: null);
     try {
       final proposals = await _repository.getProposalsByProperty(propertyId);
       state = state.copyWith(status: ProposalStatus.success, proposals: proposals);
@@ -81,10 +86,10 @@ class ProposalNotifier extends Notifier<ProposalStateData> {
     }
   }
 
-  Future<void> createProposal(String propertyId, {String? proposalFilePath}) async {
-    state = state.copyWith(status: ProposalStatus.loading, errorMessage: null);
+  Future<void> createProposal(String propertyId, {String? proposalFilePath, List<int>? fileBytes, String? fileName, double? amount, String? details}) async {
+    state = state.copyWith(status: ProposalStatus.loading, lastAction: ProposalAction.create, errorMessage: null);
     try {
-      final newProposal = await _repository.createProposal(propertyId, proposalFilePath: proposalFilePath);
+      final newProposal = await _repository.createProposal(propertyId, proposalFilePath: proposalFilePath, fileBytes: fileBytes, fileName: fileName, amount: amount, details: details);
       state = state.copyWith(
         status: ProposalStatus.success,
         proposals: [...state.proposals, newProposal],
@@ -95,7 +100,7 @@ class ProposalNotifier extends Notifier<ProposalStateData> {
   }
 
   Future<void> updateProposalStatus(String proposalId, String newStatus) async {
-    state = state.copyWith(status: ProposalStatus.loading, errorMessage: null);
+    state = state.copyWith(status: ProposalStatus.loading, lastAction: ProposalAction.update, errorMessage: null);
     try {
       final updatedProposal = await _repository.updateProposalStatus(proposalId, newStatus);
       final updatedList = state.proposals.map((p) => p.id == proposalId ? updatedProposal : p).toList();

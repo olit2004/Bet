@@ -1,4 +1,6 @@
 import '../../domain/entities/seller_property.dart';
+import 'bid_model.dart';
+import 'proposal_model.dart';
 
 class SellerPropertyModel extends SellerProperty {
   const SellerPropertyModel({
@@ -15,6 +17,9 @@ class SellerPropertyModel extends SellerProperty {
     super.status,
     super.sqFootage,
     super.views,
+    super.bidCount,
+    super.bids,
+    super.proposals,
     required super.imageUrls,
     super.endTime,
     required super.ownerId,
@@ -39,11 +44,24 @@ class SellerPropertyModel extends SellerProperty {
           ? (json['sqFootage'] as num).toDouble()
           : null,
       views: json['views'] as int? ?? 0,
+      bidCount: json['_count'] != null
+          ? (json['_count'] as Map<String, dynamic>)['bids'] as int?
+          : null,
+      bids: json['bids'] != null
+          ? (json['bids'] as List)
+              .map((e) => BidModel.fromJson(e as Map<String, dynamic>))
+              .toList()
+          : null,
+      proposals: json['proposals'] != null
+          ? (json['proposals'] as List)
+              .map((e) => ProposalModel.fromJson(e as Map<String, dynamic>))
+              .toList()
+          : null,
       imageUrls: json['imageUrls'] != null
           ? List<String>.from(json['imageUrls'] as List)
           : [],
-      endTime: json['endTime'] != null
-          ? DateTime.parse(json['endTime'] as String)
+      endTime: (json['endingAt'] ?? json['endTime']) != null
+          ? DateTime.parse((json['endingAt'] ?? json['endTime']) as String)
           : null,
       ownerId: json['ownerId'] as String,
       createdAt: json['createdAt'] != null
@@ -71,6 +89,13 @@ class SellerPropertyModel extends SellerProperty {
       if (sqFootage != null) 'sqFootage': sqFootage,
       'imageUrls': imageUrls,
       if (endTime != null) 'endTime': endTime?.toIso8601String(),
+      'ownerId': ownerId,
+      'views': views,
+      if (bidCount != null) '_count': {'bids': bidCount},
+      if (bids != null) 'bids': bids!.map((e) => (e as BidModel).toJson()).toList(),
+      if (proposals != null) 'proposals': proposals!.map((e) => (e as ProposalModel).toJson()).toList(),
+      if (createdAt != null) 'createdAt': createdAt?.toIso8601String(),
+      if (updatedAt != null) 'updatedAt': updatedAt?.toIso8601String(),
     };
   }
 }

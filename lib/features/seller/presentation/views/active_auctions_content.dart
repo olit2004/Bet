@@ -1,93 +1,140 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/features/seller/presentation/widgets/active_auction_card.dart';
+import '../../../auth/application/providers/auth_provider.dart';
+import '../providers/seller_properties_provider.dart';
+import '../../seller_routes.dart';
 
-class ActiveAuctionsContent extends StatelessWidget {
+class ActiveAuctionsContent extends ConsumerWidget {
   const ActiveAuctionsContent({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authNotifierProvider);
+    final userId = authState.user?.id ?? '';
+    final propertiesAsync = ref.watch(sellerPropertiesProvider(userId));
+
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Stats Section
-          Row(
+      child: propertiesAsync.when(
+        loading: () => const Center(
+          child: Padding(
+            padding: EdgeInsets.all(32.0),
+            child: CircularProgressIndicator(color: AppColors.primaryBlue),
+          ),
+        ),
+        error: (err, stack) => Center(
+          child: Text(
+            'Failed to load auctions: $err',
+            style: const TextStyle(color: AppColors.error),
+          ),
+        ),
+        data: (properties) {
+          final activeAuctions = properties
+              .where((p) => p.listingType == 'AUCTION' && p.status == 'ACTIVE')
+              .toList();
+          
+          final totalBids = activeAuctions.fold<int>(
+            0,
+            (sum, p) => sum + (p.bidCount ?? 0),
+          );
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: _buildStatCard(
-                  title: 'Live Auctions',
-                  value: '2',
-                  valueColor: AppColors.primaryBlue,
-                ),
+              // Stats Section
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildStatCard(
+                      title: 'Live Auctions',
+                      value: activeAuctions.length.toString(),
+                      valueColor: AppColors.primaryBlue,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildStatCard(
+                      title: 'Total Bids',
+                      value: totalBids.toString(),
+                      valueColor: const Color(0xFF00684A),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildStatCard(
-                  title: 'Total Bids',
-                  value: '4',
-                  valueColor: const Color(0xFF00684A),
-                ),
-              ),
+              const SizedBox(height: 32),
+
+              if (activeAuctions.isEmpty)
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(32.0),
+                    child: Text(
+                      'You do not have any active auctions.',
+                      style: TextStyle(color: AppColors.secondaryText),
+                    ),
+                  ),
+                )
+              else
+                ...activeAuctions.map((property) {
+                  final imageUrl = property.imageUrls.isNotEmpty 
+                      ? 'http://localhost:8080${property.imageUrls.first}'
+                      : 'assets/images/properties/apartment.png';
+
+                  // Calculate time remaining based on endTime
+                  String timeRemaining = '00h 00m remaining';
+                  if (property.endTime != null) {
+                    final diff = property.endTime!.difference(DateTime.now());
+                    if (diff.isNegative) {
+                      timeRemaining = 'Ended';
+                    } else {
+                      final days = diff.inDays;
+                      final hours = diff.inHours % 24;
+                      final minutes = diff.inMinutes % 60;
+                      if (days > 0) {
+                        timeRemaining = '${days}d ${hours}h remaining';
+                      } else {
+                        timeRemaining = '${hours}h ${minutes}m remaining';
+                      }
+                    }
+                  }
+
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 24.0),
+                    child: ActiveAuctionCard(
+                      imageUrl: imageUrl,
+                      isVerified: authState.user?.isVerified ?? false,
+                      timeRemaining: timeRemaining,
+                      title: property.title,
+                      location: property.location,
+                      currentBid: '${property.price} Birr', // TODO: Fetch highest bid dynamically in the future
+                      bidsPlaced: property.bidCount ?? 0,
+                      onManageAuction: () {
+                        context.push('${SellerRoutes.manageBids}/${property.id}');
+                      },
+                      onTap: () {
+                        context.push(
+                          '${SellerRoutes.propertyDetail}/${property.id}',
+                          extra: {
+                            'propertyId': property.id,
+                            'imageUrl': imageUrl,
+                            'title': property.title,
+                            'location': property.location,
+                          },
+                        );
+                      },
+                    ),
+                  );
+                }),
             ],
-          ),
-          const SizedBox(height: 32),
-
-          // Auctions List
-          ActiveAuctionCard(
-            imageUrl: 'assets/images/properties/apartment.png',
-            isVerified: true,
-            timeRemaining: '02h 45m remaining',
-            title: 'Skyline\nPenthouse',
-            location: 'Yeka, Addis Ababa',
-            currentBid: '18,450,000 Birr',
-            bidsPlaced: 24,
-            onManageAuction: () {
-              context.push('/manage-bids/skyline-123');
-            },
-            onTap: () {
-              context.push(
-                '/property/skyline-123',
-                extra: {
-                  'imageUrl': 'assets/images/properties/apartment.png',
-                  'title': 'Skyline\nPenthouse',
-                  'location': 'Yeka, Addis Ababa',
-                },
-              );
-            },
-          ),
-          const SizedBox(height: 48),
-
-          ActiveAuctionCard(
-            imageUrl: 'assets/images/properties/villa.png',
-            isVerified: false,
-            timeRemaining: '14h 22m remaining',
-            title: 'Azure Heights\nVilla',
-            location: 'Nifas Silk-Lafto,Addis Ababa',
-            currentBid: '25,120,000 Birr',
-            bidsPlaced: 38,
-            onManageAuction: () {
-              context.push('/manage-bids/azure-123');
-            },
-            onTap: () {
-              context.push(
-                '/property/azure-123',
-                extra: {
-                  'imageUrl': 'assets/images/properties/villa.png',
-                  'title': 'Azure Heights\nVilla',
-                  'location': 'Nifas Silk-Lafto,Addis Ababa',
-                },
-              );
-            },
-          ),
-          const SizedBox(height: 24),
-        ],
+          );
+        },
       ),
     );
   }
+
 
   Widget _buildStatCard({
     required String title,

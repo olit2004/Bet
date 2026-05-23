@@ -2,33 +2,41 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/seller_property.dart';
 import '../../domain/repositories/seller_property_repository.dart';
 import '../../data/data_sources/seller_property_remote_data_source.dart';
+import '../../data/data_sources/seller_property_local_data_source.dart';
 import '../../data/repositories/seller_property_repository_impl.dart';
+import '../../../../core/database/database_helper.dart';
 import '../../../auth/application/providers/auth_provider.dart';
+import 'seller_properties_provider.dart';
+import 'seller_profile_provider.dart';
 
-// --- Dependency Injection Providers ---
+// Dependency Injection Providers ---
 
 final sellerPropertyRemoteDataSourceProvider =
     Provider<SellerPropertyRemoteDataSource>((ref) {
-  return SellerPropertyRemoteDataSource(
-    authLocalDataSource: ref.watch(authLocalDataSourceProvider),
-  );
-});
+      return SellerPropertyRemoteDataSource(
+        authLocalDataSource: ref.watch(authLocalDataSourceProvider),
+      );
+    });
 
-final sellerPropertyRepositoryProvider =
-    Provider<SellerPropertyRepository>((ref) {
+final sellerPropertyLocalDataSourceProvider =
+    Provider<SellerPropertyLocalDataSource>((ref) {
+      return SellerPropertyLocalDataSource(
+        databaseHelper: DatabaseHelper(),
+      );
+    });
+
+final sellerPropertyRepositoryProvider = Provider<SellerPropertyRepository>((
+  ref,
+) {
   return SellerPropertyRepositoryImpl(
     remoteDataSource: ref.watch(sellerPropertyRemoteDataSourceProvider),
+    localDataSource: ref.watch(sellerPropertyLocalDataSourceProvider),
   );
 });
 
-// --- State Management ---
+// State Management
 
-enum CreatePropertyStatus {
-  initial,
-  loading,
-  success,
-  error,
-}
+enum CreatePropertyStatus { initial, loading, success, error }
 
 class CreatePropertyState {
   final CreatePropertyStatus status;
@@ -42,9 +50,9 @@ class CreatePropertyState {
   });
 
   const CreatePropertyState.initial()
-      : status = CreatePropertyStatus.initial,
-        createdProperty = null,
-        errorMessage = null;
+    : status = CreatePropertyStatus.initial,
+      createdProperty = null,
+      errorMessage = null;
 
   CreatePropertyState copyWith({
     CreatePropertyStatus? status,
@@ -73,7 +81,7 @@ class CreatePropertyNotifier extends Notifier<CreatePropertyState> {
     state = const CreatePropertyState.initial();
   }
 
-  /// Submits a new property listing to the backend.
+  //Submits a new property listing to the backend.
   Future<bool> createProperty(Map<String, dynamic> propertyData) async {
     state = state.copyWith(
       status: CreatePropertyStatus.loading,
@@ -86,6 +94,12 @@ class CreatePropertyNotifier extends Notifier<CreatePropertyState> {
         status: CreatePropertyStatus.success,
         createdProperty: property,
       );
+
+      // Invalidate the seller's properties list to force a refresh
+      ref.invalidate(sellerPropertiesProvider);
+      // Invalidate the seller's profile stats to update the counts in the profile tab
+      ref.invalidate(sellerProfileStatsProvider);
+
       return true;
     } catch (e) {
       String message = 'Something went wrong. Please try again.';
@@ -103,5 +117,5 @@ class CreatePropertyNotifier extends Notifier<CreatePropertyState> {
 
 final createPropertyNotifierProvider =
     NotifierProvider<CreatePropertyNotifier, CreatePropertyState>(() {
-  return CreatePropertyNotifier();
-});
+      return CreatePropertyNotifier();
+    });

@@ -7,6 +7,7 @@ class UploadContainer extends StatelessWidget {
   final String? subtitle;
   final String? fileName;
   final VoidCallback onBrowse;
+  final String buttonText;
 
   const UploadContainer({
     super.key,
@@ -14,6 +15,7 @@ class UploadContainer extends StatelessWidget {
     this.subtitle,
     this.fileName,
     required this.onBrowse,
+    this.buttonText = 'Browse',
   });
 
   @override
@@ -91,7 +93,7 @@ class UploadContainer extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 12),
               ),
               child: Text(
-                'Browse',
+                buttonText,
                 style: GoogleFonts.inter(
                   fontWeight: FontWeight.bold,
                   fontSize: 15,

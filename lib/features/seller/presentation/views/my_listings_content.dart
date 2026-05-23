@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:bet/core/constants/app_colors.dart';
 import 'package:bet/core/widgets/app_logo.dart';
@@ -6,17 +7,20 @@ import 'package:bet/features/seller/presentation/widgets/seller_button.dart';
 import 'package:bet/features/seller/presentation/widgets/stat_item.dart';
 import 'package:bet/features/seller/presentation/widgets/property_listing_card.dart';
 import 'package:bet/features/seller/seller_routes.dart';
+import '../../../auth/application/providers/auth_provider.dart';
+import '../providers/seller_properties_provider.dart';
+import '../../../notification/presentation/widgets/notification_bell.dart';
 
-class MyListingsContent extends StatefulWidget {
+class MyListingsContent extends ConsumerStatefulWidget {
   final VoidCallback? onAddNewListing;
 
   const MyListingsContent({super.key, this.onAddNewListing});
 
   @override
-  State<MyListingsContent> createState() => _MyListingsContentState();
+  ConsumerState<MyListingsContent> createState() => _MyListingsContentState();
 }
 
-class _MyListingsContentState extends State<MyListingsContent> {
+class _MyListingsContentState extends ConsumerState<MyListingsContent> {
   final ScrollController _scrollController = ScrollController();
   bool _isScrolled = false;
 
@@ -40,6 +44,10 @@ class _MyListingsContentState extends State<MyListingsContent> {
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authNotifierProvider);
+    final userId = authState.user?.id ?? '';
+    final propertiesAsync = ref.watch(sellerPropertiesProvider(userId));
+
     return Column(
       children: [
         // ── Stationary Header ──
@@ -62,11 +70,18 @@ class _MyListingsContentState extends State<MyListingsContent> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const AppLogo(size: 32),
-              const CircleAvatar(
-                radius: 22,
-                backgroundImage: AssetImage(
-                  'assets/images/seller_profile.png',
-                ),
+              Row(
+                children: [
+                  NotificationBell(),
+                  const SizedBox(width: 16),
+                  CircleAvatar(
+                    radius: 22,
+                    backgroundColor: Colors.grey.shade200,
+                    backgroundImage: authState.user?.avatarUrl != null
+                        ? NetworkImage('http://localhost:8080${authState.user!.avatarUrl}')
+                        : const AssetImage('assets/images/seller_profile.png') as ImageProvider,
+                  ),
+                ],
               ),
             ],
           ),
@@ -109,83 +124,107 @@ class _MyListingsContentState extends State<MyListingsContent> {
                 ),
                 const SizedBox(height: 20),
 
-                const StatItem(
-                  label: 'Active Properties',
-                  value: '13',
-                  valueColor: AppColors.primaryText,
-                ),
-                const StatItem(
-                  label: 'Total Bids',
-                  value: '48',
-                  valueColor: Color(0xFF00684A),
-                ),
-                const StatItem(
-                  label: 'Views (30d)',
-                  value: '2.4k',
-                  valueColor: AppColors.primaryText,
-                ),
-                const StatItem(
-                  label: 'Conversion',
-                  value: '8.2%',
-                  valueColor: AppColors.primaryBlue,
-                  showDivider: false,
-                ),
-                const SizedBox(height: 32),
+                propertiesAsync.when(
+                  loading: () => const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(32.0),
+                      child: CircularProgressIndicator(color: AppColors.primaryBlue),
+                    ),
+                  ),
+                  error: (err, stack) => Center(
+                    child: Text(
+                      'Failed to load properties: $err',
+                      style: const TextStyle(color: AppColors.error),
+                    ),
+                  ),
+                  data: (properties) {
+                    final activeCount = properties.where((p) => p.status == 'ACTIVE').length;
+                    final totalBids = properties.fold<int>(0, (sum, p) => sum + (p.bidCount ?? 0));
+                    final totalViews = properties.fold<int>(0, (sum, p) => sum + p.views);
+                    
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        StatItem(
+                          label: 'Active Properties',
+                          value: activeCount.toString(),
+                          valueColor: AppColors.primaryText,
+                        ),
+                        StatItem(
+                          label: 'Total Bids',
+                          value: totalBids.toString(),
+                          valueColor: const Color(0xFF00684A),
+                        ),
+                        StatItem(
+                          label: 'Total Views',
+                          value: totalViews.toString(),
+                          valueColor: AppColors.primaryText,
+                          showDivider: false,
+                        ),
+                        const SizedBox(height: 32),
+                        
+                        if (properties.isEmpty)
+                          const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(32.0),
+                              child: Text(
+                                'No listings yet. Create your first property!',
+                                style: TextStyle(color: AppColors.secondaryText),
+                              ),
+                            ),
+                          )
+                        else
+                          ...properties.map((property) {
+                            final status = property.status == 'ACTIVE' 
+                                ? ListingStatus.active 
+                                : ListingStatus.sold;
 
-                PropertyListingCard(
-                  imageUrl: 'assets/images/properties/villa.png',
-                  status: ListingStatus.active,
-                  price: '32,250,000 Birr',
-                  title: 'Skyline Penthouse',
-                  location: 'Yeka, Addis Ababa',
-                  stats: const [
-                    ListingCardStat(label: 'TOTAL BIDS', value: '14'),
-                    ListingCardStat(label: 'VIEWS', value: '1,240'),
-                    ListingCardStat(label: 'ENDING IN', value: '2d 4h'),
-                  ],
-                  actionLabel: 'Manage Bids',
-                  onActionPressed: () {
-                    context.push('${SellerRoutes.manageBids}/skyline-123');
-                  },
-                  onTap: () {
-                    context.push(
-                      '${SellerRoutes.propertyDetail}/skyline-123',
-                      extra: {
-                        'imageUrl': 'assets/images/properties/villa.png',
-                        'title': 'Skyline Penthouse',
-                        'location': 'Yeka, Addis Ababa',
-                      },
+                            // Ensure an image exists or fallback
+                            final imageUrl = property.imageUrls.isNotEmpty 
+                                ? 'http://localhost:8080${property.imageUrls.first}'
+                                : 'assets/images/properties/villa.png'; // A local fallback
+
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 24.0),
+                              child: PropertyListingCard(
+                                imageUrl: imageUrl,
+                                status: status,
+                                price: '${property.price} Birr',
+                                title: property.title,
+                                location: property.location,
+                                stats: [
+                                  ListingCardStat(label: 'TOTAL BIDS', value: (property.bidCount ?? 0).toString()),
+                                  ListingCardStat(label: 'VIEWS', value: property.views.toString()),
+                                  if (property.endTime != null)
+                                    ListingCardStat(
+                                      label: 'ENDING',
+                                      value: '${property.endTime!.difference(DateTime.now()).inDays}d',
+                                    ),
+                                ],
+                                actionLabel: 'Manage Bids',
+                                onActionPressed: () {
+                                  context.push('${SellerRoutes.manageBids}/${property.id}');
+                                },
+                                onTap: () {
+                                  context.push(
+                                    '${SellerRoutes.propertyDetail}/${property.id}',
+                                    extra: {
+                                      'propertyId': property.id,
+                                      'imageUrl': imageUrl,
+                                      'title': property.title,
+                                      'location': property.location,
+                                    },
+                                  );
+                                },
+                              ),
+                            );
+                          }),
+                      ],
                     );
                   },
                 ),
-                const SizedBox(height: 24),
-
-                PropertyListingCard(
-                  imageUrl: 'assets/images/properties/apartment.png',
-                  status: ListingStatus.sold,
-                  price: '28,000,000 Birr',
-                  title: '3bdrm Apartment',
-                  location: 'Bole, Addis Ababa',
-                  stats: const [
-                    ListingCardStat(label: 'FINAL BIDS', value: '32'),
-                    ListingCardStat(label: 'TOTAL VIEWS', value: '5,892'),
-                    ListingCardStat(label: 'STATUS', value: 'Completed'),
-                  ],
-                  actionLabel: 'Download Sales Report',
-                  onActionPressed: () {},
-                  onTap: () {
-                    context.push(
-                      '${SellerRoutes.propertyDetail}/apartment-123',
-                      extra: {
-                        'imageUrl': 'assets/images/properties/apartment.png',
-                        'title': '3bdrm Apartment',
-                        'location': 'Bole, Addis Ababa',
-                      },
-                    );
-                  },
-                ),
-                const SizedBox(height: 16),
               ],
+
             ),
           ),
         ),

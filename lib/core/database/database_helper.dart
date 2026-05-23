@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 import 'package:path/path.dart';
 
 class DatabaseHelper {
@@ -16,11 +18,22 @@ class DatabaseHelper {
   }
 
   Future<Database> _initDatabase() async {
+    if (kIsWeb) {
+      databaseFactory = databaseFactoryFfiWeb;
+      return await openDatabase(
+        'bet_app.db', // on web, it uses IndexedDB with this name, no path needed
+        version: 2,
+        onCreate: _onCreate,
+        onUpgrade: _onUpgrade,
+      );
+    }
+    
     String path = join(await getDatabasesPath(), 'bet_app.db');
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
@@ -59,8 +72,26 @@ class DatabaseHelper {
         amount REAL,
         status TEXT,
         bankStatementUrl TEXT,
-        createdAt TEXT,
+      createdAt TEXT,
         updatedAt TEXT
+      )
+    ''');
+
+    await _createSellerPropertiesTable(db);
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await _createSellerPropertiesTable(db);
+    }
+  }
+
+  Future<void> _createSellerPropertiesTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE seller_properties (
+        id TEXT PRIMARY KEY,
+        ownerId TEXT,
+        data TEXT
       )
     ''');
   }
@@ -71,5 +102,6 @@ class DatabaseHelper {
     await db.delete('users');
     await db.delete('proposals');
     await db.delete('bids');
+    await db.delete('seller_properties');
   }
 }

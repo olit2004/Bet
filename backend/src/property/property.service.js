@@ -59,12 +59,12 @@ class PropertyService {
       where: { property: { ownerId: sellerId } }
     });
 
-    const totalViewsAggregation = await prisma.property.aggregate({
+    const properties = await prisma.property.findMany({
       where: { ownerId: sellerId },
-      _sum: { views: true }
+      select: { views: true }
     });
 
-    const totalViews = totalViewsAggregation._sum.views || 0;
+    const totalViews = properties.reduce((sum, prop) => sum + (prop.views || 0), 0);
     
     // Simple conversion rate: (Total Bids / Total Views) * 100
     let conversionRate = 0;
@@ -85,8 +85,42 @@ class PropertyService {
       where: { id },
       include: {
         owner: true,
-        bids: true,
-        proposals: true,
+        bids: {
+          include: {
+            bidder: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    email: true,
+                    role: true,
+                    name: true,
+                    isVerified: true,
+                  }
+                }
+              }
+            }
+          },
+          orderBy: { amount: 'desc' }
+        },
+        proposals: {
+          include: {
+            bidder: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    email: true,
+                    role: true,
+                    name: true,
+                    isVerified: true,
+                  }
+                }
+              }
+            }
+          },
+          orderBy: { createdAt: 'desc' }
+        },
       },
     });
   }

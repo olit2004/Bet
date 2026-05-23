@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -9,12 +10,15 @@ import 'package:bet/features/seller/presentation/widgets/seller_button.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:bet/features/seller/presentation/widgets/listing_success_overlay.dart';
 import 'package:bet/features/seller/presentation/providers/create_property_provider.dart';
+import 'package:bet/features/seller/presentation/providers/seller_properties_provider.dart';
+import 'package:bet/features/auth/application/providers/auth_provider.dart';
 
 class CreatePropertyContent extends ConsumerStatefulWidget {
   const CreatePropertyContent({super.key});
 
   @override
-  ConsumerState<CreatePropertyContent> createState() => _CreatePropertyContentState();
+  ConsumerState<CreatePropertyContent> createState() =>
+      _CreatePropertyContentState();
 }
 
 class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
@@ -51,7 +55,8 @@ class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
   @override
   Widget build(BuildContext context) {
     final createState = ref.watch(createPropertyNotifierProvider);
-    final isLoading = createState.status == CreatePropertyStatus.loading || _isSubmitting;
+    final isLoading =
+        createState.status == CreatePropertyStatus.loading || _isSubmitting;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
@@ -96,7 +101,7 @@ class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
           ),
           const SizedBox(height: 24),
 
-          // ── Value Point & SQ Footage ──
+          // Value Point & SQ Footage
           Row(
             children: [
               Expanded(
@@ -181,7 +186,36 @@ class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
                       const SizedBox(height: 10),
                       _buildTextField(
                         controller: _endDateController,
-                        hint: 'e.g. Apr 20, 18:00',
+                        hint: 'Select Date',
+                        readOnly: true,
+                        onTap: () async {
+                          final date = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now().add(
+                              const Duration(days: 1),
+                            ),
+                            firstDate: DateTime.now(),
+                            lastDate: DateTime.now().add(
+                              const Duration(days: 365),
+                            ),
+                            builder: (context, child) {
+                              return Theme(
+                                data: Theme.of(context).copyWith(
+                                  colorScheme: const ColorScheme.light(
+                                    primary: AppColors.primaryLightBlue,
+                                    onPrimary: Colors.white,
+                                    onSurface: AppColors.primaryText,
+                                  ),
+                                ),
+                                child: child!,
+                              );
+                            },
+                          );
+                          if (date != null) {
+                            _endDateController.text =
+                                "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T23:59:59Z";
+                          }
+                        },
                       ),
                     ],
                   ),
@@ -199,7 +233,6 @@ class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
       ),
     );
   }
-
 
   // Image Upload Area
 
@@ -299,7 +332,11 @@ class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.add_photo_alternate, color: AppColors.primaryBlue, size: 32),
+            Icon(
+              Icons.add_photo_alternate,
+              color: AppColors.primaryBlue,
+              size: 32,
+            ),
             const SizedBox(height: 8),
             Text(
               'Add More',
@@ -320,12 +357,19 @@ class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(16),
-          child: Image.file(
-            File(file.path),
-            width: 120,
-            height: 120,
-            fit: BoxFit.cover,
-          ),
+          child: kIsWeb
+              ? Image.network(
+                  file.path,
+                  width: 120,
+                  height: 120,
+                  fit: BoxFit.cover,
+                )
+              : Image.file(
+                  File(file.path),
+                  width: 120,
+                  height: 120,
+                  fit: BoxFit.cover,
+                ),
         ),
         Positioned(
           top: 6,
@@ -352,16 +396,13 @@ class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
 
   Future<void> _pickImages() async {
     final ImagePicker picker = ImagePicker();
-    final List<XFile> images = await picker.pickMultiImage(
-      imageQuality: 80,
-    );
+    final List<XFile> images = await picker.pickMultiImage(imageQuality: 80);
     if (images.isNotEmpty) {
       setState(() {
         _selectedImages.addAll(images);
       });
     }
   }
-
 
   // Geographic Anchor (Interactive Map)
   Widget _buildGeographicAnchor(BuildContext context) {
@@ -648,7 +689,8 @@ class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
 
   Future<void> _submitProperty() async {
     // Validation
-    if (_titleController.text.trim().isEmpty || _priceController.text.trim().isEmpty) {
+    if (_titleController.text.trim().isEmpty ||
+        _priceController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -703,7 +745,10 @@ class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
       payload['value'] = _valueController.text.trim().replaceAll(',', '');
     }
     if (_sqFootageController.text.trim().isNotEmpty) {
-      payload['sqFootage'] = _sqFootageController.text.trim().replaceAll(',', '');
+      payload['sqFootage'] = _sqFootageController.text.trim().replaceAll(
+        ',',
+        '',
+      );
     }
     if (_listingType == 1 && _endDateController.text.trim().isNotEmpty) {
       payload['endingAt'] = _endDateController.text.trim();
@@ -722,6 +767,13 @@ class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
     if (success) {
       // Reset provider state for next creation
       ref.read(createPropertyNotifierProvider.notifier).reset();
+
+      // Invalidate the properties list so it fetches the new item
+      final userId = ref.read(authNotifierProvider).user?.id;
+      if (userId != null) {
+        ref.invalidate(sellerPropertiesProvider(userId));
+      }
+
       showListingSuccessOverlay(
         context,
         onReturnToDashboard: () {
@@ -731,7 +783,7 @@ class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
     } else {
       final errorMsg =
           ref.read(createPropertyNotifierProvider).errorMessage ??
-              'Failed to create listing.';
+          'Failed to create listing.';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(errorMsg, style: GoogleFonts.inter()),
@@ -763,39 +815,49 @@ class _CreatePropertyContentState extends ConsumerState<CreatePropertyContent> {
     required TextEditingController controller,
     required String hint,
     int maxLines = 1,
-    TextInputType keyboardType = TextInputType.text,
+    TextInputType? keyboardType,
+    bool readOnly = false,
+    VoidCallback? onTap,
   }) {
-    return TextField(
-      controller: controller,
-      maxLines: maxLines,
-      keyboardType: keyboardType,
-      style: GoogleFonts.inter(color: AppColors.primaryText, fontSize: 15),
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: GoogleFonts.inter(
-          color: AppColors.secondaryText.withValues(alpha: 0.5),
-          fontSize: 15,
-        ),
-        fillColor: AppColors.inputFill,
-        filled: true,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(
-            color: AppColors.primaryBlue.withValues(alpha: 0.3),
-            width: 1.5,
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F3F6), // subtle inner shadow/gray
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: TextField(
+        controller: controller,
+        maxLines: maxLines,
+        keyboardType: keyboardType,
+        readOnly: readOnly,
+        onTap: onTap,
+        style: GoogleFonts.inter(color: AppColors.primaryText, fontSize: 15),
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: GoogleFonts.inter(
+            color: AppColors.secondaryText.withValues(alpha: 0.5),
+            fontSize: 15,
           ),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 16,
+          fillColor: AppColors.inputFill,
+          filled: true,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(
+              color: AppColors.primaryBlue.withValues(alpha: 0.3),
+              width: 1.5,
+            ),
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 16,
+          ),
         ),
       ),
     );

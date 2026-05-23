@@ -30,15 +30,7 @@ class SellerRoutes {
       path: '$propertyDetail/:id',
       builder: (context, state) {
         final id = state.pathParameters['id']!;
-        final extra = state.extra as Map<String, dynamic>?;
-
-        return PropertyDetailsScreen(
-          propertyId: id,
-          imageUrl:
-              extra?['imageUrl'] ?? 'assets/images/properties/apartment.png',
-          title: extra?['title'] ?? 'Property Details',
-          location: extra?['location'] ?? 'Addis Ababa',
-        );
+        return PropertyDetailsScreen(propertyId: id);
       },
     ),
 
@@ -64,10 +56,11 @@ class SellerRoutes {
     ),
 
     GoRoute(
-      path: '$reviewBid/:bidId',
+      path: '$reviewBid/:propertyId/:bidId',
       builder: (context, state) {
+        final propertyId = state.pathParameters['propertyId']!;
         final bidId = state.pathParameters['bidId']!;
-        return ReviewBidScreen(bidId: bidId);
+        return ReviewBidScreen(propertyId: propertyId, bidId: bidId);
       },
     ),
 
