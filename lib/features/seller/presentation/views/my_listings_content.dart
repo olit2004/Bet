@@ -9,7 +9,7 @@ import 'package:bet/features/seller/presentation/widgets/property_listing_card.d
 import 'package:bet/features/seller/seller_routes.dart';
 import '../../../auth/application/providers/auth_provider.dart';
 import '../providers/seller_properties_provider.dart';
-import '../../notification/presentation/widgets/notification_bell.dart';
+import '../../../notification/presentation/widgets/notification_bell.dart';
 
 class MyListingsContent extends ConsumerStatefulWidget {
   final VoidCallback? onAddNewListing;
@@ -72,7 +72,7 @@ class _MyListingsContentState extends ConsumerState<MyListingsContent> {
               const AppLogo(size: 32),
               Row(
                 children: [
-                  const NotificationBell(),
+                  NotificationBell(),
                   const SizedBox(width: 16),
                   CircleAvatar(
                     radius: 22,

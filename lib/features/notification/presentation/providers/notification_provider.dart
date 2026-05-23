@@ -6,16 +6,17 @@ final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
   return NotificationRepository();
 });
 
-class NotificationNotifier extends StateNotifier<AsyncValue<List<NotificationModel>>> {
-  final NotificationRepository _repository;
+class NotificationNotifier extends AsyncNotifier<List<NotificationModel>> {
+  NotificationRepository get _repository => ref.read(notificationRepositoryProvider);
 
-  NotificationNotifier(this._repository) : super(const AsyncValue.loading()) {
-    fetchNotifications();
+  @override
+  Future<List<NotificationModel>> build() async {
+    return _repository.getNotifications();
   }
 
   Future<void> fetchNotifications() async {
+    state = const AsyncValue.loading();
     try {
-      state = const AsyncValue.loading();
       final notifications = await _repository.getNotifications();
       state = AsyncValue.data(notifications);
     } catch (e, stackTrace) {
@@ -46,9 +47,8 @@ class NotificationNotifier extends StateNotifier<AsyncValue<List<NotificationMod
   }
 }
 
-final notificationProvider = StateNotifierProvider<NotificationNotifier, AsyncValue<List<NotificationModel>>>((ref) {
-  final repository = ref.watch(notificationRepositoryProvider);
-  return NotificationNotifier(repository);
+final notificationProvider = AsyncNotifierProvider<NotificationNotifier, List<NotificationModel>>(() {
+  return NotificationNotifier();
 });
 
 // Provider to easily get unread count

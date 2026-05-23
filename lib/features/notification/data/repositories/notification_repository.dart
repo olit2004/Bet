@@ -1,14 +1,15 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../../../../core/network/api_client.dart';
+import '../../../auth/infrastructure/data_sources/auth_local_data_source.dart';
 import '../models/notification_model.dart';
 
 class NotificationRepository {
-  final String baseUrl = ApiClient.baseUrl;
+  final String baseUrl = 'http://localhost:8080';
+  final AuthLocalDataSource _authLocalDataSource = AuthLocalDataSource();
 
   Future<List<NotificationModel>> getNotifications() async {
     try {
-      final token = await ApiClient.getToken();
+      final token = await _authLocalDataSource.getToken();
       if (token == null) throw Exception('Authentication required');
 
       final response = await http.get(
@@ -33,7 +34,7 @@ class NotificationRepository {
 
   Future<void> markAsRead(String notificationId) async {
     try {
-      final token = await ApiClient.getToken();
+      final token = await _authLocalDataSource.getToken();
       if (token == null) throw Exception('Authentication required');
 
       final response = await http.patch(
