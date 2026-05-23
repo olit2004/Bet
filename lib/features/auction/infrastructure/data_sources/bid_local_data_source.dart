@@ -1,3 +1,4 @@
+import 'package:sqflite/sqflite.dart';
 import '../../../../core/database/database_helper.dart';
 import '../models/bid_model.dart';
 
@@ -21,7 +22,7 @@ class BidLocalDataSourceImpl implements BidLocalDataSource {
       batch.insert(
         'bids',
         bid.toJson(),
-        conflictAlgorithm: 5, // CONFLICT_REPLACE
+        conflictAlgorithm: ConflictAlgorithm.replace,
       );
     }
     await batch.commit(noResult: true);
@@ -44,7 +45,7 @@ class BidLocalDataSourceImpl implements BidLocalDataSource {
     await db.insert(
       'bids',
       bid.toJson(),
-      conflictAlgorithm: 5, // CONFLICT_REPLACE
+      conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 

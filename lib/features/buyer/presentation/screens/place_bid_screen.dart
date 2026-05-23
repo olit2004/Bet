@@ -11,6 +11,8 @@ import 'package:bet/core/property/widgets/bid_info_card.dart';
 import 'package:bet/core/property/widgets/upload_container.dart';
 import 'package:bet/core/property/widgets/legal_notice_card.dart';
 import 'package:bet/core/widgets/app_logo.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:path/path.dart' as path;
 
 class PlaceBidScreen extends ConsumerStatefulWidget {
   final Property property;
@@ -26,6 +28,34 @@ class PlaceBidScreen extends ConsumerStatefulWidget {
 
 class _PlaceBidScreenState extends ConsumerState<PlaceBidScreen> {
   final TextEditingController _bidController = TextEditingController();
+  PlatformFile? _bankStatementFile;
+  PlatformFile? _proposalFile;
+
+  Future<void> _pickBankStatement() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf'],
+      withData: true,
+    );
+    if (result != null) {
+      setState(() {
+        _bankStatementFile = result.files.single;
+      });
+    }
+  }
+
+  Future<void> _pickProposal() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf'],
+      withData: true,
+    );
+    if (result != null) {
+      setState(() {
+        _proposalFile = result.files.single;
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -37,6 +67,27 @@ class _PlaceBidScreenState extends ConsumerState<PlaceBidScreen> {
   void dispose() {
     _bidController.dispose();
     super.dispose();
+  }
+
+  Future<void> _submitBid() async {
+    final amount = double.tryParse(_bidController.text.replaceAll(',', '')) ?? 0.0;
+    await ref.read(bidNotifierProvider.notifier).placeBid(
+      widget.property.id,
+      amount,
+      bankStatementBytes: _bankStatementFile?.bytes,
+      bankStatementFileName: _bankStatementFile?.name,
+    );
+    
+    if (mounted) {
+      final finalState = ref.read(bidNotifierProvider);
+      if (finalState.status == BidStatus.success) {
+        _showSuccessDialog();
+      } else if (finalState.status == BidStatus.error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(finalState.errorMessage ?? 'Error submitting bid')),
+        );
+      }
+    }
   }
 
   @override
@@ -209,9 +260,12 @@ class _PlaceBidScreenState extends ConsumerState<PlaceBidScreen> {
             ),
             const SizedBox(height: 12),
             UploadContainer(
-              title: 'Select your Bank Statement to upload',
+              title: _bankStatementFile != null 
+                  ? 'Selected: ${_bankStatementFile!.name}' 
+                  : 'Select your Bank Statement to upload',
               subtitle: 'Only PDF format is Allowed:\nCBE-Bank_Statement_Form_Validated.pdf',
-              onBrowse: () {},
+              buttonText: _bankStatementFile != null ? 'Upload' : 'Browse',
+              onBrowse: _bankStatementFile != null ? _submitBid : _pickBankStatement,
             ),
             const SizedBox(height: 24),
             Text(
@@ -224,9 +278,12 @@ class _PlaceBidScreenState extends ConsumerState<PlaceBidScreen> {
             ),
             const SizedBox(height: 12),
             UploadContainer(
-              title: 'Select a proposal to upload',
+              title: _proposalFile != null 
+                  ? 'Selected: ${_proposalFile!.name}' 
+                  : 'Select a proposal to upload',
               subtitle: 'Only PDF format is Allowed:\nCBE-Bank_Statement_Form_Validated.pdf',
-              onBrowse: () {},
+              buttonText: _proposalFile != null ? 'Upload' : 'Browse',
+              onBrowse: _proposalFile != null ? _submitBid : _pickProposal,
             ),
             const SizedBox(height: 32),
             const LegalNoticeCard(
@@ -235,24 +292,7 @@ class _PlaceBidScreenState extends ConsumerState<PlaceBidScreen> {
             const SizedBox(height: 32),
             CustomButton(
               text: bidState.status == BidStatus.loading ? 'Submitting...' : 'Submit',
-              onPressed: bidState.status == BidStatus.loading ? () {} : () async {
-                final amount = double.tryParse(_bidController.text.replaceAll(',', '')) ?? 0.0;
-                await ref.read(bidNotifierProvider.notifier).placeBid(
-                  widget.property.id,
-                  amount,
-                );
-                
-                if (mounted) {
-                  final finalState = ref.read(bidNotifierProvider);
-                  if (finalState.status == BidStatus.success) {
-                    _showSuccessDialog();
-                  } else if (finalState.status == BidStatus.error) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(finalState.errorMessage ?? 'Error submitting bid')),
-                    );
-                  }
-                }
-              },
+              onPressed: bidState.status == BidStatus.loading ? () {} : _submitBid,
             ),
             const SizedBox(height: 40),
           ],

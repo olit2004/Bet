@@ -13,7 +13,7 @@ class ProposalRemoteDataSourceImpl implements ProposalRemoteDataSource {
   final http.Client client;
   final String baseUrl;
 
-  ProposalRemoteDataSourceImpl({required this.client, this.baseUrl = 'http://localhost:5000/api/v1'});
+  ProposalRemoteDataSourceImpl({required this.client, this.baseUrl = 'http://localhost:8080/api'});
 
   @override
   Future<List<ProposalModel>> getMyProposals(String token) async {
@@ -24,7 +24,7 @@ class ProposalRemoteDataSourceImpl implements ProposalRemoteDataSource {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      final List proposals = data['data']['proposals'] ?? [];
+      final List proposals = data['data'] ?? [];
       return proposals.map((json) => ProposalModel.fromJson(json)).toList();
     } else {
       throw Exception('Failed to fetch my proposals');
@@ -40,7 +40,7 @@ class ProposalRemoteDataSourceImpl implements ProposalRemoteDataSource {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      final List proposals = data['data']['proposals'] ?? [];
+      final List proposals = data['data'] ?? [];
       return proposals.map((json) => ProposalModel.fromJson(json)).toList();
     } else {
       throw Exception('Failed to fetch property proposals');
@@ -61,7 +61,7 @@ class ProposalRemoteDataSourceImpl implements ProposalRemoteDataSource {
 
     if (response.statusCode == 201) {
       final data = jsonDecode(response.body);
-      return ProposalModel.fromJson(data['data']['proposal']);
+      return ProposalModel.fromJson(data['data']);
     } else {
       throw Exception('Failed to create proposal');
     }
@@ -80,7 +80,7 @@ class ProposalRemoteDataSourceImpl implements ProposalRemoteDataSource {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      return ProposalModel.fromJson(data['data']['proposal']);
+      return ProposalModel.fromJson(data['data']);
     } else {
       throw Exception('Failed to update proposal status');
     }
